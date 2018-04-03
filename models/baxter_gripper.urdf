@@ -2,13 +2,8 @@
 <robot name="baxter_gripper">
 
   <!-- Base link -->
-  <link name="base">
+  <link name="hand">
   </link>
-  <joint name="base_joint" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0 0.025"/>
-    <parent link="base"/>
-    <child link="gripper_base"/>
-  </joint>
 
   <!-- Base of end effector -->
   <link name="gripper_base">
@@ -147,13 +142,11 @@
   </joint>
 
   <!-- Electric Gripper Base Joint -->
-  <!--
   <joint name="gripper_base" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0.025"/>
     <parent link="hand"/>
     <child link="gripper_base"/>
   </joint>
-  -->
 
   <!-- Electric Gripper Tip joint -->
   <joint name="endpoint" type="fixed">
@@ -209,10 +202,16 @@
     </actuator>
   </transmission>
   
-  <!-- Control -->
-  <gazebo reference="gripper_base">
-    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-      <robotNamespace>/baxter_gripper</robotNamespace>
+  <!-- Gazebo gripper plugin -->
+  <gazebo>
+    <plugin name="gripper_plugin" filename="libGripperPlugin.so">
+      <!-- Reference names -->
+      <model>baxter_gripper</model>
+      <baseLink>hand</baseLink>
+      <leftLink>gripper_l_finger</leftLink>
+      <rightLink>gripper_r_finger</rightLink>
+      <!-- Constraints -->
+      <gravity>0</gravity>
     </plugin>
   </gazebo>
 
@@ -223,26 +222,5 @@
   <gazebo reference="gripper_l_finger_joint">
     <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
-
-  <!-- Remove gravity -->
-  <gazebo reference="base">
-    <gravity>0</gravity>
-  </gazebo>
-  <gazebo reference="gripper_base">
-    <gravity>0</gravity>
-  </gazebo>
-  <gazebo reference="gripper_l_finger">
-    <gravity>0</gravity>
-  </gazebo>
-  <gazebo reference="gripper_l_finger_tip">
-    <gravity>0</gravity>
-  </gazebo>
-  <gazebo reference="gripper_r_finger">
-    <gravity>0</gravity>
-  </gazebo>
-  <gazebo reference="gripper_r_finger_tip">
-    <gravity>0</gravity>
-  </gazebo>
-
 
 </robot>

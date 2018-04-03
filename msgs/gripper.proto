@@ -1,0 +1,13 @@
+syntax = "proto2";
+package grasp.msgs;
+
+/// \ingroup grasp_msgs
+/// \interface Gripper
+/// \brief TODO
+
+import "pose.proto";
+
+message Gripper
+{
+    optional gazebo.msgs.Pose pose = 1;
+}

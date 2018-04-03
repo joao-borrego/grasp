@@ -18,13 +18,13 @@ include_directories(${GAZEBO_INCLUDE_DIRS} ${SDF_INCLUDE_DIRS})
 link_directories(${GAZEBO_LIBRARY_DIRS})
 
 # Include custom messages
-#include_directories(${PROJECT_BINARY_DIR}/msgs/CameraUtils)
-#link_directories(${PROJECT_BINARY_DIR}/msgs/CameraUtils)
+include_directories(${PROJECT_BINARY_DIR}/msgs)
+link_directories(${PROJECT_BINARY_DIR}/msgs)
 
 # Gripper Gazebo plugin
 add_library(GripperPlugin SHARED GripperPlugin.cc )
 target_link_libraries(GripperPlugin
-    #camera_utils_msgs
+    grasp_msgs
     ${Boost_LIBRARIES} ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
-#add_dependencies(GripperPlugin
-    #camera_utils_msgs)
+add_dependencies(GripperPlugin
+    grasp_msgs)

@@ -27,5 +27,7 @@ find_package(Boost COMPONENTS system REQUIRED)
 
 # Build project
 
+# Gazebo plugin messages
+add_subdirectory(msgs)
 # Gazebo plugins
 add_subdirectory(plugins)
