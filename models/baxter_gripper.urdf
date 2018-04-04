@@ -1,10 +1,6 @@
 <?xml version="1.0" ?>
 <robot name="baxter_gripper">
 
-  <!-- Base link -->
-  <link name="hand">
-  </link>
-
   <!-- Base of end effector -->
   <link name="gripper_base">
     <visual>
@@ -141,13 +137,6 @@
     <child link="gripper_r_finger_tip"/>
   </joint>
 
-  <!-- Electric Gripper Base Joint -->
-  <joint name="gripper_base" type="fixed">
-    <origin rpy="0 0 0" xyz="0 0 0.025"/>
-    <parent link="hand"/>
-    <child link="gripper_base"/>
-  </joint>
-
   <!-- Electric Gripper Tip joint -->
   <joint name="endpoint" type="fixed">
     <origin rpy="0 0 0" xyz="0 0 0.1327"/>
@@ -179,7 +168,7 @@
     <mimic joint="gripper_l_finger_joint" multiplier="-1.0"/>
     <dynamics damping="0.7" friction="0.0"/>
   </joint>
-  
+
   <!-- Transmissions -->
   <transmission name="gripper_right1">
     <type>transmission_interface/SimpleTransmission</type>
@@ -201,15 +190,28 @@
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
-  
+
+  <!-- Virtual joints for floating behaviour -->
+  <link name="world"/>
+  <joint name="virtual_prismatic_joint" type="prismatic">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <parent link="world"/>
+    <child link="gripper_base"/>
+    <limit effort="20.0" lower="0.0" upper="0.5" velocity="5.0"/>
+    <dynamics damping="0.01" friction="0.0"/>
+  </joint>
+
   <!-- Gazebo gripper plugin -->
   <gazebo>
     <plugin name="gripper_plugin" filename="libGripperPlugin.so">
       <!-- Reference names -->
       <model>baxter_gripper</model>
-      <baseLink>hand</baseLink>
+      <baseLink>gripper_base</baseLink>
       <leftLink>gripper_l_finger</leftLink>
       <rightLink>gripper_r_finger</rightLink>
+      <leftJoint>gripper_l_finger_joint</leftJoint>
+      <rightJoint>gripper_r_finger_joint</rightJoint>
       <!-- Constraints -->
       <gravity>0</gravity>
     </plugin>

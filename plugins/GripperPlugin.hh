@@ -20,22 +20,26 @@
 #include "gripper.pb.h"
 
 namespace GripperPlugin {
-    
+
     // Plugin parameters
 
     /// Base link name parameter SDF
-    #define PARAM_BASE_LINK  "baseLink"
+    #define PARAM_BASE_LINK     "baseLink"
     /// Left gripper link name parameter SDF
-    #define PARAM_LEFT_LINK  "leftLink"
+    #define PARAM_LEFT_LINK     "leftLink"
     /// Right gripper link name parameter SDF
-    #define PARAM_RIGHT_LINK "rightLink"
+    #define PARAM_RIGHT_LINK    "rightLink"
+    /// Left gripper joint name parameter SDF
+    #define PARAM_LEFT_JOINT    "leftJoint"
+    /// Right gripper joint name parameter SDF
+    #define PARAM_RIGHT_JOINT   "rightJoint"
     /// Set gravity state parameter SDF
-    #define PARAM_GRAVITY    "gravity"
+    #define PARAM_GRAVITY       "gravity"
 
     // Plugin messages
 
     /// Topic for incoming requests
-    #define REQUEST_TOPIC    "~/gripper"    
+    #define REQUEST_TOPIC    "~/gripper"
 }
 
 namespace gazebo {
@@ -66,7 +70,11 @@ namespace gazebo {
         private: physics::LinkPtr left_link;
         /// Right gripper link pointer
         private: physics::LinkPtr right_link;
-        
+        /// Left gripper joint pointer
+        private: physics::JointPtr left_joint;
+        /// Right gripper joint pointer
+        private: physics::JointPtr right_joint;
+
         // Protected attributes
 
         // Public methods
@@ -88,6 +96,14 @@ namespace gazebo {
         /// \brief Callback function for handling incoming requests
         /// \param _msg  The message
         public: void onRequest(GripperMsgPtr & _msg);
+
+        // Private methods
+
+        /// \brief Opens the gripper
+        private: void open();
+
+        /// \brief Closes the gripper
+        private: void close();
     };
 }
 
