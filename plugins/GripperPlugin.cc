@@ -121,7 +121,7 @@ void GripperPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         &GripperPlugin::onRequest, this);
 
     // DEBUG
-    this->virtual_joints.at(0)->SetPosition(0,0.5);
+    this->virtual_joints.at(0)->SetPosition(0,1.0);
     this->virtual_joints.at(1)->SetPosition(0,0.5);
     this->virtual_joints.at(2)->SetPosition(0,0.5);
     this->virtual_joints.at(3)->SetPosition(0,0.5);
