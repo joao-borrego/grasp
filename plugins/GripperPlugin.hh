@@ -19,22 +19,28 @@
 // Custom messages
 #include "gripper.pb.h"
 
+// Boost - for convenient string split
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+
 namespace GripperPlugin {
 
-    // Plugin parameters
+    // Plugin parameters instanced in SDF
 
     /// Base link name parameter SDF
-    #define PARAM_BASE_LINK     "baseLink"
+    #define PARAM_BASE_LINK         "baseLink"
     /// Left gripper link name parameter SDF
-    #define PARAM_LEFT_LINK     "leftLink"
+    #define PARAM_LEFT_LINK         "leftLink"
     /// Right gripper link name parameter SDF
-    #define PARAM_RIGHT_LINK    "rightLink"
+    #define PARAM_RIGHT_LINK        "rightLink"
     /// Left gripper joint name parameter SDF
-    #define PARAM_LEFT_JOINT    "leftJoint"
+    #define PARAM_LEFT_JOINT        "leftJoint"
     /// Right gripper joint name parameter SDF
-    #define PARAM_RIGHT_JOINT   "rightJoint"
+    #define PARAM_RIGHT_JOINT       "rightJoint"
+    /// Virtual revolute joint name parameter SDF
+    #define PARAM_VIRTUAL_JOINTS    "virtualJoints"
     /// Set gravity state parameter SDF
-    #define PARAM_GRAVITY       "gravity"
+    #define PARAM_GRAVITY           "gravity"
 
     // Plugin messages
 
@@ -74,6 +80,8 @@ namespace gazebo {
         private: physics::JointPtr left_joint;
         /// Right gripper joint pointer
         private: physics::JointPtr right_joint;
+        /// Array of virtual x y z r p y joint pointers
+        private: std::vector<physics::JointPtr> virtual_joints;
 
         // Protected attributes
 
