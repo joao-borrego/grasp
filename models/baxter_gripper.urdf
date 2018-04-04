@@ -193,12 +193,39 @@
 
   <!-- Virtual joints for floating behaviour -->
   <link name="world"/>
+  <link name="virtual_link">
+    <visual>
+      <origin rpy="0 0 0.0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.01"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <mass value="0.001"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.01"/>
+      </geometry>
+    </collision>
+  </link>
   <joint name="virtual_prismatic_joint" type="prismatic">
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="0 0 1"/>
     <parent link="world"/>
-    <child link="gripper_base"/>
+    <child link="virtual_link"/>
     <limit effort="20.0" lower="0.0" upper="0.5" velocity="5.0"/>
+    <dynamics damping="0.01" friction="0.0"/>
+  </joint>
+  <joint name="virtual_revolute_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <parent link="virtual_link"/>
+    <child link="gripper_base"/>
+    <limit effort="20.0" lower="0.0" upper="3.5" velocity="5.0"/>
     <dynamics damping="0.01" friction="0.0"/>
   </joint>
 
