@@ -112,6 +112,15 @@ namespace gazebo {
 
         /// \brief Closes the gripper
         private: void close();
+
+        /// \brief Changes gripper's pose
+        ///
+        /// Since the gripper is fixed to the world, the pose can not be set
+        /// directly, and instead must be obtained using the virtual
+        /// joints.
+        ///
+        /// \param pose The gripper's new pose
+        private: void changePose(ignition::math::Pose3d & pose);
     };
 }
 

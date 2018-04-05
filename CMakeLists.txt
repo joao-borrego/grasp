@@ -31,3 +31,5 @@ find_package(Boost COMPONENTS system REQUIRED)
 add_subdirectory(msgs)
 # Gazebo plugins
 add_subdirectory(plugins)
+# Utilities
+add_subdirectory(utils)

@@ -124,9 +124,9 @@ void GripperPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     this->virtual_joints.at(0)->SetPosition(0,1.0);
     this->virtual_joints.at(1)->SetPosition(0,0.5);
     this->virtual_joints.at(2)->SetPosition(0,0.5);
-    this->virtual_joints.at(3)->SetPosition(0,0.5);
-    this->virtual_joints.at(4)->SetPosition(0,0.5);
-    this->virtual_joints.at(5)->SetPosition(0,0.5);
+    this->virtual_joints.at(3)->SetPosition(0,0.5); // yaw
+    this->virtual_joints.at(4)->SetPosition(0,0.4); // pitch
+    this->virtual_joints.at(5)->SetPosition(0,0.3); // roll
 }
 
 /////////////////////////////////////////////////
@@ -138,7 +138,19 @@ void GripperPlugin::onUpdate()
 /////////////////////////////////////////////////
 void GripperPlugin::onRequest(GripperMsgPtr &_msg)
 {
+    ignition::math::Pose3d pose;
 
+    // Handle change pose request
+    if (_msg->has_pose()) {
+        pose = msgs::ConvertIgn(_msg->pose());
+        changePose(pose);
+    }
+}
+
+/////////////////////////////////////////////////
+void GripperPlugin::changePose(ignition::math::Pose3d & pose)
+{
+    gzmsg << "Received change pose request" << std::endl;
 }
 
 /////////////////////////////////////////////////
