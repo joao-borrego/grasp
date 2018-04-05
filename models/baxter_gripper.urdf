@@ -198,7 +198,7 @@
   <gazebo reference="gripper_l_finger_joint">
     <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
-  
+
   <!-- Gazebo gripper plugin -->
   <gazebo>
     <plugin name="gripper_plugin" filename="libGripperPlugin.so">

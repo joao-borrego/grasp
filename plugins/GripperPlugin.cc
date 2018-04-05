@@ -119,36 +119,49 @@ void GripperPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     // Subcribe to the monitored requests topic
     this->data_ptr->sub = this->data_ptr->node->Subscribe(REQUEST_TOPIC,
         &GripperPlugin::onRequest, this);
-
-    // DEBUG
-    this->virtual_joints.at(0)->SetPosition(0,1.0);
-    this->virtual_joints.at(1)->SetPosition(0,0.5);
-    this->virtual_joints.at(2)->SetPosition(0,0.5);
-    this->virtual_joints.at(3)->SetPosition(0,0.5); // yaw
-    this->virtual_joints.at(4)->SetPosition(0,0.4); // pitch
-    this->virtual_joints.at(5)->SetPosition(0,0.3); // roll
 }
 
 /////////////////////////////////////////////////
 void GripperPlugin::onUpdate()
 {
-
+    if (this->update_pose) {
+        setPose(this->new_pose);
+        this->update_pose = false;
+    }
+    if (this->update_velocity) {
+        setVelocity(this->new_velocity);
+        this->update_velocity = false;
+    }
+    if (this->new_open != this->open) {
+        (this->new_open)? openGripper() : closeGripper();
+        this->open = this->new_open;
+    }
 }
 
 /////////////////////////////////////////////////
 void GripperPlugin::onRequest(GripperMsgPtr &_msg)
 {
     ignition::math::Pose3d pose;
+    ignition::math::Vector3d velocity;
 
     // Handle change pose request
     if (_msg->has_pose()) {
-        pose = msgs::ConvertIgn(_msg->pose());
-        changePose(pose);
+        this->new_pose = msgs::ConvertIgn(_msg->pose());
+        this->update_pose = true;
+    }
+    // Handle change velocity request
+    if (_msg->has_velocity()) {
+        this->new_velocity = msgs::ConvertIgn(_msg->velocity());
+        this->update_velocity = true;
+    }
+    // Handle open/close gripper request
+    if (_msg->has_open()) {
+        this->new_open = _msg->open();
     }
 }
 
 /////////////////////////////////////////////////
-void GripperPlugin::changePose(ignition::math::Pose3d & _pose)
+void GripperPlugin::setPose(ignition::math::Pose3d & _pose)
 {
     gzmsg << "Received change pose request" << std::endl;
 
@@ -163,15 +176,25 @@ void GripperPlugin::changePose(ignition::math::Pose3d & _pose)
 }
 
 /////////////////////////////////////////////////
-void GripperPlugin::open()
+void GripperPlugin::setVelocity(ignition::math::Vector3d & _velocity)
 {
-
+    this->virtual_joints.at(0)->SetVelocity(0, _velocity.X());
+    this->virtual_joints.at(1)->SetVelocity(0, _velocity.Y());
+    this->virtual_joints.at(2)->SetVelocity(0, _velocity.Z());
 }
 
 /////////////////////////////////////////////////
-void GripperPlugin::close()
+void GripperPlugin::openGripper()
 {
+    this->left_joint->SetPosition(0, this->left_joint->UpperLimit());
+    this->right_joint->SetPosition(0, this->right_joint->LowerLimit());
+}
 
+/////////////////////////////////////////////////
+void GripperPlugin::closeGripper()
+{
+    this->left_joint->SetPosition(0, this->left_joint->LowerLimit());
+    this->right_joint->SetPosition(0, this->right_joint->UpperLimit());
 }
 
 }

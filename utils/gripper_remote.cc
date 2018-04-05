@@ -30,17 +30,39 @@ int main(int _argc, char **_argv)
 
     while (std::cout << PROMPT)
     {
-        getline(std::cin, line);
-        std::stringstream input_stream(line);
-
         // Create a custom message
         grasp::msgs::Gripper msg;
-
-        // Fill the contents of the message
-        ignition::math::Pose3d pose(0.1,0.1,0.1,0.1,0.2,0.3);
-        gazebo::msgs::Pose *pose_msg = new gazebo::msgs::Pose();
-        gazebo::msgs::Set(pose_msg, pose);
-        msg.set_allocated_pose(pose_msg);
+        
+        // Process command
+        getline(std::cin, line);
+        std::stringstream input_stream(line);
+        std::string command = input_stream.str();
+        // Change pose request
+        if (command == "pose")
+        {
+            ignition::math::Pose3d pose(0.1,0.1,0.1,0.1,0.2,0.3);
+            gazebo::msgs::Pose *pose_msg = new gazebo::msgs::Pose();
+            gazebo::msgs::Set(pose_msg, pose);
+            msg.set_allocated_pose(pose_msg);
+        }
+        // Change velocity request
+        else if (command == "velocity")
+        {
+            ignition::math::Vector3d velocity(0.1,0.1,0.1);
+            gazebo::msgs::Vector3d *velocity_msg = new gazebo::msgs::Vector3d();
+            gazebo::msgs::Set(velocity_msg, velocity);
+            msg.set_allocated_velocity(velocity_msg);
+        }
+        // Open gripper request
+        else if (command == "open")
+        {
+            msg.set_open(true);
+        }
+        // Close gripper request
+        else if (command == "close")
+        {
+            msg.set_open(false);
+        }
 
         // Send the message
         pub->Publish(msg);

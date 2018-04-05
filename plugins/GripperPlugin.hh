@@ -83,6 +83,19 @@ namespace gazebo {
         /// Array of virtual x y z r p y joint pointers
         private: std::vector<physics::JointPtr> virtual_joints;
 
+        /// New pose
+        private: ignition::math::Pose3d new_pose;
+        /// New velocity vector
+        private: ignition::math::Vector3d new_velocity;
+        /// New open/closed state
+        private: bool new_open;
+        /// Flag to update pose
+        private: bool update_pose;
+        /// Flag to update velocity
+        private: bool update_velocity;
+        /// Current open/closed state
+        private: bool open;
+
         // Protected attributes
 
         // Public methods
@@ -107,12 +120,6 @@ namespace gazebo {
 
         // Private methods
 
-        /// \brief Opens the gripper
-        private: void open();
-
-        /// \brief Closes the gripper
-        private: void close();
-
         /// \brief Changes gripper's pose
         ///
         /// Since the gripper is fixed to the world, the pose can not be set
@@ -120,7 +127,17 @@ namespace gazebo {
         /// joints.
         ///
         /// \param pose The gripper's new pose
-        private: void changePose(ignition::math::Pose3d & pose);
+        private: void setPose(ignition::math::Pose3d & _pose);
+
+        /// \brief Changes gripper's velocity
+        /// \param pose The gripper's new velocity vector
+        private: void setVelocity(ignition::math::Vector3d & _velocity);
+
+        /// \brief Opens the gripper
+        private: void openGripper();
+
+        /// \brief Closes the gripper
+        private: void closeGripper();
     };
 }
 
