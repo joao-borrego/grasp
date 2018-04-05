@@ -148,9 +148,18 @@ void GripperPlugin::onRequest(GripperMsgPtr &_msg)
 }
 
 /////////////////////////////////////////////////
-void GripperPlugin::changePose(ignition::math::Pose3d & pose)
+void GripperPlugin::changePose(ignition::math::Pose3d & _pose)
 {
     gzmsg << "Received change pose request" << std::endl;
+
+    ignition::math::Vector3d pos = _pose.Pos();
+    ignition::math::Quaterniond rot = _pose.Rot();
+    this->virtual_joints.at(0)->SetPosition(0, pos.X());
+    this->virtual_joints.at(1)->SetPosition(0, pos.Y());
+    this->virtual_joints.at(2)->SetPosition(0, pos.Z());
+    this->virtual_joints.at(3)->SetPosition(0, rot.Roll());
+    this->virtual_joints.at(4)->SetPosition(0, rot.Pitch());
+    this->virtual_joints.at(5)->SetPosition(0, rot.Yaw());
 }
 
 /////////////////////////////////////////////////

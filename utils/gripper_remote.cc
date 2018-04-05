@@ -37,7 +37,7 @@ int main(int _argc, char **_argv)
         grasp::msgs::Gripper msg;
 
         // Fill the contents of the message
-        ignition::math::Pose3d pose(0.1,0.1,0.1,0,0,0);
+        ignition::math::Pose3d pose(0.1,0.1,0.1,0.1,0.2,0.3);
         gazebo::msgs::Pose *pose_msg = new gazebo::msgs::Pose();
         gazebo::msgs::Set(pose_msg, pose);
         msg.set_allocated_pose(pose_msg);

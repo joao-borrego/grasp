@@ -310,15 +310,15 @@
   </link>
 
   <!-- Rotation -->
-  <joint name="virtual_rr_joint" type="continuous">
+  <joint name="virtual_ry_joint" type="continuous">
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="0 0 1"/>
     <parent link="virtual_pz_link"/>
-    <child link="virtual_rr_link"/>
+    <child link="virtual_ry_link"/>
     <limit effort="20.0" velocity="5.0"/>
     <dynamics damping="0.01" friction="0.0"/>
   </joint>
-  <link name="virtual_rr_link">
+  <link name="virtual_ry_link">
     <visual>
       <origin rpy="0 0 0.0" xyz="0 0 0"/>
       <geometry>
@@ -340,7 +340,7 @@
     <joint name="virtual_rp_joint" type="continuous">
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <parent link="virtual_rr_link"/>
+    <parent link="virtual_ry_link"/>
     <child link="virtual_rp_link"/>
     <limit effort="20.0" velocity="5.0"/>
     <dynamics damping="0.01" friction="0.0"/>
@@ -364,7 +364,7 @@
       </geometry>
     </collision>
   </link>
-    <joint name="virtual_ry_joint" type="continuous">
+    <joint name="virtual_rr_joint" type="continuous">
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="1 0 0"/>
     <parent link="virtual_rp_link"/>
