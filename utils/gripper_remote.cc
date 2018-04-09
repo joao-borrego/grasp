@@ -61,6 +61,11 @@ int main(int _argc, char **_argv)
         {
            tryGrasp(pub);
         }
+        // Reset everything
+        else if (command == "reset")
+        {
+            reset(pub);
+        }
     }
 
     // Shut down
@@ -104,6 +109,16 @@ void closeGripper(gazebo::transport::PublisherPtr pub)
     msg.set_open(false);
     pub->Publish(msg);
 }
+
+
+/////////////////////////////////////////////////
+void reset(gazebo::transport::PublisherPtr pub)
+{
+    grasp::msgs::Gripper msg;
+    msg.set_reset(true);
+    pub->Publish(msg);
+}
+
 
 /////////////////////////////////////////////////
 void tryGrasp(gazebo::transport::PublisherPtr pub)

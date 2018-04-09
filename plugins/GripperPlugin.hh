@@ -88,13 +88,15 @@ namespace gazebo {
         /// New velocity vector
         private: std::vector<double> new_velocity;
         /// New open/closed state
-        private: bool new_open;
+        private: bool new_open          {false};
         /// Flag to update pose
-        private: bool update_pose;
+        private: bool update_pose       {false};
         /// Flag to update velocity
-        private: bool update_velocity;
+        private: bool update_velocity   {false};
         /// Current open/closed state
-        private: bool open;
+        private: bool open              {false};
+        /// Flag to reset
+        private: bool reset             {false};
 
         // Protected attributes
 
@@ -141,6 +143,9 @@ namespace gazebo {
 
         /// \brief Closes the gripper
         private: void closeGripper();
+
+        /// \brief Resets the world
+        private: void resetWorld();
     };
 }
 

@@ -16,4 +16,6 @@ message Gripper
     repeated double             velocity    = 2;
     /// New gripper open/closed state
     optional bool               open        = 3;
+    /// Reset
+    optional bool               reset       = 4;
 }

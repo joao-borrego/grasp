@@ -119,6 +119,10 @@ void GripperPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     // Subcribe to the monitored requests topic
     this->data_ptr->sub = this->data_ptr->node->Subscribe(REQUEST_TOPIC,
         &GripperPlugin::onRequest, this);
+
+    // DEBUG joint params
+    this->left_joint->SetStiffness(0,0);
+    this->right_joint->SetStiffness(0,0);
 }
 
 /////////////////////////////////////////////////
@@ -135,6 +139,10 @@ void GripperPlugin::onUpdate()
     if (this->new_open != this->open) {
         (this->new_open)? openGripper() : closeGripper();
         this->open = this->new_open;
+    }
+    if (this->reset) {
+        resetWorld();
+        this->reset = false;
     }
 }
 
@@ -160,6 +168,10 @@ void GripperPlugin::onRequest(GripperMsgPtr &_msg)
     // Handle open/close gripper request
     if (_msg->has_open()) {
         this->new_open = _msg->open();
+    }
+    // Handle reset
+    if (_msg->has_reset()) {
+        this->reset =  _msg->reset();
     }
 
     gzmsg << "Request:" <<
@@ -204,7 +216,7 @@ void GripperPlugin::setVelocity(std::vector<double> & _velocity)
 /////////////////////////////////////////////////
 void GripperPlugin::openGripper()
 {
-    double velocity = 4.0;
+    double velocity = 10.0;
     this->left_joint->SetVelocity(0, velocity);
     this->right_joint->SetVelocity(0, -velocity);
 }
@@ -215,6 +227,15 @@ void GripperPlugin::closeGripper()
     double velocity = 4.0;
     this->left_joint->SetVelocity(0, -velocity);
     this->right_joint->SetVelocity(0, velocity);
+}
+
+/////////////////////////////////////////////////
+void GripperPlugin::resetWorld()
+{
+    physics::WorldPtr world = this->model->GetWorld();
+    world->SetPhysicsEnabled(false);
+    world->Reset();
+    world->SetPhysicsEnabled(true);
 }
 
 }
