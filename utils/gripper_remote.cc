@@ -40,7 +40,7 @@ int main(int _argc, char **_argv)
         // Change pose request
         if (command == "pose")
         {
-            ignition::math::Pose3d pose(0.1,0.1,0.1,0.1,0.2,0.3);
+            ignition::math::Pose3d pose(0,0,0.1,0,1.57,0);
             gazebo::msgs::Pose *pose_msg = new gazebo::msgs::Pose();
             gazebo::msgs::Set(pose_msg, pose);
             msg.set_allocated_pose(pose_msg);
@@ -48,7 +48,7 @@ int main(int _argc, char **_argv)
         // Change velocity request
         else if (command == "velocity")
         {
-            ignition::math::Vector3d velocity(0.1,0.1,0.1);
+            ignition::math::Vector3d velocity(0,0,0.8);
             gazebo::msgs::Vector3d *velocity_msg = new gazebo::msgs::Vector3d();
             gazebo::msgs::Set(velocity_msg, velocity);
             msg.set_allocated_velocity(velocity_msg);

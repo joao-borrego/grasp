@@ -158,6 +158,11 @@ void GripperPlugin::onRequest(GripperMsgPtr &_msg)
     if (_msg->has_open()) {
         this->new_open = _msg->open();
     }
+
+    gzmsg << "Request:" <<
+        " pose " << this->update_pose <<
+        " velocity " << this->update_velocity <<
+        " open " << this->new_open << std::endl;
 }
 
 /////////////////////////////////////////////////
@@ -186,15 +191,17 @@ void GripperPlugin::setVelocity(ignition::math::Vector3d & _velocity)
 /////////////////////////////////////////////////
 void GripperPlugin::openGripper()
 {
-    this->left_joint->SetPosition(0, this->left_joint->UpperLimit());
-    this->right_joint->SetPosition(0, this->right_joint->LowerLimit());
+    double velocity = 2.0;
+    this->left_joint->SetVelocity(0, velocity);
+    this->right_joint->SetVelocity(0, -velocity);
 }
 
 /////////////////////////////////////////////////
 void GripperPlugin::closeGripper()
 {
-    this->left_joint->SetPosition(0, this->left_joint->LowerLimit());
-    this->right_joint->SetPosition(0, this->right_joint->UpperLimit());
+    double velocity = 2.0;
+    this->left_joint->SetVelocity(0, -velocity);
+    this->right_joint->SetVelocity(0, velocity);
 }
 
 }
