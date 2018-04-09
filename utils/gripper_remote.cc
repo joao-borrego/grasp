@@ -30,9 +30,6 @@ int main(int _argc, char **_argv)
 
     while (std::cout << PROMPT)
     {
-        // Create a custom message
-        grasp::msgs::Gripper msg;
-        
         // Process command
         getline(std::cin, line);
         std::stringstream input_stream(line);
@@ -41,34 +38,90 @@ int main(int _argc, char **_argv)
         if (command == "pose")
         {
             ignition::math::Pose3d pose(0,0,0.1,0,1.57,0);
-            gazebo::msgs::Pose *pose_msg = new gazebo::msgs::Pose();
-            gazebo::msgs::Set(pose_msg, pose);
-            msg.set_allocated_pose(pose_msg);
+            setPose(pub, pose);
         }
         // Change velocity request
         else if (command == "velocity")
         {
-            ignition::math::Vector3d velocity(0,0,0.8);
-            gazebo::msgs::Vector3d *velocity_msg = new gazebo::msgs::Vector3d();
-            gazebo::msgs::Set(velocity_msg, velocity);
-            msg.set_allocated_velocity(velocity_msg);
+            std::vector<double> velocity {0,0,0.8,0,0,0};
+            setVelocity(pub, velocity);
         }
         // Open gripper request
         else if (command == "open")
         {
-            msg.set_open(true);
+            openGripper(pub);
         }
         // Close gripper request
         else if (command == "close")
         {
-            msg.set_open(false);
+            closeGripper(pub);
         }
-
-        // Send the message
-        pub->Publish(msg);
+        // Perform grasp attempt request
+        else if (command == "grasp")
+        {
+           tryGrasp(pub);
+        }
     }
 
     // Shut down
     gazebo::client::shutdown();
     return 0;
+}
+
+/////////////////////////////////////////////////
+void setPose(gazebo::transport::PublisherPtr pub,
+    ignition::math::Pose3d pose)
+{
+    grasp::msgs::Gripper msg;
+    gazebo::msgs::Pose *pose_msg = new gazebo::msgs::Pose();
+    gazebo::msgs::Set(pose_msg, pose);
+    msg.set_allocated_pose(pose_msg);
+    pub->Publish(msg);
+}
+
+/////////////////////////////////////////////////
+void setVelocity(gazebo::transport::PublisherPtr pub,
+    std::vector<double> & velocity)
+{
+    grasp::msgs::Gripper msg;
+    google::protobuf::RepeatedField<double> data(velocity.begin(), velocity.end());
+    msg.mutable_velocity()->Swap(&data);
+    pub->Publish(msg);
+}
+
+/////////////////////////////////////////////////
+void openGripper(gazebo::transport::PublisherPtr pub)
+{
+    grasp::msgs::Gripper msg;
+    msg.set_open(true);
+    pub->Publish(msg);
+}
+
+/////////////////////////////////////////////////
+void closeGripper(gazebo::transport::PublisherPtr pub)
+{
+    grasp::msgs::Gripper msg;
+    msg.set_open(false);
+    pub->Publish(msg);
+}
+
+/////////////////////////////////////////////////
+void tryGrasp(gazebo::transport::PublisherPtr pub)
+{
+    ignition::math::Pose3d pose(0,0,0.1,0,1.57,0);
+    std::vector<double> velocity_lift {0,0,0.8,0,0,0};
+    std::vector<double> velocity_stop {0,0,0,0,0,0};
+    
+    openGripper(pub);
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    setPose(pub, pose);
+    closeGripper(pub);
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    setVelocity(pub, velocity_lift);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    setVelocity(pub, velocity_stop);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    openGripper(pub);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    setPose(pub, pose);
 }

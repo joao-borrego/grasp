@@ -86,7 +86,7 @@ namespace gazebo {
         /// New pose
         private: ignition::math::Pose3d new_pose;
         /// New velocity vector
-        private: ignition::math::Vector3d new_velocity;
+        private: std::vector<double> new_velocity;
         /// New open/closed state
         private: bool new_open;
         /// Flag to update pose
@@ -120,6 +120,9 @@ namespace gazebo {
 
         // Private methods
 
+        /// \brief Imobilises the gripper
+        private: void imobilise();
+
         /// \brief Changes gripper's pose
         ///
         /// Since the gripper is fixed to the world, the pose can not be set
@@ -131,7 +134,7 @@ namespace gazebo {
 
         /// \brief Changes gripper's velocity
         /// \param pose The gripper's new velocity vector
-        private: void setVelocity(ignition::math::Vector3d & _velocity);
+        private: void setVelocity(std::vector<double> & _velocity);
 
         /// \brief Opens the gripper
         private: void openGripper();

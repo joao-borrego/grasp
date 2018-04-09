@@ -3,7 +3,7 @@
   <world name="default">
 
     <physics type="dart">
-      <real_time_update_rate>900.000000</real_time_update_rate>
+      <real_time_update_rate>0.000000</real_time_update_rate>
     </physics>
 
     <include>

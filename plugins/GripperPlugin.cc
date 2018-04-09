@@ -150,8 +150,11 @@ void GripperPlugin::onRequest(GripperMsgPtr &_msg)
         this->update_pose = true;
     }
     // Handle change velocity request
-    if (_msg->has_velocity()) {
-        this->new_velocity = msgs::ConvertIgn(_msg->velocity());
+    if (_msg->velocity_size() > 0) {
+        this->new_velocity.clear();
+        for (const auto velocity : _msg->velocity()) {
+            this->new_velocity.push_back(velocity);
+        }
         this->update_velocity = true;
     }
     // Handle open/close gripper request
@@ -166,10 +169,18 @@ void GripperPlugin::onRequest(GripperMsgPtr &_msg)
 }
 
 /////////////////////////////////////////////////
+void GripperPlugin::imobilise()
+{
+    this->left_joint->SetVelocity(0, 0);
+    this->right_joint->SetVelocity(0, 0);
+    for (int i = 0; i < this->virtual_joints.size(); i++) {
+        this->virtual_joints.at(i)->SetVelocity(0, 0);    
+    }
+}
+
+/////////////////////////////////////////////////
 void GripperPlugin::setPose(ignition::math::Pose3d & _pose)
 {
-    gzmsg << "Received change pose request" << std::endl;
-
     ignition::math::Vector3d pos = _pose.Pos();
     ignition::math::Quaterniond rot = _pose.Rot();
     this->virtual_joints.at(0)->SetPosition(0, pos.X());
@@ -178,20 +189,22 @@ void GripperPlugin::setPose(ignition::math::Pose3d & _pose)
     this->virtual_joints.at(3)->SetPosition(0, rot.Roll());
     this->virtual_joints.at(4)->SetPosition(0, rot.Pitch());
     this->virtual_joints.at(5)->SetPosition(0, rot.Yaw());
+
+    this->imobilise();
 }
 
 /////////////////////////////////////////////////
-void GripperPlugin::setVelocity(ignition::math::Vector3d & _velocity)
+void GripperPlugin::setVelocity(std::vector<double> & _velocity)
 {
-    this->virtual_joints.at(0)->SetVelocity(0, _velocity.X());
-    this->virtual_joints.at(1)->SetVelocity(0, _velocity.Y());
-    this->virtual_joints.at(2)->SetVelocity(0, _velocity.Z());
+    for (int i = 0; i < _velocity.size(); i++) {
+        this->virtual_joints.at(i)->SetVelocity(0, _velocity.at(i));    
+    }
 }
 
 /////////////////////////////////////////////////
 void GripperPlugin::openGripper()
 {
-    double velocity = 2.0;
+    double velocity = 4.0;
     this->left_joint->SetVelocity(0, velocity);
     this->right_joint->SetVelocity(0, -velocity);
 }
@@ -199,7 +212,7 @@ void GripperPlugin::openGripper()
 /////////////////////////////////////////////////
 void GripperPlugin::closeGripper()
 {
-    double velocity = 2.0;
+    double velocity = 4.0;
     this->left_joint->SetVelocity(0, -velocity);
     this->right_joint->SetVelocity(0, velocity);
 }

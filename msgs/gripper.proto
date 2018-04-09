@@ -11,9 +11,9 @@ import "vector3d.proto";
 message Gripper
 {
     /// New gripper pose
-    optional gazebo.msgs.Pose       pose        = 1;
+    optional gazebo.msgs.Pose   pose        = 1;
     /// New gripper velocity vector
-    optional gazebo.msgs.Vector3d   velocity    = 2;
+    repeated double             velocity    = 2;
     /// New gripper open/closed state
-    optional bool                   open        = 3;
+    optional bool               open        = 3;
 }

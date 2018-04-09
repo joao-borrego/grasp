@@ -16,6 +16,10 @@
 // I/O streams
 #include <iostream>
 
+// Sleep
+#include <chrono>
+#include <thread>
+
 // Custom messages
 #include "gripper.pb.h"
 
@@ -24,3 +28,29 @@
 
 /// Topic monitored by Gripper plugin for incoming requests
 #define GRIPPER_PLUGIN_TOPIC "~/gripper"
+
+// Functions
+
+/// \brief Sets gripper pose
+/// \param pub Publisher to gripper's topic
+/// \param pose New gripper pose
+void setPose(gazebo::transport::PublisherPtr pub,
+    ignition::math::Pose3d pose);
+
+/// \brief Sets gripper velocity
+/// \param pub Publisher to gripper's topic
+/// \param pose New gripper velocity vector
+void setVelocity(gazebo::transport::PublisherPtr pub,
+    std::vector<double> & velocity);
+
+/// \brief Opens gripper
+/// \param pub Publisher to gripper's topic
+void openGripper(gazebo::transport::PublisherPtr pub);
+
+/// \brief Closes gripper
+/// \param pub Publisher to gripper's topic
+void closeGripper(gazebo::transport::PublisherPtr pub);
+
+/// \brief Attempts to grasp object
+/// \param pub Publisher to gripper's topic
+void tryGrasp(gazebo::transport::PublisherPtr pub);
