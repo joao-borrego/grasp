@@ -926,14 +926,27 @@
     <plugin name="hand_plugin" filename="libHandPlugin.so">
       <!-- Reference names -->
       <model>vizzy_right_hand</model>
+      <!-- Fingers -->
+      <actuatedJoint name="r_thumb_phal_1_joint">
+        <mimicJoint name="r_thumb_phal_2_joint" multiplier="0.5" />
+        <mimicJoint name="r_thumb_phal_3_joint" multiplier="0.5" />
+      </actuatedJoint>
+      <actuatedJoint name="r_ind_phal_1_joint">
+        <mimicJoint name="r_ind_phal_2_joint" multiplier="0.5" />
+        <mimicJoint name="r_ind_phal_3_joint" multiplier="0.5" />
+      </actuatedJoint>
+      <!-- Vizzy's med and min fingers are coupled and act as one -->
+      <actuatedJoint name="r_med_phal_1_joint">
+        <mimicJoint name="r_med_phal_2_joint" multiplier="0.5" />
+        <mimicJoint name="r_med_phal_3_joint" multiplier="0.5" />
+        <mimicJoint name="r_min_phal_2_joint" multiplier="0.5" />
+        <mimicJoint name="r_min_phal_3_joint" multiplier="0.5" />
+        <mimicJoint name="r_min_phal_2_joint" multiplier="0.5" />
+      </actuatedJoint>
       <!-- Virtual joints for floating behaviour -->
       <virtualJoints>
-        virtual_px_joint
-        virtual_py_joint
-        virtual_pz_joint
-        virtual_rr_joint
-        virtual_rp_joint
-        virtual_ry_joint
+        virtual_px_joint virtual_py_joint virtual_pz_joint
+        virtual_rr_joint virtual_rp_joint virtual_ry_joint
       </virtualJoints>
       <!-- Constraints -->
       <gravity>0</gravity>

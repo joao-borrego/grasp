@@ -27,9 +27,17 @@ namespace HandPlugin {
 
     // Plugin parameters instanced in SDF
 
-    /// Virtual revolute joint name parameter SDF
+    /// Name SDF attribute
+    #define PARAM_NAME              "name"
+    /// Mimic joint multiplier SDF attribute
+    #define PARAM_MULTIPLIER        "multiplier"
+    /// Finger joint name SDF entity
+    #define PARAM_FINGER_JOINT      "actuatedJoint"
+    /// Mimic joint name SDF entity
+    #define PARAM_MIMIC_JOINT       "mimicJoint"
+    /// Virtual revolute joint name SDF entity
     #define PARAM_VIRTUAL_JOINTS    "virtualJoints"
-    /// Set gravity state parameter SDF
+    /// Set gravity state SDF entity
     #define PARAM_GRAVITY           "gravity"
 
     // Plugin messages
@@ -43,6 +51,9 @@ namespace gazebo {
     /// Shared pointer declaration for request message type
     typedef const boost::shared_ptr<const grasp::msgs::Hand>
         HandMsgPtr;
+
+    // Forward declaration of private joint class
+    class FingerJoint;
 
     // Forward declaration of private data class
     class HandPluginPrivate;
@@ -58,6 +69,8 @@ namespace gazebo {
         /// Connection to world update event
         private: event::ConnectionPtr update_connection;
 
+        /// Array of finger joints
+        private: std::vector<FingerJoint> finger_joints;
         /// Array of virtual x y z r p y joint pointers
         private: std::vector<physics::JointPtr> virtual_joints;
 
@@ -95,6 +108,18 @@ namespace gazebo {
         public: void onRequest(HandMsgPtr & _msg);
 
         // Private methods
+
+        private: bool loadMimicJoints(sdf::ElementPtr _sdf, FingerJoint & joint);
+
+        /// \brief Loads finger joints
+        /// \param _sdf The root sdf element pointer
+        /// \returns Success
+        private: bool loadFingerJoints(sdf::ElementPtr _sdf);
+
+        /// \brief Loads virtual joints
+        /// \param _sdf The root sdf element pointer
+        /// \returns Success
+        private: bool loadVirtualJoints(sdf::ElementPtr _sdf);
 
         /// \brief Imobilises the hand
         private: void imobilise();

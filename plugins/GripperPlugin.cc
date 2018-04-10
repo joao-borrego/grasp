@@ -12,7 +12,7 @@
 namespace gazebo {
 
 
-/// \brief Class for private camera utils plugin data.
+/// \brief Class for private gripper plugin data.
 class GripperPluginPrivate
 {
     /// Gazebo transport node
