@@ -12,6 +12,7 @@ endforeach()
 set (msgs
   # Custom messages
   gripper.proto
+  hand.proto
   # Message dependencies
   ${PROTOBUF_IMPORT_DIRS}/header.proto
   ${PROTOBUF_IMPORT_DIRS}/time.proto

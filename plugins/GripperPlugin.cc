@@ -17,9 +17,9 @@ class GripperPluginPrivate
 {
     /// Gazebo transport node
     public: transport::NodePtr node;
-    /// Camera utils topic subscriber
+    /// Gazebo topic subscriber
     public: transport::SubscriberPtr sub;
-    /// Camera utils topic publisher
+    /// Gazebo topic publisher
     public: transport::PublisherPtr pub;
 
     /// Mutex for safe data access
@@ -186,7 +186,7 @@ void GripperPlugin::imobilise()
     this->left_joint->SetVelocity(0, 0);
     this->right_joint->SetVelocity(0, 0);
     for (int i = 0; i < this->virtual_joints.size(); i++) {
-        this->virtual_joints.at(i)->SetVelocity(0, 0);    
+        this->virtual_joints.at(i)->SetVelocity(0, 0);
     }
 }
 
@@ -209,7 +209,7 @@ void GripperPlugin::setPose(ignition::math::Pose3d & _pose)
 void GripperPlugin::setVelocity(std::vector<double> & _velocity)
 {
     for (int i = 0; i < _velocity.size(); i++) {
-        this->virtual_joints.at(i)->SetVelocity(0, _velocity.at(i));    
+        this->virtual_joints.at(i)->SetVelocity(0, _velocity.at(i));
     }
 }
 

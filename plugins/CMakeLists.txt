@@ -28,3 +28,11 @@ target_link_libraries(GripperPlugin
     ${Boost_LIBRARIES} ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
 add_dependencies(GripperPlugin
     grasp_msgs)
+
+# Hand Gazebo plugin
+add_library(HandPlugin SHARED HandPlugin.cc )
+target_link_libraries(HandPlugin
+    grasp_msgs
+    ${Boost_LIBRARIES} ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
+add_dependencies(HandPlugin
+    grasp_msgs)

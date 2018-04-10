@@ -1,0 +1,18 @@
+syntax = "proto2";
+package grasp.msgs;
+
+/// \ingroup grasp_msgs
+/// \interface Hand
+/// \brief TODO
+
+import "pose.proto";
+
+message Hand
+{
+    /// New hand pose
+    optional gazebo.msgs.Pose   pose        = 1;
+    /// New hand velocity vector
+    repeated double             velocity    = 2;
+    /// Reset
+    optional bool               reset       = 3;
+}

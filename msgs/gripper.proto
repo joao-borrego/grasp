@@ -6,7 +6,6 @@ package grasp.msgs;
 /// \brief TODO
 
 import "pose.proto";
-import "vector3d.proto";
 
 message Gripper
 {
