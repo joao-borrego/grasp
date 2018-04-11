@@ -200,6 +200,14 @@ bool HandPlugin::loadVirtualJoints(sdf::ElementPtr _sdf)
 /////////////////////////////////////////////////
 void HandPlugin::onUpdate()
 {
+    if (this->update_pose) {
+        setPose(this->new_pose);
+        this->update_pose = false;
+    }
+    if (this->update_velocity) {
+        setVelocity(this->new_velocity);
+        this->update_velocity = false;
+    }
     if (this->reset) {
         resetWorld();
         this->reset = false;
@@ -214,6 +222,14 @@ void HandPlugin::onRequest(HandMsgPtr &_msg)
         this->new_pose = msgs::ConvertIgn(_msg->pose());
         this->update_pose = true;
     }
+    // Handle change velocity request
+    if (_msg->velocity_size() > 0) {
+        this->new_velocity.clear();
+        for (const auto velocity : _msg->velocity()) {
+            this->new_velocity.push_back(velocity);
+        }
+        this->update_velocity = true;
+    }
     // Handle reset
     if (_msg->has_reset()) {
         this->reset =  _msg->reset();
@@ -223,19 +239,32 @@ void HandPlugin::onRequest(HandMsgPtr &_msg)
 /////////////////////////////////////////////////
 void HandPlugin::imobilise()
 {
-    // TODO
+    for (int i = 0; i < this->virtual_joints.size(); i++) {
+        this->virtual_joints.at(i)->SetVelocity(0, 0);
+    }
 }
 
 /////////////////////////////////////////////////
 void HandPlugin::setPose(ignition::math::Pose3d & _pose)
 {
-    // TODO
+    ignition::math::Vector3d pos = _pose.Pos();
+    ignition::math::Quaterniond rot = _pose.Rot();
+    this->virtual_joints.at(0)->SetPosition(0, pos.X());
+    this->virtual_joints.at(1)->SetPosition(0, pos.Y());
+    this->virtual_joints.at(2)->SetPosition(0, pos.Z());
+    this->virtual_joints.at(3)->SetPosition(0, rot.Roll());
+    this->virtual_joints.at(4)->SetPosition(0, rot.Pitch());
+    this->virtual_joints.at(5)->SetPosition(0, rot.Yaw());
+
+    this->imobilise();
 }
 
 /////////////////////////////////////////////////
 void HandPlugin::setVelocity(std::vector<double> & _velocity)
 {
-    // TODO
+    for (int i = 0; i < _velocity.size(); i++) {
+        this->virtual_joints.at(i)->SetVelocity(0, _velocity.at(i));
+    }
 }
 
 /////////////////////////////////////////////////
