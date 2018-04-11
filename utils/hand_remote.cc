@@ -46,6 +46,14 @@ int main(int _argc, char **_argv)
             std::vector<double> velocity {0,0,0.8,0,0,0};
             setVelocity(pub, velocity);
         }
+        // Close hand
+        else if (command == "close")
+        {
+            std::vector<double> velocities {0.8,0.8,0.8};
+            std::vector<double> velocity {0,0,0,0,0,0};
+            setJointVelocities(pub, velocities);
+            setVelocity(pub, velocity);
+        }
         // Reset everything
         else if (command == "reset")
         {
@@ -76,6 +84,16 @@ void setVelocity(gazebo::transport::PublisherPtr pub,
     grasp::msgs::Hand msg;
     google::protobuf::RepeatedField<double> data(velocity.begin(), velocity.end());
     msg.mutable_velocity()->Swap(&data);
+    pub->Publish(msg);
+}
+
+/////////////////////////////////////////////////
+void setJointVelocities(gazebo::transport::PublisherPtr pub,
+    std::vector<double> & velocities)
+{
+    grasp::msgs::Hand msg;
+    google::protobuf::RepeatedField<double> data(velocities.begin(), velocities.end());
+    msg.mutable_joint_velocities()->Swap(&data);
     pub->Publish(msg);
 }
 

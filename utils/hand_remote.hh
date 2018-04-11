@@ -43,6 +43,12 @@ void setPose(gazebo::transport::PublisherPtr pub,
 void setVelocity(gazebo::transport::PublisherPtr pub,
     std::vector<double> & velocity);
 
+/// \brief Sets hand's finger joint velocities
+/// \param pub Publisher to hand's topic
+/// \param pose New finger joint velocities vector
+void setJointVelocities(gazebo::transport::PublisherPtr pub,
+    std::vector<double> & velocities);
+
 /// \brief Resets simulation world
 /// \param pub Publisher to hand's topic
 void reset(gazebo::transport::PublisherPtr pub);

@@ -78,12 +78,16 @@ namespace gazebo {
         private: ignition::math::Pose3d new_pose;
         /// New velocity vector
         private: std::vector<double> new_velocity;
+        /// New joint velocities vector
+        private: std::vector<double> new_joint_velocities;
         /// Flag to update pose
-        private: bool update_pose       {false};
+        private: bool update_pose                   {false};
         /// Flag to update velocity
-        private: bool update_velocity   {false};
+        private: bool update_velocity               {false};
+        /// Flag to update joints velocity
+        private: bool update_joint_velocities       {false};
         /// Flag to reset
-        private: bool reset             {false};
+        private: bool reset                         {false};
 
         // Protected attributes
 
@@ -136,6 +140,10 @@ namespace gazebo {
         /// \brief Changes hand's velocity
         /// \param pose The hand's new velocity vector
         private: void setVelocity(std::vector<double> & _velocity);
+
+        /// \brief Changes hand's finger joints velocities
+        /// \param pose The new finger joint velocities
+        private: void setJointVelocities(std::vector<double> & _velocities);
 
         /// \brief Resets the world
         private: void resetWorld();

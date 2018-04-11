@@ -208,6 +208,10 @@ void HandPlugin::onUpdate()
         setVelocity(this->new_velocity);
         this->update_velocity = false;
     }
+    if (this->update_joint_velocities) {
+        setJointVelocities(this->new_joint_velocities);
+        this->update_joint_velocities = false;
+    }
     if (this->reset) {
         resetWorld();
         this->reset = false;
@@ -230,6 +234,21 @@ void HandPlugin::onRequest(HandMsgPtr &_msg)
         }
         this->update_velocity = true;
     }
+    // Handle change finger joint velocities request
+    if (_msg->joint_velocities_size() > 0) {
+        this->new_joint_velocities.clear();
+        if (_msg->joint_velocities_size() == this->finger_joints.size())
+        {
+            for (const auto velocity : _msg->joint_velocities()) {
+                this->new_joint_velocities.push_back(velocity);
+            }
+            this->update_joint_velocities = true;
+        }
+        else
+        {
+            gzdbg << "Invalid joint velocities message" << std::endl;
+        }
+    }
     // Handle reset
     if (_msg->has_reset()) {
         this->reset =  _msg->reset();
@@ -241,6 +260,14 @@ void HandPlugin::imobilise()
 {
     for (int i = 0; i < this->virtual_joints.size(); i++) {
         this->virtual_joints.at(i)->SetVelocity(0, 0);
+    }
+    for (int i = 0; i < this->finger_joints.size(); i++)
+    {
+        this->finger_joints.at(i).actuated->SetVelocity(0, 0);
+        for (int j = 0; j < this->finger_joints.at(i).mimic.size(); j++)
+        {
+            this->finger_joints.at(i).mimic.at(j)->SetVelocity(0, 0);
+        }
     }
 }
 
@@ -264,6 +291,22 @@ void HandPlugin::setVelocity(std::vector<double> & _velocity)
 {
     for (int i = 0; i < _velocity.size(); i++) {
         this->virtual_joints.at(i)->SetVelocity(0, _velocity.at(i));
+        
+    }
+}
+
+/////////////////////////////////////////////////
+void HandPlugin::setJointVelocities(std::vector<double> & _velocities)
+{
+    for (int i = 0; i < _velocities.size(); i++)
+    {
+        this->finger_joints.at(i).actuated->SetVelocity(0, _velocities.at(i));
+        for (int j = 0; j < this->finger_joints.at(i).mimic.size(); j++)
+        {
+            physics::JointPtr mimic_joint = this->finger_joints.at(i).mimic.at(j);
+            double multiplier = this->finger_joints.at(i).multipliers.at(j);
+            mimic_joint->SetVelocity(0, _velocities.at(i) * multiplier);
+        }
     }
 }
 
