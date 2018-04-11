@@ -37,7 +37,7 @@ int main(int _argc, char **_argv)
         // Change pose request
         if (command == "pose")
         {
-            ignition::math::Pose3d pose(0,0,0.1,0,1.57,0);
+            ignition::math::Pose3d pose(0.07,0.1,0.1,0,1.57,0);
             setPose(pub, pose);
         }
         // Change velocity request
@@ -49,7 +49,7 @@ int main(int _argc, char **_argv)
         // Close hand
         else if (command == "close")
         {
-            std::vector<double> velocities {0.8,0.8,0.8};
+            std::vector<double> velocities {5,5,5};
             std::vector<double> velocity {0,0,0,0,0,0};
             setJointVelocities(pub, velocities);
             setVelocity(pub, velocity);

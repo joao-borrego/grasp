@@ -272,6 +272,20 @@ void HandPlugin::imobilise()
 }
 
 /////////////////////////////////////////////////
+void HandPlugin::resetJoints()
+{
+    for (int i = 0; i < this->finger_joints.size(); i++)
+    {
+        this->finger_joints.at(i).actuated->SetPosition(0, 0);
+        for (int j = 0; j < this->finger_joints.at(i).mimic.size(); j++)
+        {
+            this->finger_joints.at(i).mimic.at(j)->SetPosition(0, 0);
+        }
+    }
+}
+
+
+/////////////////////////////////////////////////
 void HandPlugin::setPose(ignition::math::Pose3d & _pose)
 {
     ignition::math::Vector3d pos = _pose.Pos();
@@ -284,6 +298,7 @@ void HandPlugin::setPose(ignition::math::Pose3d & _pose)
     this->virtual_joints.at(5)->SetPosition(0, rot.Yaw());
 
     this->imobilise();
+    this->resetJoints();
 }
 
 /////////////////////////////////////////////////

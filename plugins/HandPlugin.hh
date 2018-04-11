@@ -128,6 +128,9 @@ namespace gazebo {
         /// \brief Imobilises the hand
         private: void imobilise();
 
+        /// \brief Resets finger joints to default pose
+        private: void resetJoints();
+
         /// \brief Changes hand's pose
         ///
         /// Since the hand is fixed to the world, the pose can not be set
