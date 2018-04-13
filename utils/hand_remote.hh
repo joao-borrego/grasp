@@ -52,3 +52,7 @@ void setJointVelocities(gazebo::transport::PublisherPtr pub,
 /// \brief Resets simulation world
 /// \param pub Publisher to hand's topic
 void reset(gazebo::transport::PublisherPtr pub);
+
+/// \brief Attempts to grasp object
+/// \param pub Publisher to hand's topic
+void tryGrasp(gazebo::transport::PublisherPtr pub);

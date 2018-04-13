@@ -6,101 +6,11 @@
 <!-- =================================================================================== -->
 <robot name="vizzy_hand" xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller" xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface" xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor" xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <!-- Transmissions -->
-  <transmission name="r_min_phal_1_transmission">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="r_min_phal_1_joint">
-      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="r_min_phal_1_motor">
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-  <transmission name="r_med_phal_1_transmission">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="r_med_phal_1_joint">
-      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="r_med_phal_1_motor">
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-  <transmission name="r_med_phal_2_transmission">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="r_med_phal_2_joint">
-      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="r_med_phal_2_motor">
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-  <transmission name="r_med_phal_3_transmission">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="r_med_phal_3_joint">
-      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="r_med_phal_3_motor">
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-  <transmission name="r_ind_phal_1_transmission">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="r_ind_phal_1_joint">
-      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="r_ind_phal_1_motor">
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-  <transmission name="r_ind_phal_2_transmission">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="r_ind_phal_2_joint">
-      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="r_ind_phal_2_motor">
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-  <transmission name="r_ind_phal_3_transmission">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="r_ind_phal_3_joint">
-      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="r_ind_phal_3_motor">
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-  <transmission name="r_thumb_phal_1_transmission">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="r_thumb_phal_1_joint">
-      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="r_thumb_phal_1_motor">
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-  <transmission name="r_thumb_phal_2_transmission">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="r_thumb_phal_2_joint">
-      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="r_thumb_phal_2_motor">
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-  <transmission name="r_thumb_phal_3_transmission">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="r_thumb_phal_3_joint">
-      <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="r_thumb_phal_3_motor">
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-
   <!-- Root link, on the ground just below the robot origin -->
   <link name="base_footprint">
   </link>
+
+  <!-- Vizzy's right hand -->
   <link name="r_hand_base_link">
     <inertial>
       <origin rpy="0 0 0" xyz="-0.00674439077967622 -0.00586648543041128 0.00390957138640023"/>
@@ -780,8 +690,8 @@
     <axis xyz="1 0 0"/>
     <parent link="world"/>
     <child link="virtual_px_link"/>
-    <limit effort="40.0" lower="0.0" upper="0.5" velocity="5.0"/>
-    <dynamics damping="0.01" friction="0.0"/>
+    <limit effort="10.0" lower="0.0" upper="0.5" velocity="5.0"/>
+    <dynamics damping="100.0" friction="0.0"/>
   </joint>
   <link name="virtual_px_link">
     <visual>
@@ -807,8 +717,8 @@
     <axis xyz="0 1 0"/>
     <parent link="virtual_px_link"/>
     <child link="virtual_py_link"/>
-    <limit effort="40.0" lower="0.0" upper="0.5" velocity="5.0"/>
-    <dynamics damping="0.01" friction="0.0"/>
+    <limit effort="10.0" lower="0.0" upper="0.5" velocity="5.0"/>
+    <dynamics damping="100.0" friction="0.0"/>
   </joint>
   <link name="virtual_py_link">
     <visual>
@@ -829,13 +739,13 @@
       </geometry>
     </collision>
   </link>
-    <joint name="virtual_pz_joint" type="prismatic">
+  <joint name="virtual_pz_joint" type="prismatic">
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="0 0 1"/>
     <parent link="virtual_py_link"/>
     <child link="virtual_pz_link"/>
-    <limit effort="40.0" lower="0.0" upper="0.5" velocity="5.0"/>
-    <dynamics damping="0.01" friction="0.0"/>
+    <limit effort="10.0" lower="0.0" upper="0.5" velocity="10.0"/>
+    <dynamics damping="50.0" friction="0.0"/>
   </joint>
   <link name="virtual_pz_link">
     <visual>
@@ -863,7 +773,7 @@
     <axis xyz="0 0 1"/>
     <parent link="virtual_pz_link"/>
     <child link="virtual_ry_link"/>
-    <limit effort="40.0" velocity="5.0"/>
+    <limit effort="0.01" velocity="0.01"/>
     <dynamics damping="10000" friction="0.0"/>
   </joint>
   <link name="virtual_ry_link">
@@ -890,7 +800,7 @@
     <axis xyz="0 1 0"/>
     <parent link="virtual_ry_link"/>
     <child link="virtual_rp_link"/>
-    <limit effort="40.0" velocity="5.0"/>
+    <limit effort="0.01" velocity="0.01"/>
     <dynamics damping="10000" friction="0.0"/>
   </joint>
   <link name="virtual_rp_link">
@@ -917,7 +827,7 @@
     <axis xyz="1 0 0"/>
     <parent link="virtual_rp_link"/>
     <child link="base_footprint"/>
-    <limit effort="40.0" velocity="5.0"/>
+    <limit effort="0.01" velocity="0.01"/>
     <dynamics damping="10000" friction="0.0"/>
   </joint>
 

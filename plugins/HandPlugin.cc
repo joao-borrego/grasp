@@ -15,7 +15,7 @@ namespace gazebo {
 /// TODO: Maybe refine data structure?
 class FingerJoint
 {
-    /// Actuated joint 
+    /// Actuated joint
     public: physics::JointPtr actuated;
     /// Vector of mimic joints
     public: std::vector<physics::JointPtr> mimic;
@@ -65,6 +65,7 @@ void HandPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     if (_model->GetJointCount() != 0)
     {
         this->model = _model;
+        this->world = _model->GetWorld();
     }
     else
     {
@@ -112,7 +113,7 @@ bool HandPlugin::loadMimicJoints(sdf::ElementPtr _sdf, FingerJoint & joint)
             mimic_sdf != NULL;
             mimic_sdf = mimic_sdf->GetNextElement())
         {
-            if (mimic_sdf->HasAttribute(PARAM_NAME) && 
+            if (mimic_sdf->HasAttribute(PARAM_NAME) &&
                 mimic_sdf->HasAttribute(PARAM_MULTIPLIER))
             {
                 mimic_sdf->GetAttribute(PARAM_NAME)->Get<std::string>(mimic_name);
@@ -127,7 +128,7 @@ bool HandPlugin::loadMimicJoints(sdf::ElementPtr _sdf, FingerJoint & joint)
                 gzerr << "[HandPlugin] No joint name provided." << std::endl;
                 return false;
             }
-        } 
+        }
     }
 }
 
@@ -156,7 +157,7 @@ bool HandPlugin::loadFingerJoints(sdf::ElementPtr _sdf)
                 gzerr << "[HandPlugin] No joint name provided." << std::endl;
                 return false;
             }
-        } 
+        }
     }
     else
     {
@@ -200,6 +201,18 @@ bool HandPlugin::loadVirtualJoints(sdf::ElementPtr _sdf)
 /////////////////////////////////////////////////
 void HandPlugin::onUpdate()
 {
+    std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+ 
+    uint32_t now = this->world->Iterations();
+    if (now >= this->last_updated + this->update_rate)
+    {
+        this->last_updated = now;
+        if (this->update_joint_velocities) {
+            setJointVelocities(this->new_joint_velocities);
+            //this->update_joint_velocities = false;
+        }
+    }
+
     if (this->update_pose) {
         setPose(this->new_pose);
         this->update_pose = false;
@@ -208,14 +221,13 @@ void HandPlugin::onUpdate()
         setVelocity(this->new_velocity);
         this->update_velocity = false;
     }
-    if (this->update_joint_velocities) {
-        setJointVelocities(this->new_joint_velocities);
-        this->update_joint_velocities = false;
-    }
     if (this->reset) {
+        this->imobilise();
         resetWorld();
+        this->last_updated = 0;
         this->reset = false;
     }
+    
 }
 
 /////////////////////////////////////////////////
@@ -224,10 +236,12 @@ void HandPlugin::onRequest(HandMsgPtr &_msg)
     // Handle change pose request
     if (_msg->has_pose()) {
         this->new_pose = msgs::ConvertIgn(_msg->pose());
+        std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
         this->update_pose = true;
     }
     // Handle change velocity request
     if (_msg->velocity_size() > 0) {
+        std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
         this->new_velocity.clear();
         for (const auto velocity : _msg->velocity()) {
             this->new_velocity.push_back(velocity);
@@ -236,6 +250,7 @@ void HandPlugin::onRequest(HandMsgPtr &_msg)
     }
     // Handle change finger joint velocities request
     if (_msg->joint_velocities_size() > 0) {
+        std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
         this->new_joint_velocities.clear();
         if (_msg->joint_velocities_size() == this->finger_joints.size())
         {
@@ -251,6 +266,7 @@ void HandPlugin::onRequest(HandMsgPtr &_msg)
     }
     // Handle reset
     if (_msg->has_reset()) {
+        std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
         this->reset =  _msg->reset();
     }
 }
@@ -258,17 +274,13 @@ void HandPlugin::onRequest(HandMsgPtr &_msg)
 /////////////////////////////////////////////////
 void HandPlugin::imobilise()
 {
-    for (int i = 0; i < this->virtual_joints.size(); i++) {
-        this->virtual_joints.at(i)->SetVelocity(0, 0);
-    }
-    for (int i = 0; i < this->finger_joints.size(); i++)
-    {
-        this->finger_joints.at(i).actuated->SetVelocity(0, 0);
-        for (int j = 0; j < this->finger_joints.at(i).mimic.size(); j++)
-        {
-            this->finger_joints.at(i).mimic.at(j)->SetVelocity(0, 0);
-        }
-    }
+    physics::Link_V links = this->model->GetLinks();
+    for (auto link : links) { link->ResetPhysicsStates(); }
+    physics::Joint_V joints = this->model->GetJoints();
+    for (auto joint : joints) { joint->SetVelocity(0, 0); }
+
+    this->update_velocity = false;
+    this->update_joint_velocities = false;
 }
 
 /////////////////////////////////////////////////
@@ -297,8 +309,8 @@ void HandPlugin::setPose(ignition::math::Pose3d & _pose)
     this->virtual_joints.at(4)->SetPosition(0, rot.Pitch());
     this->virtual_joints.at(5)->SetPosition(0, rot.Yaw());
 
-    this->imobilise();
     this->resetJoints();
+    this->imobilise();
 }
 
 /////////////////////////////////////////////////
@@ -306,7 +318,6 @@ void HandPlugin::setVelocity(std::vector<double> & _velocity)
 {
     for (int i = 0; i < _velocity.size(); i++) {
         this->virtual_joints.at(i)->SetVelocity(0, _velocity.at(i));
-        
     }
 }
 

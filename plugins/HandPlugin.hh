@@ -66,6 +66,8 @@ namespace gazebo {
         private: std::unique_ptr<HandPluginPrivate> data_ptr;
         /// Model to which the plugin is attached
         private: physics::ModelPtr model;
+        /// World in which the model exists
+        private: physics::WorldPtr world;
         /// Connection to world update event
         private: event::ConnectionPtr update_connection;
 
@@ -88,6 +90,11 @@ namespace gazebo {
         private: bool update_joint_velocities       {false};
         /// Flag to reset
         private: bool reset                         {false};
+
+        /// Update rate value in physics engine iterations
+        private: uint32_t update_rate               {10};
+        /// Last updated
+        private: uint32_t last_updated              {0};
 
         // Protected attributes
 
