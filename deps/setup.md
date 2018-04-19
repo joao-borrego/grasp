@@ -3,6 +3,7 @@
 1. Ubuntu 16.04.4 LTS (Xenial Xerus)
 1. Gazebo 9.0.0
 1. DART 6.3.0
+1. ROS Kinetic Kame desktop
 1. gazebo_ros_pks for Gazebo-ROS bridge
 
 You can either follow the installation of each of the required dependencies, or simply run the provided [installation script] (needs to be tested).
@@ -129,6 +130,22 @@ Installed to:
 1. Binaries: `/usr/local/lib/gazebo-9/`
 1. Resources: `/usr/local/share/gazebo-9/`
 
+#### [ROS]
+
+Version: Kinetic Kame desktop
+
+Install with `apt`:
+``` bash
+# Setup sources.list and keys
+sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
+sudo apt update
+sudo apt install ros-kinetic-desktop
+```
+
+**DO NOT** install desktop **FULL** version! This will ruin the whole process!
+
+
 #### [gazebo_ros_pkgs]
 
 Branch: `kinetic-devel`
@@ -154,6 +171,7 @@ catkin_make
 [GAZEBO]: http://gazebosim.org/tutorials?tut=install_from_source
 [gazebo_ros_pkgs]: https://github.com/ros-simulation/gazebo_ros_pkgs
 [libccd]: https://github.com/danfis/libccd
+[ROS]: http://wiki.ros.org/kinetic/Installation/Ubuntu
 [SDF]: http://sdformat.com/tutorials?tut=install
 
 [installation script]: install_deps.sh
