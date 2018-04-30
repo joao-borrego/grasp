@@ -10,11 +10,15 @@ import "pose.proto";
 message Hand
 {
     /// New hand pose
-    optional gazebo.msgs.Pose   pose        		= 1;
+    optional gazebo.msgs.Pose   pose                = 1;
     /// New hand velocity vector
-    repeated double             velocity    		= 2;
+    repeated double             velocity            = 2;
     /// Actuated joints velocity vector
-    repeated double             joint_velocities	= 3;
+    repeated double             joint_velocities    = 3;
+    /// Controller rate
+    optional double             rate                = 4;
+    /// Controller timeout
+    optional double             timeout             = 5;
     /// Reset
-    optional bool               reset       		= 4;
+    optional bool               reset               = 6;
 }

@@ -49,13 +49,13 @@ GZ_REGISTER_MODEL_PLUGIN(HandPlugin)
 HandPlugin::HandPlugin() : ModelPlugin(),
     data_ptr(new HandPluginPrivate)
 {
-    gzmsg << "[HandPlugin] Started hand plugin." << std::endl;
+    gzmsg << "[HandPlugin] Started plugin." << std::endl;
 }
 
 /////////////////////////////////////////////////
 HandPlugin::~HandPlugin()
 {
-    gzmsg << "[HandPlugin] Unloaded hand plugin." << std::endl;
+    gzmsg << "[HandPlugin] Unloaded plugin." << std::endl;
 }
 
 /////////////////////////////////////////////////
@@ -97,7 +97,7 @@ void HandPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     this->data_ptr->sub = this->data_ptr->node->Subscribe(REQUEST_TOPIC,
         &HandPlugin::onRequest, this);
 
-    gzmsg << "[HandPlugin] Loaded hand plugin." << std::endl;
+    gzmsg << "[HandPlugin] Loaded plugin." << std::endl;
 }
 
 /////////////////////////////////////////////////
@@ -202,7 +202,7 @@ bool HandPlugin::loadVirtualJoints(sdf::ElementPtr _sdf)
 void HandPlugin::onUpdate()
 {
     std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
- 
+
     uint32_t now = this->world->Iterations();
     if (now >= this->last_updated + this->update_rate)
     {
@@ -227,7 +227,7 @@ void HandPlugin::onUpdate()
         this->last_updated = 0;
         this->reset = false;
     }
-    
+
 }
 
 /////////////////////////////////////////////////

@@ -1,0 +1,25 @@
+syntax = "proto2";
+package grasp.msgs;
+
+/// \ingroup grasp_msgs
+/// \interface grasp target request
+/// \brief grasp target plugin request
+
+import "pose.proto";
+
+message TargetRequest
+{
+    /// Type of request 
+    enum Type
+    {
+        // Request grasp target current pose
+        GET_POSE = 1;
+        // Change grasp target current pose
+        SET_POSE = 2;
+    }
+
+    /// Type of request
+    required Type               type = 1;
+    /// New pose
+    optional gazebo.msgs.Pose   pose = 2;
+}

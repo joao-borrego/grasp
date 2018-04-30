@@ -1,0 +1,14 @@
+syntax = "proto2";
+package grasp.msgs;
+
+/// \ingroup grasp_msgs
+/// \interface grasp target response
+/// \brief grasp target plugin response
+
+import "pose.proto";
+
+message TargetResponse
+{
+    /// Target current pose
+    optional gazebo.msgs.Pose pose = 1;
+}

@@ -13,7 +13,10 @@ set (msgs
   # Custom messages
   gripper.proto
   hand.proto
-  # Contact sensor plugin
+  # Grasp target messages
+  target_request.proto
+  target_response.proto
+  # Contact sensor messages
   contact_sensor_request.proto
   contact_sensor_response.proto
   # Message dependencies
