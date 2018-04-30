@@ -13,6 +13,9 @@ set (msgs
   # Custom messages
   gripper.proto
   hand.proto
+  # Contact sensor plugin
+  contact_sensor_request.proto
+  contact_sensor_response.proto
   # Message dependencies
   ${PROTOBUF_IMPORT_DIRS}/header.proto
   ${PROTOBUF_IMPORT_DIRS}/time.proto

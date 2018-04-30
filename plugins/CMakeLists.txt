@@ -36,3 +36,11 @@ target_link_libraries(HandPlugin
     ${Boost_LIBRARIES} ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
 add_dependencies(HandPlugin
     grasp_msgs)
+
+# Contact Gazebo plugin
+add_library(ContactSensorPlugin SHARED ContactSensorPlugin.cc )
+target_link_libraries(ContactSensorPlugin
+	grasp_msgs
+    ${Boost_LIBRARIES} ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
+add_dependencies(ContactSensorPlugin
+    grasp_msgs)

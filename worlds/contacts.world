@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <world name="default">
+
+    <physics type="dart">
+      <real_time_update_rate>0.000000</real_time_update_rate>
+    </physics>
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <model name="custom_box">
+      <pose>0.11 0 1 0 0 0</pose>
+      <link name="link">
+
+        <inertial>
+          <mass>0.05</mass>
+          <inertia>
+            <ixx>0.0083</ixx>
+            <ixy>0.0</ixy>
+            <ixz>0.0</ixz>
+            <iyy>0.0083</iyy>
+            <iyz>0.0</iyz>
+            <izz>0.0083</izz>
+          </inertia>
+        </inertial>
+
+        <collision name="box_collision">
+          <geometry>
+            <box>
+              <size>0.025 0.025 0.35</size>
+            </box>
+          </geometry>
+        </collision>
+
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.025 0.025 0.35</size>
+            </box>
+          </geometry>
+        </visual>
+
+        <sensor name='contact_sensor' type='contact'>
+          <contact>
+            <collision>box_collision</collision>
+          </contact>
+          <update_rate>0.2</update_rate>
+          <!-- Gazebo contact plugin -->
+          <plugin name="contact_plugin" filename="libContactSensorPlugin.so">
+          </plugin>
+        </sensor>
+
+      </link>
+    </model>
+  </world>
+</sdf>

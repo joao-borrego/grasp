@@ -1,0 +1,21 @@
+syntax = "proto2";
+package grasp.msgs;
+
+/// \ingroup grasp_msgs
+/// \interface contact sensor response
+/// \brief ContactSensor plugin response
+
+message ContactSensorResponse
+{
+    /// Type of response 
+    enum Type
+    {
+        /// Test if sensor is touching collision model
+        IN_CONTACT = 1;
+    }
+
+    /// Type of response 
+    optional Type   type        = 1;
+    /// Collision model to test if in contact
+    optional string in_contact  = 2;
+}
