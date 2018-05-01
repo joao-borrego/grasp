@@ -10,9 +10,15 @@
 #include "run_trials.hh"
 
 /// Global timeout flag
-bool g_timeout {false};
+bool g_timeout  {false};
 /// Mutex for global timeout flag
 std::mutex g_timeout_mutex;
+/// Global trial finished flag
+bool g_finished {false};
+/// Global trial outcome
+bool g_success  {false};
+/// Mutex for global timeout flag
+std::mutex g_finished_mutex;
 
 int main(int _argc, char **_argv)
 {
@@ -25,7 +31,7 @@ int main(int _argc, char **_argv)
     // Publish to the hand plugin topic
     gazebo::transport::PublisherPtr pub_hand =
         node->Advertise<HandMsg>(HAND_REQ_TOPIC);
-	// Subscribe to the grasp target topic and link callback function
+    // Subscribe to the grasp target topic and link callback function
     gazebo::transport::SubscriberPtr sub_hand =
         node->Subscribe(HAND_RES_TOPIC, onHandResponse);
     // Publish to the grasp target plugin topic
@@ -56,12 +62,16 @@ int main(int _argc, char **_argv)
  
 /////////////////////////////////////////////////
 void setPose(gazebo::transport::PublisherPtr pub,
-    ignition::math::Pose3d pose)
+    ignition::math::Pose3d pose,
+    double timeout)
 {
     HandMsg msg;
     gazebo::msgs::Pose *pose_msg = new gazebo::msgs::Pose();
     gazebo::msgs::Set(pose_msg, pose);
     msg.set_allocated_pose(pose_msg);
+    if (timeout > 0) {
+        msg.set_timeout(timeout);
+    }
     pub->Publish(msg);
 }
 
@@ -74,18 +84,30 @@ void setVelocity(gazebo::transport::PublisherPtr pub,
     google::protobuf::RepeatedField<double> data(velocity.begin(), velocity.end());
     msg.mutable_velocity()->Swap(&data);
     if (timeout > 0) {
-    	msg.set_timeout(timeout);
+        msg.set_timeout(timeout);
     }
     pub->Publish(msg);
 }
 
 /////////////////////////////////////////////////
 void setJointVelocities(gazebo::transport::PublisherPtr pub,
-    std::vector<double> & velocities)
+    std::vector<double> & velocities,
+    double timeout)
 {
     HandMsg msg;
     google::protobuf::RepeatedField<double> data(velocities.begin(), velocities.end());
     msg.mutable_joint_velocities()->Swap(&data);
+    if (timeout > 0) {
+        msg.set_timeout(timeout);
+    }
+    pub->Publish(msg);
+}
+
+/////////////////////////////////////////////////
+void getTargetPose(gazebo::transport::PublisherPtr pub)
+{
+    TargetRequest msg;
+    msg.set_type(REQ_GET_POSE);
     pub->Publish(msg);
 }
 
@@ -104,25 +126,21 @@ void tryGrasp(
     gazebo::transport::PublisherPtr pub_target)
 {
     std::vector<double> velocity_lift {0,0,20,0,0,0};
-    std::vector<double> velocity_stop {0,0,0,0,0,0};
     std::vector<double> velocities_close {8,8,8};
-    std::vector<double> velocities_open {0,0,0};
 
-    setPose(pub_hand, grasp.pose);
-    waitMs(50);
-    setJointVelocities(pub_hand, velocities_close);
-    setVelocity(pub_hand, velocity_stop);
-    waitMs(1000);
-    setVelocity(pub_hand, velocity_lift, 1.0);
+    setPose(pub_hand, grasp.pose, 0.1);
     while (waitForTimeout()) {waitMs(10);}
+    setJointVelocities(pub_hand, velocities_close, 0.5);
+    while (waitForTimeout()) {waitMs(10);}
+    setVelocity(pub_hand, velocity_lift, 0.3);
+    while (waitForTimeout()) {waitMs(10);}
+    getTargetPose(pub_target);
+    while (waitForTrialEnd()) {waitMs(10);}
     
-    //waitMs(3000);
-    //setJointVelocities(pub_hand, velocities_open);
-    //setVelocity(pub_hand, velocity_stop);
-    //waitMs(1000);
-    
+    std::cout << "Success: " << g_success << std::endl;
+
     reset(pub_hand);
-	waitMs(50);
+    waitMs(50);
 }
 
 //////////////////////////////////////////////////
@@ -136,19 +154,39 @@ bool waitForTimeout()
     return true;
 }
 
+//////////////////////////////////////////////////
+bool waitForTrialEnd()
+{
+    std::lock_guard<std::mutex> lock(g_finished_mutex);
+    if (g_finished) {
+        g_finished = false;
+        return false;
+    }
+    return true;
+}
+
 /////////////////////////////////////////////////
 void onHandResponse(HandMsgPtr & _msg)
 {
-	if (_msg->has_timeout()) {
-		std::lock_guard<std::mutex> lock(g_timeout_mutex);
-		g_timeout = true;
-	}
+    if (_msg->has_timeout()) {
+        std::lock_guard<std::mutex> lock(g_timeout_mutex);
+        g_timeout = true;
+    }
 }
 
 /////////////////////////////////////////////////
 void onTargetResponse(TargetResponsePtr & _msg)
 {
-
+    if (_msg->has_pose()) {
+        bool success = false;
+        ignition::math::Pose3d pose(gazebo::msgs::ConvertIgn(_msg->pose()));
+        if (pose.Pos().Z() > Z_LIFTED) {
+            success = true;
+        }
+        std::lock_guard<std::mutex> lock(g_finished_mutex);
+        g_finished = true;
+        g_success = success;
+    }
 }
 
 /////////////////////////////////////////////////

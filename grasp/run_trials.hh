@@ -31,6 +31,9 @@
 // Tools
 #include "gen_grasps.hh"
 
+// Height threshold
+#define Z_LIFTED 0.2
+
 // Topics
 
 /// Topic monitored by hand plugin for incoming requests
@@ -74,7 +77,8 @@ typedef const boost::shared_ptr<const grasp::msgs::TargetResponse>
 /// \param pub Publisher to hand's topic
 /// \param pose New hand pose
 void setPose(gazebo::transport::PublisherPtr pub,
-    ignition::math::Pose3d pose);
+    ignition::math::Pose3d pose,
+    double timeout=-1);
 
 /// \brief Sets hand velocity
 /// \param pub 		Publisher to hand's topic
@@ -88,7 +92,11 @@ void setVelocity(gazebo::transport::PublisherPtr pub,
 /// \param pub Publisher to hand's topic
 /// \param pose New finger joint velocities vector
 void setJointVelocities(gazebo::transport::PublisherPtr pub,
-    std::vector<double> & velocities);
+    std::vector<double> & velocities,
+    double timeout=-1);
+
+/// TODO
+void getTargetPose(gazebo::transport::PublisherPtr pub);
 
 /// \brief Resets simulation world
 /// \param pub Publisher to hand's topic
@@ -105,6 +113,9 @@ void tryGrasp(
 
 /// TODO
 bool waitForTimeout();
+
+/// TODO
+bool waitForTrialEnd();
 
 /// TODO
 void onHandResponse(HandMsgPtr & _msg);

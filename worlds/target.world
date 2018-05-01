@@ -15,7 +15,7 @@
     </include>
 
     <model name="custom_box">
-      <pose>0.11 0 1 0 0 0</pose>
+      <pose>0.11 0 0.175 0 0 0</pose>
       <link name="link">
 
         <inertial>

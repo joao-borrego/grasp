@@ -21,8 +21,8 @@
     <axis xyz="1 0 0"/>
     <parent link="world"/>
     <child link="virtual_px_link"/>
-    <limit effort="5.0" lower="0.0" upper="0.5" velocity="5.0"/>
-    <dynamics damping="400.0" friction="0.0"/>
+    <limit effort="5.0" lower="-0.5" upper="0.5" velocity="5.0"/>
+    <dynamics damping="600.0" friction="0.0"/>
   </joint>
   <link name="virtual_px_link">
     <visual>
@@ -48,8 +48,8 @@
     <axis xyz="0 1 0"/>
     <parent link="virtual_px_link"/>
     <child link="virtual_py_link"/>
-    <limit effort="5.0" lower="0.0" upper="0.5" velocity="5.0"/>
-    <dynamics damping="400.0" friction="0.0"/>
+    <limit effort="5.0" lower="-0.5" upper="0.5" velocity="5.0"/>
+    <dynamics damping="600.0" friction="0.0"/>
   </joint>
   <link name="virtual_py_link">
     <visual>
@@ -75,8 +75,8 @@
     <axis xyz="0 0 1"/>
     <parent link="virtual_py_link"/>
     <child link="virtual_pz_link"/>
-    <limit effort="10.0" lower="0.0" upper="0.5" velocity="10.0"/>
-    <dynamics damping="100.0" friction="0.0"/>
+    <limit effort="20.0" lower="0.0" upper="1.0" velocity="20.0"/>
+    <dynamics damping="50.0" friction="0.0"/>
   </joint>
   <link name="virtual_pz_link">
     <visual>
@@ -104,8 +104,8 @@
     <axis xyz="0 0 1"/>
     <parent link="virtual_pz_link"/>
     <child link="virtual_ry_link"/>
-    <limit effort="0.01" velocity="0.01"/>
-    <dynamics damping="10000" friction="0.0"/>
+    <limit effort="0.001" velocity="0.001"/>
+    <dynamics damping="100000" friction="0.0"/>
   </joint>
   <link name="virtual_ry_link">
     <visual>
@@ -131,8 +131,8 @@
     <axis xyz="0 1 0"/>
     <parent link="virtual_ry_link"/>
     <child link="virtual_rp_link"/>
-    <limit effort="0.01" velocity="0.01"/>
-    <dynamics damping="10000" friction="0.0"/>
+    <limit effort="0.001" velocity="0.001"/>
+    <dynamics damping="100000" friction="0.0"/>
   </joint>
   <link name="virtual_rp_link">
     <visual>
@@ -158,8 +158,8 @@
     <axis xyz="1 0 0"/>
     <parent link="virtual_rp_link"/>
     <child link="base_footprint"/>
-    <limit effort="0.01" velocity="0.01"/>
-    <dynamics damping="10000" friction="0.0"/>
+    <limit effort="0.001" velocity="0.001"/>
+    <dynamics damping="100000" friction="0.0"/>
   </joint>
 
   <!-- Gazebo gripper plugin -->

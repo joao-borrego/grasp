@@ -101,7 +101,7 @@ namespace gazebo {
         private: bool reset                         {false};
 
         /// Update rate value in physics engine iterations
-        private: uint32_t update_rate               {10};
+        private: uint32_t update_rate               {5};
         /// Last updated
         private: uint32_t last_updated              {0};
 

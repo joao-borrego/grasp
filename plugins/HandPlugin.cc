@@ -225,7 +225,7 @@ void HandPlugin::onUpdate()
         this->update_velocity = false;
     }
     if (this->timer_active) {
-        if (this->timeout >= this->world->SimTime()) {
+        if (this->timeout <= this->world->SimTime()) {
             sendTimeout();
             this->timer_active = false;
         }
