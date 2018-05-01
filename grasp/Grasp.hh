@@ -18,6 +18,8 @@ class Grasp
 
     /// Robot endpoint pose
     public: ignition::math::Pose3d pose;
+    /// Grasp outcome
+    public: bool success {false};
 
     /// \brief Constructor
     /// \param _pose Endpoint pose

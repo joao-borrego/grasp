@@ -9,6 +9,11 @@
 
 #include "run_trials.hh"
 
+/// Global timeout flag
+bool g_timeout {false};
+/// Mutex for global timeout flag
+std::mutex g_timeout_mutex;
+
 int main(int _argc, char **_argv)
 {
     // Load gazebo as a client
@@ -19,7 +24,10 @@ int main(int _argc, char **_argv)
     node->Init();
     // Publish to the hand plugin topic
     gazebo::transport::PublisherPtr pub_hand =
-        node->Advertise<HandMsg>(HAND_MSG_TOPIC);
+        node->Advertise<HandMsg>(HAND_REQ_TOPIC);
+	// Subscribe to the grasp target topic and link callback function
+    gazebo::transport::SubscriberPtr sub_hand =
+        node->Subscribe(HAND_RES_TOPIC, onHandResponse);
     // Publish to the grasp target plugin topic
     gazebo::transport::PublisherPtr pub_target =
         node->Advertise<TargetRequest>(TARGET_REQ_TOPIC);
@@ -30,7 +38,7 @@ int main(int _argc, char **_argv)
     // Wait for hand plugin to connect
     pub_hand->WaitForConnection();
     // Wait for grasp target plugin to connect
-    //pub_target->WaitForConnection();
+    pub_target->WaitForConnection();
 
     // Obtain candidate grasps
     std::vector<Grasp> grasps;
@@ -38,7 +46,7 @@ int main(int _argc, char **_argv)
     // Perform trials
     for (auto candidate : grasps)
     {
-        tryGrasp(candidate, pub_hand);
+        tryGrasp(candidate, pub_hand, pub_target);
     }
 
     // Shut down
@@ -59,11 +67,15 @@ void setPose(gazebo::transport::PublisherPtr pub,
 
 /////////////////////////////////////////////////
 void setVelocity(gazebo::transport::PublisherPtr pub,
-    std::vector<double> & velocity)
+    std::vector<double> & velocity,
+    double timeout)
 {
     HandMsg msg;
     google::protobuf::RepeatedField<double> data(velocity.begin(), velocity.end());
     msg.mutable_velocity()->Swap(&data);
+    if (timeout > 0) {
+    	msg.set_timeout(timeout);
+    }
     pub->Publish(msg);
 }
 
@@ -88,24 +100,49 @@ void reset(gazebo::transport::PublisherPtr pub)
 /////////////////////////////////////////////////
 void tryGrasp(
     Grasp & grasp,
-    gazebo::transport::PublisherPtr pub)
+    gazebo::transport::PublisherPtr pub_hand,
+    gazebo::transport::PublisherPtr pub_target)
 {
     std::vector<double> velocity_lift {0,0,20,0,0,0};
     std::vector<double> velocity_stop {0,0,0,0,0,0};
     std::vector<double> velocities_close {8,8,8};
     std::vector<double> velocities_open {0,0,0};
 
-    setPose(pub, grasp.pose);
+    setPose(pub_hand, grasp.pose);
     waitMs(50);
-    setJointVelocities(pub, velocities_close);
-    setVelocity(pub, velocity_stop);
+    setJointVelocities(pub_hand, velocities_close);
+    setVelocity(pub_hand, velocity_stop);
     waitMs(1000);
-    setVelocity(pub, velocity_lift);
-    waitMs(3000);
-    setJointVelocities(pub, velocities_open);
-    setVelocity(pub, velocity_stop);
-    waitMs(1000);
-    reset(pub);
+    setVelocity(pub_hand, velocity_lift, 1.0);
+    while (waitForTimeout()) {waitMs(10);}
+    
+    //waitMs(3000);
+    //setJointVelocities(pub_hand, velocities_open);
+    //setVelocity(pub_hand, velocity_stop);
+    //waitMs(1000);
+    
+    reset(pub_hand);
+	waitMs(50);
+}
+
+//////////////////////////////////////////////////
+bool waitForTimeout()
+{
+    std::lock_guard<std::mutex> lock(g_timeout_mutex);
+    if (g_timeout) {
+        g_timeout = false;
+        return false;
+    }
+    return true;
+}
+
+/////////////////////////////////////////////////
+void onHandResponse(HandMsgPtr & _msg)
+{
+	if (_msg->has_timeout()) {
+		std::lock_guard<std::mutex> lock(g_timeout_mutex);
+		g_timeout = true;
+	}
 }
 
 /////////////////////////////////////////////////

@@ -96,6 +96,9 @@ void HandPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     // Subcribe to the monitored requests topic
     this->data_ptr->sub = this->data_ptr->node->Subscribe(REQUEST_TOPIC,
         &HandPlugin::onRequest, this);
+    // Publish to the hand plugin topic
+    this->data_ptr->pub = this->data_ptr->node->
+        Advertise<HandMsg>(RESPONSE_TOPIC);
 
     gzmsg << "[HandPlugin] Loaded plugin." << std::endl;
 }
@@ -221,6 +224,12 @@ void HandPlugin::onUpdate()
         setVelocity(this->new_velocity);
         this->update_velocity = false;
     }
+    if (this->timer_active) {
+        if (this->timeout >= this->world->SimTime()) {
+            sendTimeout();
+            this->timer_active = false;
+        }
+    }
     if (this->reset) {
         this->imobilise();
         resetWorld();
@@ -262,6 +271,18 @@ void HandPlugin::onRequest(HandMsgPtr &_msg)
         else
         {
             gzdbg << "Invalid joint velocities message" << std::endl;
+        }
+    }
+    // Handle timer
+    if (_msg->has_timeout()) {
+        if (_msg->timeout() > 0)
+        {
+            common::Time duration(_msg->timeout());
+            common::Time now = this->world->SimTime();
+            // Set timeout for now + duration seconds
+            std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+            this->timeout = now + duration;
+            this->timer_active = true;
         }
     }
     // Handle reset
@@ -337,12 +358,19 @@ void HandPlugin::setJointVelocities(std::vector<double> & _velocities)
 }
 
 /////////////////////////////////////////////////
+void HandPlugin::sendTimeout()
+{
+    HandMsg msg;
+    msg.set_timeout(this->timeout.Double());
+    this->data_ptr->pub->Publish(msg);
+}
+
+/////////////////////////////////////////////////
 void HandPlugin::resetWorld()
 {
-    physics::WorldPtr world = this->model->GetWorld();
-    world->SetPhysicsEnabled(false);
-    world->Reset();
-    world->SetPhysicsEnabled(true);
+    this->world->SetPhysicsEnabled(false);
+    this->world->Reset();
+    this->world->SetPhysicsEnabled(true);
 }
 
 }

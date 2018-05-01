@@ -44,10 +44,14 @@ namespace HandPlugin {
 
     /// Topic for incoming requests
     #define REQUEST_TOPIC    "~/hand"
+    /// Topic for outgoing responses
+    #define RESPONSE_TOPIC    "~/hand/response"
 }
 
 namespace gazebo {
 
+    /// Declaration for request message type
+    typedef grasp::msgs::Hand HandMsg;
     /// Shared pointer declaration for request message type
     typedef const boost::shared_ptr<const grasp::msgs::Hand>
         HandMsgPtr;
@@ -75,6 +79,11 @@ namespace gazebo {
         private: std::vector<FingerJoint> finger_joints;
         /// Array of virtual x y z r p y joint pointers
         private: std::vector<physics::JointPtr> virtual_joints;
+
+        /// Timeout trigger
+        private: bool timer_active {false};
+        /// Next timeout
+        private: common::Time timeout;
 
         /// New pose
         private: ignition::math::Pose3d new_pose;
@@ -154,6 +163,9 @@ namespace gazebo {
         /// \brief Changes hand's finger joints velocities
         /// \param pose The new finger joint velocities
         private: void setJointVelocities(std::vector<double> & _velocities);
+
+        /// \brief Broadcasts a timeout message
+        private: void sendTimeout();
 
         /// \brief Resets the world
         private: void resetWorld();

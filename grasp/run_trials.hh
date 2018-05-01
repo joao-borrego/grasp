@@ -34,7 +34,9 @@
 // Topics
 
 /// Topic monitored by hand plugin for incoming requests
-#define HAND_MSG_TOPIC      "~/hand"
+#define HAND_REQ_TOPIC      "~/hand"
+/// Topic for hand plugin responses
+#define HAND_RES_TOPIC    	"~/hand/response"
 /// Topic monitored by target plugin for incoming requests
 #define TARGET_REQ_TOPIC    "~/grasp/target"
 /// Topic for target plugin responses
@@ -51,6 +53,9 @@
 
 /// Declaration for hand message type
 typedef grasp::msgs::Hand HandMsg;
+/// Shared pointer declaration for hand message type
+typedef const boost::shared_ptr<const grasp::msgs::Hand>
+    HandMsgPtr;
 /// Declaration for request message type
 typedef grasp::msgs::TargetRequest TargetRequest;
 /// Shared pointer declaration for request message type
@@ -72,10 +77,12 @@ void setPose(gazebo::transport::PublisherPtr pub,
     ignition::math::Pose3d pose);
 
 /// \brief Sets hand velocity
-/// \param pub Publisher to hand's topic
-/// \param pose New hand velocity vector
+/// \param pub 		Publisher to hand's topic
+/// \param pose 	New hand velocity vector
+/// \param timeout	Timeout in seconds
 void setVelocity(gazebo::transport::PublisherPtr pub,
-    std::vector<double> & velocity);
+    std::vector<double> & velocity,
+    double timeout=-1);
 
 /// \brief Sets hand's finger joint velocities
 /// \param pub Publisher to hand's topic
@@ -90,7 +97,17 @@ void reset(gazebo::transport::PublisherPtr pub);
 /// \brief Attempts to grasp object
 /// \param grasp The grasp configuration
 /// \param pub   Publisher to hand's topic
-void tryGrasp(Grasp & grasp, gazebo::transport::PublisherPtr pub);
+/// \param pub   Publisher to grasp target topic
+void tryGrasp(
+    Grasp & grasp,
+    gazebo::transport::PublisherPtr pub_hand,
+    gazebo::transport::PublisherPtr pub_target);
+
+/// TODO
+bool waitForTimeout();
+
+/// TODO
+void onHandResponse(HandMsgPtr & _msg);
 
 /// TODO
 void onTargetResponse(TargetResponsePtr & _msg);
