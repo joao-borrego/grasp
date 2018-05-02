@@ -21,6 +21,7 @@ link_directories(${PROJECT_BINARY_DIR}/msgs)
 add_executable (run_trials
 	run_trials.cc
 	gen_grasps.cc
+	object_utils.cc
 	Grasp.cc)
 target_link_libraries(run_trials
     grasp_msgs

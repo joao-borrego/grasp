@@ -1,5 +1,5 @@
 /*!
-    \file utils/gen_grasps.cc
+    \file grasp/gen_grasps.cc
     \brief Generate candidate grasps
 
     TODO

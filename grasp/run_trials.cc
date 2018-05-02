@@ -40,10 +40,21 @@ int main(int _argc, char **_argv)
     // Subscribe to the grasp target topic and link callback function
     gazebo::transport::SubscriberPtr sub_target =
         node->Subscribe(TARGET_RES_TOPIC, onTargetResponse);
+    // Publish to gazebo's factory topic
+    gazebo::transport::PublisherPtr pub_factory =
+        node->Advertise<gazebo::msgs::Factory>(FACTORY_TOPIC);
+        // Publish to gazebo's factory topic
+    gazebo::transport::PublisherPtr pub_request =
+        node->Advertise<gazebo::msgs::Request>(REQUEST_TOPIC);
 
-    // Wait for hand plugin to connect
+    // Wait for subscribers to connect
+    pub_factory->WaitForConnection();
+    pub_request->WaitForConnection();
     pub_hand->WaitForConnection();
-    // Wait for grasp target plugin to connect
+    
+    // Spawn target object
+    std::string model_path("models/target_box.sdf");
+    spawnModelFromFile(pub_factory, model_path);
     pub_target->WaitForConnection();
 
     // Obtain candidate grasps
@@ -54,6 +65,10 @@ int main(int _argc, char **_argv)
     {
         tryGrasp(candidate, pub_hand, pub_target);
     }
+
+    // Remove target object
+    std::string model_name("target_box");
+    removeModel(pub_request, model_name);
 
     // Shut down
     gazebo::client::shutdown();

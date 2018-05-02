@@ -30,6 +30,7 @@
 #include "Grasp.hh"
 // Tools
 #include "gen_grasps.hh"
+#include "object_utils.hh"
 
 // Height threshold
 #define Z_LIFTED 0.2
@@ -44,6 +45,10 @@
 #define TARGET_REQ_TOPIC    "~/grasp/target"
 /// Topic for target plugin responses
 #define TARGET_RES_TOPIC    "~/grasp/target/response"
+/// Topic for Gazebo factory utility
+#define FACTORY_TOPIC       "~/factory"
+/// Topic for generic Gazebo requests
+#define REQUEST_TOPIC       "~/request"
 
 // Type enums
 
