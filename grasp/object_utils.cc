@@ -22,6 +22,15 @@ void spawnModelFromFile(
     pub->Publish(msg);
 }
 
+void spawnModelFromFilename(
+    gazebo::transport::PublisherPtr pub,
+    std::string & filename)
+{
+    gazebo::msgs::Factory msg;
+    msg.set_sdf_filename(filename);
+    pub->Publish(msg);
+}
+
 void removeModel(
     gazebo::transport::PublisherPtr pub,
     std::string & name)

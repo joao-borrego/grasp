@@ -25,6 +25,11 @@ void spawnModelFromFile(
     std::string & file);
 
 /// TODO
+void spawnModelFromFilename(
+    gazebo::transport::PublisherPtr pub,
+    std::string & filename);
+
+/// TODO
 void removeModel(
     gazebo::transport::PublisherPtr pub,
     std::string & name);

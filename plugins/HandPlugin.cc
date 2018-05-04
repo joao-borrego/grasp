@@ -212,6 +212,7 @@ void HandPlugin::onUpdate()
         this->last_updated = now;
         if (this->update_joint_velocities) {
             setJointVelocities(this->new_joint_velocities);
+            setVelocity(this->new_velocity);
             //this->update_joint_velocities = false;
         }
     }
@@ -299,6 +300,9 @@ void HandPlugin::imobilise()
     for (auto link : links) { link->ResetPhysicsStates(); }
     physics::Joint_V joints = this->model->GetJoints();
     for (auto joint : joints) { joint->SetVelocity(0, 0); }
+
+    this->new_velocity.clear();
+    this->new_joint_velocities.clear();
 
     this->update_velocity = false;
     this->update_joint_velocities = false;

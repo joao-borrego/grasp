@@ -43,7 +43,7 @@ int main(int _argc, char **_argv)
     // Publish to gazebo's factory topic
     gazebo::transport::PublisherPtr pub_factory =
         node->Advertise<gazebo::msgs::Factory>(FACTORY_TOPIC);
-        // Publish to gazebo's factory topic
+    // Publish to gazebo's request topic
     gazebo::transport::PublisherPtr pub_request =
         node->Advertise<gazebo::msgs::Request>(REQUEST_TOPIC);
 
@@ -53,8 +53,8 @@ int main(int _argc, char **_argv)
     pub_hand->WaitForConnection();
     
     // Spawn target object
-    std::string model_path("models/target_box.sdf");
-    spawnModelFromFile(pub_factory, model_path);
+    std::string model_filename("model://005_tomato_soup_can");
+    spawnModelFromFilename(pub_factory, model_filename);
     pub_target->WaitForConnection();
 
     // Obtain candidate grasps
@@ -67,7 +67,7 @@ int main(int _argc, char **_argv)
     }
 
     // Remove target object
-    std::string model_name("target_box");
+    std::string model_name("005_tomato_soup_can");
     removeModel(pub_request, model_name);
 
     // Shut down
@@ -140,14 +140,17 @@ void tryGrasp(
     gazebo::transport::PublisherPtr pub_hand,
     gazebo::transport::PublisherPtr pub_target)
 {
-    std::vector<double> velocity_lift {0,0,20,0,0,0};
-    std::vector<double> velocities_close {8,8,8};
+    std::vector<double> velocity_lift {0,0,5,0,0,0};
+    std::vector<double> velocity_stop {0,0,0};
+    std::vector<double> velocities_close {5,5,10};
 
     setPose(pub_hand, grasp.pose, 0.1);
     while (waitForTimeout()) {waitMs(10);}
     setJointVelocities(pub_hand, velocities_close, 0.5);
     while (waitForTimeout()) {waitMs(10);}
-    setVelocity(pub_hand, velocity_lift, 0.3);
+    setVelocity(pub_hand, velocity_lift, 0.1);
+    while (waitForTimeout()) {waitMs(10);}
+    setVelocity(pub_hand, velocity_stop, 0.5);
     while (waitForTimeout()) {waitMs(10);}
     getTargetPose(pub_target);
     while (waitForTrialEnd()) {waitMs(10);}

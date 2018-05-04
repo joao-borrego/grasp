@@ -14,7 +14,7 @@ void obtainGrasps(std::vector<Grasp> & grasps)
     // DEBUG
     for (int i = 0; i < 10; i++)
     {
-        ignition::math::Pose3d pose(0.07,0.12,0.1,0,1.57,0);
+        ignition::math::Pose3d pose(-0.05,0.07,0.01,0,1.57,0);
         grasps.emplace_back(pose);
     }
 }

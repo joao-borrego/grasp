@@ -1,1 +1,3 @@
 build/
+# TODO - clean up structure
+datasets/ycb/gazebo
