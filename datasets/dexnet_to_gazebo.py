@@ -72,15 +72,17 @@ def main(argv):
     [in_dir, out_dir, template] = parseArgs(argv)
 
     meshes = [f for f in os.listdir(in_dir) \
-    	if os.path.isfile(os.path.join(in_dir, f))]
+        if os.path.isfile(os.path.join(in_dir, f))]
 
     print('\nGenerating Gazebo models:\n')
 
-    for mesh in meshes:
+    meshes_num = len(meshes)
+    for idx, mesh in enumerate(meshes):
 
         # Erase suffix and extension
-        name = mesh.replace('_800_tex.obj', '')
-        print(name)
+        name = mesh.replace('_800_tex', '')
+        name = name.replace('.obj', '')
+        print("\x1b[2K{:10.4f}".format(idx * 100.0 / meshes_num) + ' % - ' + name, end="\r")
         
         out_name = out_dir + '/' + name + '/meshes/'
         os.makedirs(os.path.dirname(out_name), exist_ok=1)
@@ -99,13 +101,18 @@ def main(argv):
         search_and_replace(out_cfg, 'TEMPLATE', name)
         search_and_replace(out_cfg, 'DESCRIPTION', name)
 
-        try:
-            subprocess.call(['meshlabserver -i ' + in_mesh + ' -o ' + out_mesh], shell=1)
+        # Open null stream to surpress shell command output
+        FNULL = open(os.devnull, 'w')
 
+        try:
+            subprocess.call(['meshlabserver -i ' + in_mesh + ' -o ' + out_mesh], shell=1, \
+                stdout=FNULL, stderr=subprocess.STDOUT)
         except:
             # Some models do not have poisson filtered meshes; discard them
             print(in_mesh + ' not found. Removing model.')
             rmtree(out_dir + '/' + name)
+
+        print("Done!")
 
 if __name__ == "__main__":
     main(sys.argv)

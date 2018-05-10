@@ -1,6 +1,7 @@
 # Compilation
 build/
 # Model datasets
+datasets/3dnet
 datasets/dexnet
 datasets/ShapeNetSem
 datasets/ycb
