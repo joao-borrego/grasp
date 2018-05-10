@@ -22,7 +22,7 @@
     <parent link="world"/>
     <child link="virtual_px_link"/>
     <limit effort="5.0" lower="-0.5" upper="0.5" velocity="5.0"/>
-    <dynamics damping="600.0" friction="0.0"/>
+    <dynamics damping="600.0" friction="10.0"/>
   </joint>
   <link name="virtual_px_link">
     <visual>
@@ -49,7 +49,7 @@
     <parent link="virtual_px_link"/>
     <child link="virtual_py_link"/>
     <limit effort="5.0" lower="-0.5" upper="0.5" velocity="5.0"/>
-    <dynamics damping="600.0" friction="0.0"/>
+    <dynamics damping="600.0" friction="10.0"/>
   </joint>
   <link name="virtual_py_link">
     <visual>
@@ -99,13 +99,13 @@
   </link>
 
   <!-- Rotation -->
-  <joint name="virtual_ry_joint" type="continuous">
+  <joint name="virtual_ry_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="0 0 1"/>
     <parent link="virtual_pz_link"/>
     <child link="virtual_ry_link"/>
-    <limit effort="0.001" velocity="0.001"/>
-    <dynamics damping="100000" friction="0.0"/>
+    <limit lower="-1.57" upper="1.57" effort="10.01" velocity="0.0"/>
+    <dynamics damping="100000" friction="10.0"/>
   </joint>
   <link name="virtual_ry_link">
     <visual>
@@ -126,13 +126,13 @@
       </geometry>
     </collision>
   </link>
-    <joint name="virtual_rp_joint" type="continuous">
+    <joint name="virtual_rp_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="0 1 0"/>
     <parent link="virtual_ry_link"/>
     <child link="virtual_rp_link"/>
-    <limit effort="0.001" velocity="0.001"/>
-    <dynamics damping="100000" friction="0.0"/>
+    <limit lower="-1.57" upper="1.57" effort="10.01" velocity="0.0"/>
+    <dynamics damping="100000" friction="10.0"/>
   </joint>
   <link name="virtual_rp_link">
     <visual>
@@ -153,13 +153,13 @@
       </geometry>
     </collision>
   </link>
-    <joint name="virtual_rr_joint" type="continuous">
+    <joint name="virtual_rr_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="1 0 0"/>
     <parent link="virtual_rp_link"/>
     <child link="base_footprint"/>
-    <limit effort="0.001" velocity="0.001"/>
-    <dynamics damping="100000" friction="0.0"/>
+    <limit lower="-1.57" upper="1.57" effort="10.01" velocity="0.0"/>
+    <dynamics damping="100000" friction="10.0"/>
   </joint>
 
   <!-- Gazebo gripper plugin -->

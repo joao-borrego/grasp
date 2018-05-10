@@ -54,7 +54,7 @@ int main(int _argc, char **_argv)
     
     // Spawn target object
     std::string model_filename("model://Waterglass");
-    ignition::math::Pose3d pose(0,0,0.5,0,0,0);
+    ignition::math::Pose3d pose(0,0,0,0,0,0);
     spawnModelFromFilename(pub_factory, pose, model_filename);
     pub_target->WaitForConnection();
 

@@ -47,9 +47,20 @@ void TargetPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
     this->model = _model;
 
+    // Change world default pose to match bounding box height
+    // prevents clipping through floor
+    ignition::math::Pose3d pose = _model->WorldPose();
+    ignition::math::Box bnd_box = _model->CollisionBoundingBox();
+    ignition::math::Pose3d offset_z(0,0,bnd_box.ZLength() / 2,0,0,0);
+    this->init_pose = pose + offset_z;
+    _model->SetWorldPose(this->init_pose);
+
     // Connect to world update event
     this->update_connection = event::Events::ConnectWorldUpdateBegin(
         std::bind(&TargetPlugin::onUpdate, this));
+    // Connect to world reset event
+    this->reset_connection = event::Events::ConnectWorldReset(
+        std::bind(&TargetPlugin::onReset, this));
 
     // Setup transport node
     this->data_ptr->node = transport::NodePtr(new transport::Node());
@@ -89,6 +100,13 @@ void TargetPlugin::onUpdate()
         msg.set_allocated_pose(pose_msg);
         this->data_ptr->pub->Publish(msg);
     }
+}
+
+/////////////////////////////////////////////////
+void TargetPlugin::onReset()
+{
+    std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+    this->model->SetWorldPose(this->init_pose);
 }
 
 /////////////////////////////////////////////////

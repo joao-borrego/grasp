@@ -62,11 +62,15 @@ namespace gazebo {
         private: physics::ModelPtr model;
         /// Connection to world update event
         private: event::ConnectionPtr update_connection;
+        /// Connection to world reset event
+        private: event::ConnectionPtr reset_connection;
 
         /// Flag for pending get pose request
         private: bool get_pose {false};
         /// Flag for pending set pose request
         private: bool set_pose {false};
+        /// Initial pose
+        private: ignition::math::Pose3d init_pose;
         /// New pose
         private: ignition::math::Pose3d new_pose;
 
@@ -83,8 +87,11 @@ namespace gazebo {
         /// \param _sdf   The sdf element pointer
         public: virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
 
-        /// \brief Updates model on world update
+        /// \brief Callback on world update event
         public: void onUpdate();
+
+        /// \brief Callback on world reset event
+        public: void onReset();
 
         /// \brief Callback function for handling incoming requests
         /// \param _msg  The message
