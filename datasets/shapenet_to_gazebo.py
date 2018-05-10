@@ -6,7 +6,8 @@ import sys, getopt
 import csv
 # OS
 import os
-
+# Subprocess
+import subprocess
 # Copyfile
 from shutil import copyfile, rmtree
 # For file edit
@@ -114,7 +115,7 @@ def main(argv):
             out_cfg = out_dir + '/' + uid + '/model.config'
             scale = str(unit) + ' ' + str(unit) + ' ' + str(unit)
             in_mesh = in_dir + '/' + uid + '.dae'
-            out_mesh = out_dir + '/' + uid + '/meshes/' + uid + '.dae'
+            out_mesh = out_dir + '/' + uid + '/meshes/' + uid + '.stl'
             in_textures = in_dir + '/' + uid
 
             try:
@@ -132,16 +133,17 @@ def main(argv):
             copyfile(template_model, out_model)
             copyfile(template_cfg, out_cfg)
             search_and_replace(out_model, 'TEMPLATE', uid)
-            search_and_replace(out_model, 'MESH_EXT', 'dae')
+            search_and_replace(out_model, 'MESH_EXT', 'stl')
             search_and_replace(out_model, 'SCALE', scale)
             search_and_replace(out_cfg, 'TEMPLATE', uid)
             search_and_replace(out_cfg, 'DESCRIPTION', name)
 
             try:
-                copyfile(in_mesh, out_mesh)
+                subprocess.call(['meshlabserver -i ' + in_mesh + ' -o ' + out_mesh], shell=1)
+                #copyfile(in_mesh, out_mesh)
                 # Remove image texture XML block
                 # remove_xml_blocks(out_mesh, 'library_materials')
-                search_and_replace(out_mesh, uid, '../materials/textures')
+                # search_and_replace(out_mesh, uid, '../materials/textures')
 
             except:
                 # Some models do not have poisson filtered meshes; discard them

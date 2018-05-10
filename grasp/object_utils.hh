@@ -27,6 +27,7 @@ void spawnModelFromFile(
 /// TODO
 void spawnModelFromFilename(
     gazebo::transport::PublisherPtr pub,
+    ignition::math::Pose3d & pose,
     std::string & filename);
 
 /// TODO

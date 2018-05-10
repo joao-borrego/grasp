@@ -24,10 +24,14 @@ void spawnModelFromFile(
 
 void spawnModelFromFilename(
     gazebo::transport::PublisherPtr pub,
+    ignition::math::Pose3d & pose,
     std::string & filename)
 {
     gazebo::msgs::Factory msg;
     msg.set_sdf_filename(filename);
+    gazebo::msgs::Pose *pose_msg = new gazebo::msgs::Pose();
+    gazebo::msgs::Set(pose_msg, pose);
+    msg.set_allocated_pose(pose_msg);
     pub->Publish(msg);
 }
 

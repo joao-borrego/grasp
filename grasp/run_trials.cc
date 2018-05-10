@@ -53,8 +53,9 @@ int main(int _argc, char **_argv)
     pub_hand->WaitForConnection();
     
     // Spawn target object
-    std::string model_filename("model://005_tomato_soup_can");
-    spawnModelFromFilename(pub_factory, model_filename);
+    std::string model_filename("model://Waterglass");
+    ignition::math::Pose3d pose(0,0,0.5,0,0,0);
+    spawnModelFromFilename(pub_factory, pose, model_filename);
     pub_target->WaitForConnection();
 
     // Obtain candidate grasps
@@ -67,7 +68,7 @@ int main(int _argc, char **_argv)
     }
 
     // Remove target object
-    std::string model_name("005_tomato_soup_can");
+    std::string model_name("Waterglass");
     removeModel(pub_request, model_name);
 
     // Shut down
