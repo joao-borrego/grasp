@@ -1,3 +1,5 @@
+# Compilation
 build/
-# TODO - clean up structure
-datasets/ycb/gazebo
+# Model datasets
+datasets/ycb
+datasets/ShapeNetSem

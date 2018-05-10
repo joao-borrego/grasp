@@ -77,6 +77,8 @@ def main(argv):
         copyfile(template+'/model.sdf', output_dir+'/'+name+'/model.sdf')
         copyfile(template+'/model.config', output_dir+'/'+name+'/model.config')
         search_and_replace(output_dir+'/'+name+'/model.sdf', 'TEMPLATE', name)
+        search_and_replace(output_dir+'/'+name+'/model.sdf', 'MESH_EXT', 'stl')
+        search_and_replace(output_dir+'/'+name+'/model.sdf', 'SCALE', '1 1 1')
         search_and_replace(output_dir+'/'+name+'/model.config', 'TEMPLATE', name)
         try:
             copyfile(input_dir+'/'+name+'/poisson/nontextured.stl', output_dir+'/'+name+'/meshes/'+name+'.stl')

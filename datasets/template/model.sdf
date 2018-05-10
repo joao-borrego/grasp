@@ -23,8 +23,8 @@
         <pose frame=''>0 0 0 0 0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://TEMPLATE/meshes/TEMPLATE.stl</uri>
-            <scale>1 1 1</scale>
+            <uri>model://TEMPLATE/meshes/TEMPLATE.MESH_EXT</uri>
+            <scale>SCALE</scale>
           </mesh>
         </geometry>
         <material>
@@ -51,8 +51,8 @@
         <pose frame=''>0 0 0 0 0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://TEMPLATE/meshes/TEMPLATE.stl</uri>
-            <scale>1 1 1</scale>
+            <uri>model://TEMPLATE/meshes/TEMPLATE.MESH_EXT</uri>
+            <scale>SCALE</scale>
           </mesh>
         </geometry>
         <surface>
