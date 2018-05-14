@@ -25,7 +25,7 @@ link_directories(${PROJECT_BINARY_DIR}/msgs)
 add_library(GripperPlugin SHARED GripperPlugin.cc )
 target_link_libraries(GripperPlugin
     grasp_msgs
-    ${Boost_LIBRARIES} ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
+    ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
 add_dependencies(GripperPlugin
     grasp_msgs)
 
@@ -33,7 +33,7 @@ add_dependencies(GripperPlugin
 add_library(HandPlugin SHARED HandPlugin.cc )
 target_link_libraries(HandPlugin
     grasp_msgs
-    ${Boost_LIBRARIES} ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
+    ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
 add_dependencies(HandPlugin
     grasp_msgs)
 
@@ -41,14 +41,19 @@ add_dependencies(HandPlugin
 add_library(TargetPlugin SHARED TargetPlugin.cc )
 target_link_libraries(TargetPlugin
     grasp_msgs
-    ${Boost_LIBRARIES} ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
+    ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
 add_dependencies(TargetPlugin
     grasp_msgs)
+
+# RGBD Camera Gazebo plugin
+add_library(RGBDCameraPlugin SHARED RGBDCameraPlugin.cc )
+target_link_libraries(RGBDCameraPlugin
+    ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
 
 # Contact Sensor Gazebo plugin
 add_library(ContactSensorPlugin SHARED ContactSensorPlugin.cc )
 target_link_libraries(ContactSensorPlugin
     grasp_msgs
-    ${Boost_LIBRARIES} ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
+    ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
 add_dependencies(ContactSensorPlugin
     grasp_msgs)

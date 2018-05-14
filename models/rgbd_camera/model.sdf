@@ -1,0 +1,105 @@
+<?xml version='1.0'?>
+<sdf version='1.6'>
+  <model name='rgbd_camera'>
+    <link name='base_link'>
+
+      <inertial>
+        <mass>1</mass>
+        <inertia>
+          <ixx>1</ixx> <ixy>0</ixy> <ixz>0</ixz>
+                       <iyy>1</iyy> <iyz>0</iyz>
+                                    <izz>1</izz>
+        </inertia>
+        <pose frame=''>0 0 0 0 0 0</pose>
+      </inertial>
+      <pose frame=''>0 0 0 0 0 0</pose>
+      <gravity>0</gravity>
+      <self_collide>0</self_collide>
+      <kinematic>0</kinematic>
+
+      <visual name='visual'>
+        <pose frame=''>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 0.1 0.1</size>
+          </box>
+        </geometry>
+        <transparency>0.2</transparency>
+        <cast_shadows>0</cast_shadows>
+      </visual>
+
+      <collision name='collision'>
+        <max_contacts>0</max_contacts>
+        <pose frame=''>0 0 0 0 0 0</pose>
+        <geometry>
+        <box>
+            <size>0.1 0.1 0.1</size>
+          </box>      
+        </geometry>
+      </collision>
+    
+      <!-- Sensors -->
+      <sensor name="color" type="camera">
+        <pose frame="">0 0 0 0 0 0</pose>
+        <camera name="__default__">
+          <horizontal_fov>1.047</horizontal_fov>
+          <image>
+            <width>640</width>
+            <height>480</height>
+            <format>RGB_INT8</format>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>100</far>
+          </clip>
+          <!--
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.007</stddev>
+          </noise>
+          -->
+        </camera>
+        <always_on>1</always_on>
+        <update_rate>60</update_rate>
+        <visualize>1</visualize>
+      </sensor>
+
+      <sensor name="depth" type="depth">
+        <pose frame="">0 0 0 0 0 0</pose>
+        <camera name="__default__">
+          <horizontal_fov>1.047</horizontal_fov>
+          <image>
+            <width>640</width>
+            <height>480</height>
+          </image>
+          <clip>
+            <near>0.01</near>
+            <far>10</far>
+          </clip>
+          <!--
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.007</stddev>
+          </noise>
+          -->
+        </camera>
+        <always_on>1</always_on>
+        <update_rate>60</update_rate>
+        <visualize>1</visualize>
+      </sensor>
+
+    </link>
+
+    <static>1</static>
+    <allow_auto_disable>1</allow_auto_disable>
+
+    <!-- Camera plugin -->
+    <plugin name="rgbd_camera_plugin" filename="libRGBDCameraPlugin.so">
+      <rgb>color</rgb>
+      <depth>depth</depth>
+    </plugin>
+
+    </model>
+</sdf>
