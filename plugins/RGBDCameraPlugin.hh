@@ -17,6 +17,14 @@
 #include <gazebo/rendering/DepthCamera.hh>
 #include <gazebo/sensors/sensors.hh>
 #include <gazebo/transport/transport.hh>
+// OGRE
+#include "gazebo/rendering/ogre_gazebo.h"
+
+// TODO - Profiling
+#include <chrono>
+
+// Queue for threaded access
+#include "ConcurrentQueue.hh"
 
 namespace RGBDCameraPlugin {
 
@@ -67,6 +75,19 @@ namespace gazebo {
         /// Pointer to depth camera callback connection
         private: event::ConnectionPtr newDepthFrameConn;
 
+        /// Auxiliar thread for saving frames to disk
+        private: std::thread thread;
+        /// Flag to stop thread execution
+        private: bool stop_thread {false};
+
+        ///
+
+        /// Multithread safe queue
+        private: ConcurrentQueue<unsigned char*> *rgb_queue;
+
+        /// TODO
+        private: void saveRender();
+
         // Public methods
 
         /// \brief Constructs the object
@@ -105,6 +126,12 @@ namespace gazebo {
             unsigned int _height,
             unsigned int _depth,
             const std::string &_format);
+
+        /// \brief Get the OGRE image pixel format
+        /// As seen in gazebo/rendering/Camera.cc
+        /// \param[in] _format The Gazebo image format
+        /// \return Integer representation of the Ogre image format
+        private: static int OgrePixelFormat(const std::string &_format);
     };
 }
 

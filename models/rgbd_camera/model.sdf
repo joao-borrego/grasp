@@ -61,7 +61,7 @@
           -->
         </camera>
         <always_on>1</always_on>
-        <update_rate>60</update_rate>
+        <update_rate>1</update_rate>
         <visualize>1</visualize>
       </sensor>
 
@@ -86,7 +86,7 @@
           -->
         </camera>
         <always_on>1</always_on>
-        <update_rate>60</update_rate>
+        <update_rate>1</update_rate>
         <visualize>1</visualize>
       </sensor>
 

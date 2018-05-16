@@ -9,8 +9,9 @@
 
 #include "RGBDCameraPlugin.hh"
 
-namespace gazebo {
+using micro = std::chrono::microseconds;
 
+namespace gazebo {
 
 /// \brief Class for private Target plugin data.
 class RGBDCameraPluginPrivate
@@ -39,6 +40,9 @@ RGBDCameraPlugin::RGBDCameraPlugin() : ModelPlugin(),
 /////////////////////////////////////////////////
 RGBDCameraPlugin::~RGBDCameraPlugin()
 {
+    stop_thread = true;
+    if (thread.joinable()) thread.join();
+
     this->newRGBFrameConn.reset();
     this->newDepthFrameConn.reset();
     this->rgb_camera.reset();
@@ -100,6 +104,11 @@ void RGBDCameraPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
       this->data_ptr->node->Advertise<msgs::ImageStamped>(
         DEPTH_TOPIC, 1, DEPTH_PUB_FREQ_HZ);
 
+    // Create concurrent queue for image frames
+    rgb_queue = new ConcurrentQueue<unsigned char*>(10);
+    // Start aux thread
+    thread = std::thread(&RGBDCameraPlugin::saveRender, this);
+
     // Connect render callback functions
     this->newRGBFrameConn = this->rgb_camera->ConnectNewImageFrame(
         std::bind(&RGBDCameraPlugin::onNewRGBFrame, this,
@@ -116,17 +125,121 @@ void RGBDCameraPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 }
 
 /////////////////////////////////////////////////
-void RGBDCameraPlugin::onNewRGBFrame(const unsigned char *,
-    unsigned int, unsigned int, unsigned int, const std::string &)
+void RGBDCameraPlugin::onNewRGBFrame(
+    const unsigned char *_image,
+    unsigned int _width,
+    unsigned int _height,
+    unsigned int _depth,
+    const std::string &_format)
+{
+    Ogre::ImageCodec::ImageData *imgData;
+    size_t size;
+
+    auto start = std::chrono::high_resolution_clock::now();
+
+    size = rendering::Camera::ImageByteSize(_width, _height, _format);
+
+    // Copy frame data to save buffer
+    unsigned char *buffer = new unsigned char[size];
+    std::memcpy(buffer, _image, size);
+    this->rgb_queue->enqueue(buffer);
+
+    /*
+
+    Ogre::Codec * pCodec;
+    size_t size, pos;
+    std::string _filename = std::to_string(counter) + ".png";
+
+    // Wrap buffer in a chunk
+    Ogre::MemoryDataStreamPtr stream(
+      new Ogre::MemoryDataStream(const_cast<unsigned char*>(_image),
+        size, false));
+
+    // Get codec
+    Ogre::String filename = _filename;
+    pos = filename.find_last_of(".");
+    Ogre::String extension;
+
+    while (pos != filename.length() - 1)
+    extension += filename[++pos];
+
+    // Get the codec
+    pCodec = Ogre::Codec::getCodec(extension);
+
+    // Write out
+    Ogre::Codec::CodecDataPtr codecDataPtr(imgData);
+    //pCodec->encodeToFile(stream, filename, codecDataPtr);
+
+    */
+
+    auto finish = std::chrono::high_resolution_clock::now();
+    /*
+    gzdbg << std::chrono::duration_cast<micro>(finish - start).count()
+        << " us\n";
+    */
+}
+
+/////////////////////////////////////////////////
+void RGBDCameraPlugin::onNewDepthFrame(
+    const float *_image,
+    unsigned int _width,
+    unsigned int _height,
+    unsigned int _depth,
+    const std::string &_format)
 {
 
 }
 
-/////////////////////////////////////////////////
-void RGBDCameraPlugin::onNewDepthFrame(const float *,
-    unsigned int, unsigned int, unsigned int, const std::string &)
+//////////////////////////////////////////////////
+void RGBDCameraPlugin::saveRender()
 {
+    unsigned char *image;
+    while(!stop_thread)
+    {
+        auto start = std::chrono::high_resolution_clock::now();
 
+        rgb_queue->dequeue(image);
+        delete [] image;
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        auto finish = std::chrono::high_resolution_clock::now();
+        /*
+        gzdbg << std::chrono::duration_cast<micro>(finish - start).count()
+            << " us\n";
+        */
+    }
+}
+
+//////////////////////////////////////////////////
+int RGBDCameraPlugin::OgrePixelFormat(const std::string &_format)
+{
+  int result;
+
+  if (_format == "L8" || _format == "L_INT8")
+    result = static_cast<int>(Ogre::PF_L8);
+  else if (_format == "R8G8B8" || _format == "RGB_INT8")
+    result = static_cast<int>(Ogre::PF_BYTE_RGB);
+  else if (_format == "B8G8R8" || _format == "BGR_INT8")
+    result = static_cast<int>(Ogre::PF_BYTE_BGR);
+  else if (_format == "FLOAT32")
+    result = static_cast<int>(Ogre::PF_FLOAT32_R);
+  else if (_format == "FLOAT16")
+    result = static_cast<int>(Ogre::PF_FLOAT16_R);
+  else if ((_format == "BAYER_RGGB8") || (_format == "BAYER_BGGR8") ||
+    (_format == "BAYER_GBRG8") || (_format == "BAYER_GRBG8"))
+  {
+    // let ogre generate rgb8 images for all bayer format requests
+    // then post process to produce actual bayer images
+    result = static_cast<int>(Ogre::PF_BYTE_RGB);
+  }
+  else
+  {
+    gzerr << "Error parsing image format (" << _format
+          << "), using default Ogre::PF_R8G8B8\n";
+    result = static_cast<int>(Ogre::PF_R8G8B8);
+  }
+
+  return result;
 }
 
 }

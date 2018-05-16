@@ -46,7 +46,8 @@ add_dependencies(TargetPlugin
     grasp_msgs)
 
 # RGBD Camera Gazebo plugin
-add_library(RGBDCameraPlugin SHARED RGBDCameraPlugin.cc )
+add_library(RGBDCameraPlugin SHARED
+    RGBDCameraPlugin.cc)
 target_link_libraries(RGBDCameraPlugin
     ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
 
