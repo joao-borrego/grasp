@@ -17,6 +17,7 @@
 #include <gazebo/rendering/DepthCamera.hh>
 #include <gazebo/sensors/sensors.hh>
 #include <gazebo/transport/transport.hh>
+#include <gazebo/common/Events.hh>
 // OGRE
 #include "gazebo/rendering/ogre_gazebo.h"
 
@@ -32,10 +33,8 @@ namespace RGBDCameraPlugin {
 
     // SDF parameters
 
-    /// SDF RGB camera name parameter
-    #define PARAM_RGB           "rgbCameraName"
     /// SDF depth camera name parameter
-    #define PARAM_DEPTH         "depthCameraName"
+    #define PARAM_CAMERA        "cameraName"
     /// SDF rendering queue maximum size parameter
     #define PARAM_QUEUE_SIZE    "renderQueueSize"
     /// SDF output directory parameter
@@ -69,10 +68,8 @@ namespace gazebo {
         /// World
         private: physics::WorldPtr world;
 
-        /// Pointer to rgb camera renderer
-        private: rendering::CameraPtr rgb_camera;
         /// Pointer to depth camera renderer
-        private: rendering::DepthCameraPtr depth_camera;
+        private: rendering::DepthCameraPtr camera;
         /// Pointer to RGB camera callback connection
         private: event::ConnectionPtr newRGBFrameConn;
         /// Pointer to depth camera callback connection

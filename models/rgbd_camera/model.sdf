@@ -38,33 +38,7 @@
         </geometry>
       </collision>
     
-      <!-- Sensors -->
-      <sensor name="color" type="camera">
-        <pose frame="">0 0 0 0 0 0</pose>
-        <camera name="__default__">
-          <horizontal_fov>1.047</horizontal_fov>
-          <image>
-            <width>640</width>
-            <height>480</height>
-            <format>RGB_INT8</format>
-          </image>
-          <clip>
-            <near>0.1</near>
-            <far>100</far>
-          </clip>
-          <!--
-          <noise>
-            <type>gaussian</type>
-            <mean>0.0</mean>
-            <stddev>0.007</stddev>
-          </noise>
-          -->
-        </camera>
-        <always_on>1</always_on>
-        <update_rate>30</update_rate>
-        <visualize>1</visualize>
-      </sensor>
-
+      <!-- RGBD sensor -->
       <sensor name="depth" type="depth">
         <pose frame="">0 0 0 0 0 0</pose>
         <camera name="__default__">
@@ -72,6 +46,7 @@
           <image>
             <width>640</width>
             <height>480</height>
+            <format>B8G8R8</format>
           </image>
           <clip>
             <near>0.01</near>
@@ -87,7 +62,7 @@
         </camera>
         <always_on>1</always_on>
         <update_rate>30</update_rate>
-        <visualize>1</visualize>
+        <visualize>0</visualize>
       </sensor>
 
     </link>
@@ -97,8 +72,7 @@
 
     <!-- Camera plugin -->
     <plugin name="rgbd_camera_plugin" filename="libRGBDCameraPlugin.so">
-      <rgbCameraName>color</rgbCameraName>
-      <depthCameraName>depth</depthCameraName>
+      <cameraName>depth</cameraName>
       <renderQueueSize>1000</renderQueueSize>
     </plugin>
 

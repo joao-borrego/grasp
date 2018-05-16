@@ -45,8 +45,7 @@ RGBDCameraPlugin::~RGBDCameraPlugin()
 
     this->newRGBFrameConn.reset();
     this->newDepthFrameConn.reset();
-    this->rgb_camera.reset();
-    this->depth_camera.reset();
+    this->camera.reset();
     this->data_ptr->node->Fini();
     gzmsg << "[RGBDCameraPlugin] Unloaded plugin." << std::endl;
 }
@@ -54,7 +53,7 @@ RGBDCameraPlugin::~RGBDCameraPlugin()
 /////////////////////////////////////////////////
 void RGBDCameraPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
-    std::string rgb_name, depth_name;
+    std::string camera_name;
     int queue_size = 0;
     physics::Link_V model_links;
     sensors::SensorManager *sensor_manager;
@@ -63,36 +62,23 @@ void RGBDCameraPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     this->world = _model->GetWorld();
 
     // Parse camera name parameters from SDF
-    if (_sdf->HasElement(PARAM_RGB)) {
-        rgb_name = _sdf->Get<std::string>(PARAM_RGB);
+    if (_sdf->HasElement(PARAM_CAMERA)) {
+        camera_name = _sdf->Get<std::string>(PARAM_CAMERA);
     }
-    if (_sdf->HasElement(PARAM_DEPTH)) {
-        depth_name = _sdf->Get<std::string>(PARAM_DEPTH);
-    }
-    if (rgb_name.empty()) {
-        gzerr << "RGB sensor name not provided." << std::endl;
-        return;
-    }
-    if (depth_name.empty()) {
-        gzerr << "Depth sensor name not provided." << std::endl;
+    if (camera_name.empty()) {
+        gzerr << "RGBD sensor name not provided." << std::endl;
         return;
     }
 
     // Get camera renderers through the sensor manager
     sensor_manager = sensors::SensorManager::Instance();
-    if (!sensor_manager->GetSensor(rgb_name)) {
-        gzerr << "RGB camera not found." << std::endl;
+    if (!sensor_manager->GetSensor(camera_name)) {
+        gzerr << "Provided RGBD camera not found." << std::endl;
         return;
     }
-    if (!sensor_manager->GetSensor(depth_name)) {
-        gzerr << "Depth camera not found." << std::endl;
-        return;
-    }
-    this->rgb_camera = std::dynamic_pointer_cast<sensors::CameraSensor>(
-        sensor_manager->GetSensor(rgb_name))->Camera();
-    
-    this->depth_camera = std::dynamic_pointer_cast<sensors::DepthCameraSensor>(
-        sensor_manager->GetSensor(depth_name))->DepthCamera();
+
+    this->camera = std::dynamic_pointer_cast<sensors::DepthCameraSensor>(
+        sensor_manager->GetSensor(camera_name))->DepthCamera();
 
     // Parse rendering queue parameter from SDF
     if (_sdf->HasElement(PARAM_QUEUE_SIZE)) {
@@ -131,12 +117,12 @@ void RGBDCameraPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     thread = std::thread(&RGBDCameraPlugin::saveRender, this);
 
     // Connect render callback functions
-    this->newRGBFrameConn = this->rgb_camera->ConnectNewImageFrame(
+    this->newRGBFrameConn = this->camera->ConnectNewImageFrame(
         std::bind(&RGBDCameraPlugin::onNewRGBFrame, this,
             std::placeholders::_1, std::placeholders::_2,
             std::placeholders::_3, std::placeholders::_4,
             std::placeholders::_5));
-    this->newDepthFrameConn = this->depth_camera->ConnectNewDepthFrame(
+    this->newDepthFrameConn = this->camera->ConnectNewDepthFrame(
         std::bind(&RGBDCameraPlugin::onNewDepthFrame, this,
             std::placeholders::_1, std::placeholders::_2,
             std::placeholders::_3, std::placeholders::_4,
@@ -153,51 +139,11 @@ void RGBDCameraPlugin::onNewRGBFrame(
     unsigned int _depth,
     const std::string &_format)
 {
-    Ogre::ImageCodec::ImageData *imgData;
-    size_t size;
-
-    auto start = std::chrono::high_resolution_clock::now();
-
-    size = rendering::Camera::ImageByteSize(_width, _height, _format);
-
     // Copy frame data to save buffer
+    size_t size = rendering::Camera::ImageByteSize(_width, _height, _format);
     unsigned char *buffer = new unsigned char[size];
     std::memcpy(buffer, _image, size);
     this->rgb_queue->enqueue(buffer);
-
-    /*
-
-    Ogre::Codec * pCodec;
-    size_t size, pos;
-    std::string _filename = std::to_string(counter) + ".png";
-
-    // Wrap buffer in a chunk
-    Ogre::MemoryDataStreamPtr stream(
-      new Ogre::MemoryDataStream(const_cast<unsigned char*>(_image),
-        size, false));
-
-    // Get codec
-    Ogre::String filename = _filename;
-    pos = filename.find_last_of(".");
-    Ogre::String extension;
-
-    while (pos != filename.length() - 1)
-    extension += filename[++pos];
-
-    // Get the codec
-    pCodec = Ogre::Codec::getCodec(extension);
-
-    // Write out
-    Ogre::Codec::CodecDataPtr codecDataPtr(imgData);
-    //pCodec->encodeToFile(stream, filename, codecDataPtr);
-
-    */
-
-    auto finish = std::chrono::high_resolution_clock::now();
-    /*
-    gzdbg << std::chrono::duration_cast<micro>(finish - start).count()
-        << " us\n";
-    */
 }
 
 /////////////////////////////////////////////////
@@ -215,18 +161,16 @@ void RGBDCameraPlugin::onNewDepthFrame(
 void RGBDCameraPlugin::saveRender()
 {
     unsigned char *image;
-    unsigned int width = rgb_camera->ImageWidth();
-    unsigned int height = rgb_camera->ImageHeight();
-    unsigned int depth = rgb_camera->ImageDepth();
-    std::string format = rgb_camera->ImageFormat();
+    unsigned int width = camera->ImageWidth();
+    unsigned int height = camera->ImageHeight();
+    unsigned int depth = camera->ImageDepth();
+    std::string format = camera->ImageFormat();
 
     unsigned int counter = 0;
     std::string extension(".png");
 
     while(!stop_thread)
     {
-        auto start = std::chrono::high_resolution_clock::now();
-
         rgb_queue->dequeue(image);
 
         std::string filename = output_dir + "/" +
@@ -235,12 +179,6 @@ void RGBDCameraPlugin::saveRender()
             depth, format, filename);
 
         delete [] image;
-
-        auto finish = std::chrono::high_resolution_clock::now();
-        /*
-        gzdbg << std::chrono::duration_cast<micro>(finish - start).count()
-            << " us\n";
-        */
     }
 }
 
