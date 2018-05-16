@@ -55,13 +55,14 @@ RGBDCameraPlugin::~RGBDCameraPlugin()
 void RGBDCameraPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
     std::string rgb_name, depth_name;
+    int queue_size = 0;
     physics::Link_V model_links;
     sensors::SensorManager *sensor_manager;
 
     this->model = _model;
     this->world = _model->GetWorld();
 
-    // Parameters
+    // Parse camera name parameters from SDF
     if (_sdf->HasElement(PARAM_RGB)) {
         rgb_name = _sdf->Get<std::string>(PARAM_RGB);
     }
@@ -87,25 +88,45 @@ void RGBDCameraPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         gzerr << "Depth camera not found." << std::endl;
         return;
     }
-
     this->rgb_camera = std::dynamic_pointer_cast<sensors::CameraSensor>(
         sensor_manager->GetSensor(rgb_name))->Camera();
     
     this->depth_camera = std::dynamic_pointer_cast<sensors::DepthCameraSensor>(
         sensor_manager->GetSensor(depth_name))->DepthCamera();
 
+    // Parse rendering queue parameter from SDF
+    if (_sdf->HasElement(PARAM_QUEUE_SIZE)) {
+        // TODO: Check if provided queue size is reasonable
+        queue_size = _sdf->Get<int>(PARAM_QUEUE_SIZE);
+    }
+    if (queue_size <= 0) {
+        gzerr << "Invalid render queue size provided." << std::endl;
+        return;
+    }
+    gzdbg << "Render queue size: " << queue_size << std::endl;
+
+    // Parse render output directory from SDF
+    if (_sdf->HasElement(PARAM_OUTPUT_DIR)) {
+        output_dir = _sdf->Get<std::string>(PARAM_OUTPUT_DIR);
+    }
+    if (output_dir.empty()) {
+        output_dir = DEFAULT_OUTPUT_DIR;
+    }
+
+    // Parse output format from SDF
+    if (_sdf->HasElement(PARAM_EXTENSION)) {
+        output_ext = _sdf->Get<std::string>(PARAM_EXTENSION);
+    }
+    if (output_ext.empty()) {
+        output_ext = DEFAULT_EXTENSION;
+    }
+
     // Setup publishers
     this->data_ptr->node = transport::NodePtr(new transport::Node());
     this->data_ptr->node->Init();
-    this->data_ptr->pub_rgb =
-      this->data_ptr->node->Advertise<msgs::ImageStamped>(
-        RGB_TOPIC, 1, RGB_PUB_FREQ_HZ);
-    this->data_ptr->pub_depth =
-      this->data_ptr->node->Advertise<msgs::ImageStamped>(
-        DEPTH_TOPIC, 1, DEPTH_PUB_FREQ_HZ);
 
     // Create concurrent queue for image frames
-    rgb_queue = new ConcurrentQueue<unsigned char*>(10);
+    rgb_queue = new ConcurrentQueue<unsigned char*>(queue_size);
     // Start aux thread
     thread = std::thread(&RGBDCameraPlugin::saveRender, this);
 
@@ -194,13 +215,26 @@ void RGBDCameraPlugin::onNewDepthFrame(
 void RGBDCameraPlugin::saveRender()
 {
     unsigned char *image;
+    unsigned int width = rgb_camera->ImageWidth();
+    unsigned int height = rgb_camera->ImageHeight();
+    unsigned int depth = rgb_camera->ImageDepth();
+    std::string format = rgb_camera->ImageFormat();
+
+    unsigned int counter = 0;
+    std::string extension(".png");
+
     while(!stop_thread)
     {
         auto start = std::chrono::high_resolution_clock::now();
 
         rgb_queue->dequeue(image);
+
+        std::string filename = output_dir + "/" +
+            std::to_string(counter++) + "." + output_ext;
+        rendering::Camera::SaveFrame(image, width, height,
+            depth, format, filename);
+
         delete [] image;
-        std::this_thread::sleep_for(std::chrono::seconds(1));
 
         auto finish = std::chrono::high_resolution_clock::now();
         /*

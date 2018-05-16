@@ -61,7 +61,7 @@
           -->
         </camera>
         <always_on>1</always_on>
-        <update_rate>1</update_rate>
+        <update_rate>30</update_rate>
         <visualize>1</visualize>
       </sensor>
 
@@ -86,7 +86,7 @@
           -->
         </camera>
         <always_on>1</always_on>
-        <update_rate>1</update_rate>
+        <update_rate>30</update_rate>
         <visualize>1</visualize>
       </sensor>
 
@@ -97,8 +97,9 @@
 
     <!-- Camera plugin -->
     <plugin name="rgbd_camera_plugin" filename="libRGBDCameraPlugin.so">
-      <rgb>color</rgb>
-      <depth>depth</depth>
+      <rgbCameraName>color</rgbCameraName>
+      <depthCameraName>depth</depthCameraName>
+      <renderQueueSize>1000</renderQueueSize>
     </plugin>
 
     </model>

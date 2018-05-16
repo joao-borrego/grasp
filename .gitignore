@@ -5,3 +5,5 @@ datasets/3dnet
 datasets/dexnet
 datasets/ShapeNetSem
 datasets/ycb
+# Documentation
+doc/

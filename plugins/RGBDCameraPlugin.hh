@@ -30,22 +30,25 @@ namespace RGBDCameraPlugin {
 
     // Communication topics
 
-    /// Topic for RGB image stream
-    #define RGB_TOPIC   "~/grasp/camera/rgb"
-    /// Topic for depth image stream
-    #define DEPTH_TOPIC "~/grasp/camera/depth"
-    /// RGB stream update rate in Hertz
-    #define RGB_PUB_FREQ_HZ 60
-    /// Depth stream update rate in Hertz
-    #define DEPTH_PUB_FREQ_HZ 60
+    // SDF parameters
 
-    // SDF Parameters
+    /// SDF RGB camera name parameter
+    #define PARAM_RGB           "rgbCameraName"
+    /// SDF depth camera name parameter
+    #define PARAM_DEPTH         "depthCameraName"
+    /// SDF rendering queue maximum size parameter
+    #define PARAM_QUEUE_SIZE    "renderQueueSize"
+    /// SDF output directory parameter
+    #define PARAM_OUTPUT_DIR    "outputDir"
+    /// SDF output frame extension parameter
+    #define PARAM_EXTENSION     "imageFormat"
 
-    /// TODO
-    #define PARAM_RGB   "rgb"
-    /// TODO
-    #define PARAM_DEPTH "depth"
-    
+    // Default values for SDF parameters
+
+    /// Default output directory
+    #define DEFAULT_OUTPUT_DIR  "/tmp/RGBDCameraPlugin"
+    /// Default output extension
+    #define DEFAULT_EXTENSION   "png"
 }
 
 namespace gazebo {
@@ -79,14 +82,13 @@ namespace gazebo {
         private: std::thread thread;
         /// Flag to stop thread execution
         private: bool stop_thread {false};
-
-        ///
-
         /// Multithread safe queue
         private: ConcurrentQueue<unsigned char*> *rgb_queue;
 
-        /// TODO
-        private: void saveRender();
+        /// Render output directory
+        private: std::string output_dir;
+        /// Rendered output format
+        private: std::string output_ext;
 
         // Public methods
 
@@ -126,6 +128,9 @@ namespace gazebo {
             unsigned int _height,
             unsigned int _depth,
             const std::string &_format);
+
+        /// TODO
+        private: void saveRender();
 
         /// \brief Get the OGRE image pixel format
         /// As seen in gazebo/rendering/Camera.cc
