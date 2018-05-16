@@ -75,12 +75,16 @@ namespace gazebo {
         /// Pointer to depth camera callback connection
         private: event::ConnectionPtr newDepthFrameConn;
 
-        /// Auxiliar thread for saving frames to disk
-        private: std::thread thread;
+        /// Auxiliar thread for saving RGB frames to disk
+        private: std::thread thread_rgb;
+        /// Auxiliar thread for saving depth frames to disk
+        private: std::thread thread_depth;
         /// Flag to stop thread execution
         private: bool stop_thread {false};
-        /// Multithread safe queue
+        /// Multithread safe queue for RGB data
         private: ConcurrentQueue<unsigned char*> *rgb_queue;
+        /// Multithread safe queue for depth data
+        private: ConcurrentQueue<float*> *depth_queue;
 
         /// Render output directory
         private: std::string output_dir;
@@ -127,7 +131,10 @@ namespace gazebo {
             const std::string &_format);
 
         /// TODO
-        private: void saveRender();
+        private: void saveRenderRGB();
+
+        /// TODO
+        private: void saveRenderDepth();
 
         /// \brief Get the OGRE image pixel format
         /// As seen in gazebo/rendering/Camera.cc

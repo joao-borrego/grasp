@@ -41,7 +41,8 @@ RGBDCameraPlugin::RGBDCameraPlugin() : ModelPlugin(),
 RGBDCameraPlugin::~RGBDCameraPlugin()
 {
     stop_thread = true;
-    if (thread.joinable()) thread.join();
+    if (thread_rgb.joinable()) thread_rgb.join();
+    if (thread_depth.joinable()) thread_depth.join();
 
     this->newRGBFrameConn.reset();
     this->newDepthFrameConn.reset();
@@ -111,10 +112,13 @@ void RGBDCameraPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     this->data_ptr->node = transport::NodePtr(new transport::Node());
     this->data_ptr->node->Init();
 
-    // Create concurrent queue for image frames
+    // Create concurrent queues for image frames
     rgb_queue = new ConcurrentQueue<unsigned char*>(queue_size);
-    // Start aux thread
-    thread = std::thread(&RGBDCameraPlugin::saveRender, this);
+    depth_queue = new ConcurrentQueue<float*>(queue_size);
+
+    // Start aux threads
+    thread_rgb = std::thread(&RGBDCameraPlugin::saveRenderRGB, this);
+    thread_depth = std::thread(&RGBDCameraPlugin::saveRenderDepth, this);
 
     // Connect render callback functions
     this->newRGBFrameConn = this->camera->ConnectNewImageFrame(
@@ -154,33 +158,54 @@ void RGBDCameraPlugin::onNewDepthFrame(
     unsigned int _depth,
     const std::string &_format)
 {
-
+    // Copy frame data to save buffer
+    size_t size = rendering::Camera::ImageByteSize(_width, _height, _format);
+    float *buffer = new float[size];
+    std::memcpy(buffer, _image, size);
+    this->depth_queue->enqueue(buffer);
 }
 
 //////////////////////////////////////////////////
-void RGBDCameraPlugin::saveRender()
+void RGBDCameraPlugin::saveRenderRGB()
 {
-    unsigned char *image;
+    unsigned char *image_rgb;
     unsigned int width = camera->ImageWidth();
     unsigned int height = camera->ImageHeight();
-    unsigned int depth = camera->ImageDepth();
-    std::string format = camera->ImageFormat();
-
+    unsigned int depth = 3;
+    std::string format = "R8G8B8";
     unsigned int counter = 0;
     std::string extension(".png");
 
     while(!stop_thread)
     {
-        rgb_queue->dequeue(image);
-
-        std::string filename = output_dir + "/" +
+        rgb_queue->dequeue(image_rgb);
+        std::string filename = output_dir + "/rgb_" + 
             std::to_string(counter++) + "." + output_ext;
-        rendering::Camera::SaveFrame(image, width, height,
+        rendering::Camera::SaveFrame(image_rgb, width, height,
             depth, format, filename);
-
-        delete [] image;
+        delete [] image_rgb;
     }
 }
+
+//////////////////////////////////////////////////
+void RGBDCameraPlugin::saveRenderDepth()
+{
+    float *image_depth;
+    unsigned int width = camera->ImageWidth();
+    unsigned int height = camera->ImageHeight();
+    unsigned int depth = 1;   
+    std::string format = "FLOAT32";
+    unsigned int counter = 0;
+    std::string extension(".png");
+
+    while(!stop_thread)
+    {
+        depth_queue->dequeue(image_depth);
+        // TODO Process depth image and save to file
+        delete [] image_depth;
+    }
+}
+
 
 //////////////////////////////////////////////////
 int RGBDCameraPlugin::OgrePixelFormat(const std::string &_format)
