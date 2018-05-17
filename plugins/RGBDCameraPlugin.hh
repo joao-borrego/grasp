@@ -20,27 +20,32 @@
 #include <gazebo/common/Events.hh>
 // OGRE
 #include "gazebo/rendering/ogre_gazebo.h"
+// Custom messages
+#include "camera_request.pb.h"
+#include "camera_response.pb.h"
+// Queue for threaded access
+#include "ConcurrentQueue.hh"
+
 
 // TODO - Profiling
 #include <chrono>
 
-// Queue for threaded access
-#include "ConcurrentQueue.hh"
-
 namespace RGBDCameraPlugin {
-
-    // Communication topics
 
     // SDF parameters
 
-    /// SDF depth camera name parameter
+    /// Camera sensor name SDF parameter name
     #define PARAM_CAMERA        "cameraName"
-    /// SDF rendering queue maximum size parameter
+    /// Rendering queue maximum size SDF parameter name
     #define PARAM_QUEUE_SIZE    "renderQueueSize"
-    /// SDF output directory parameter
+    /// Output directory parameter SDF parameter name
     #define PARAM_OUTPUT_DIR    "outputDir"
-    /// SDF output frame extension parameter
+    /// Output extension SDF parameter name
     #define PARAM_EXTENSION     "imageFormat"
+    /// Request topic SDF parameter name
+    #define PARAM_REQ_TOPIC     "requestTopic"
+    /// Response topic SDF parameter name
+    #define PARAM_RES_TOPIC     "responseTopic"
 
     // Default values for SDF parameters
 
@@ -48,9 +53,20 @@ namespace RGBDCameraPlugin {
     #define DEFAULT_OUTPUT_DIR  "/tmp/RGBDCameraPlugin"
     /// Default output extension
     #define DEFAULT_EXTENSION   "png"
+    /// Default request topic
+    #define DEFAULT_REQ_TOPIC   "~/rgbd/"
+    /// Default response topic
+    #define DEFAULT_RES_TOPIC   "~/rgbd/response"
 }
 
 namespace gazebo {
+
+    /// Shared pointer declaration for request message type
+    typedef const boost::shared_ptr<const grasp::msgs::CameraRequest>
+        CameraRequestPtr;
+    /// Shared pointer declaration for response message type
+    typedef const boost::shared_ptr<const grasp::msgs::CameraResponse>
+        CameraResponsePtr;
 
     // Forward declaration of private data class
     class RGBDCameraPluginPrivate;

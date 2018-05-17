@@ -18,10 +18,10 @@ class RGBDCameraPluginPrivate
 {
     /// Gazebo transport node
     public: transport::NodePtr node;
-    /// Gazebo RGB topic publisher
-    public: transport::PublisherPtr pub_rgb;
-    /// Gazebo depth topic publisher
-    public: transport::PublisherPtr pub_depth;
+    /// Gazebo topic publisher
+    public: transport::PublisherPtr pub;
+    /// Gazebo topic subscriber
+    public: transport::SubscriberPtr sub;
 
     /// Mutex for safe data access
     public: std::mutex mutex;
@@ -54,7 +54,7 @@ RGBDCameraPlugin::~RGBDCameraPlugin()
 /////////////////////////////////////////////////
 void RGBDCameraPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
-    std::string camera_name;
+    std::string camera_name, req_topic, res_topic;
     int queue_size = 0;
     physics::Link_V model_links;
     sensors::SensorManager *sensor_manager;
@@ -90,7 +90,6 @@ void RGBDCameraPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         gzerr << "Invalid render queue size provided." << std::endl;
         return;
     }
-    gzdbg << "Render queue size: " << queue_size << std::endl;
 
     // Parse render output directory from SDF
     if (_sdf->HasElement(PARAM_OUTPUT_DIR)) {
@@ -108,7 +107,21 @@ void RGBDCameraPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         output_ext = DEFAULT_EXTENSION;
     }
 
-    // Setup publishers
+    // Parse topic names from SDF
+    if (_sdf->HasElement(PARAM_REQ_TOPIC)) {
+         req_topic = _sdf->Get<std::string>(PARAM_REQ_TOPIC);
+    }
+    if (req_topic.empty()) {
+        req_topic = DEFAULT_REQ_TOPIC;
+    }
+    if (_sdf->HasElement(PARAM_RES_TOPIC)) {
+        res_topic = _sdf->Get<std::string>(PARAM_RES_TOPIC);
+    }
+    if (res_topic.empty()) {
+        res_topic = DEFAULT_RES_TOPIC;
+    }
+
+    // Setup communications
     this->data_ptr->node = transport::NodePtr(new transport::Node());
     this->data_ptr->node->Init();
 
@@ -131,6 +144,11 @@ void RGBDCameraPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
             std::placeholders::_1, std::placeholders::_2,
             std::placeholders::_3, std::placeholders::_4,
             std::placeholders::_5));
+
+    gzdbg << std::endl <<
+        "   Render queue size: " << queue_size << std::endl <<
+        "   Request topic:     " << req_topic << std::endl <<
+        "   Response topic:    " << res_topic << std::endl;
 
     gzmsg << "[RGBDCameraPlugin] Loaded plugin." << std::endl;
 }

@@ -16,6 +16,9 @@ set (msgs
   # Grasp target messages
   target_request.proto
   target_response.proto
+  # Camera messages
+  camera_request.proto
+  camera_response.proto
   # Contact sensor messages
   contact_sensor_request.proto
   contact_sensor_response.proto

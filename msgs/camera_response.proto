@@ -1,0 +1,25 @@
+syntax = "proto2";
+package grasp.msgs;
+
+/// \ingroup grasp_msgs
+/// \interface grasp camera response
+/// \brief grasp camera plugin response
+
+import "pose.proto";
+
+message CameraResponse
+{
+    /// Type of response 
+    enum Type
+    {
+        /// Acquired frame and saved it to disk 
+        CAPTURE     = 1;
+        /// Moved camera
+        MOVE        = 2;
+    }
+
+    /// Type of response 
+    optional Type               type    = 1;
+    /// Expected camera pose
+    optional gazebo.msgs.Pose   pose    = 2;
+}
