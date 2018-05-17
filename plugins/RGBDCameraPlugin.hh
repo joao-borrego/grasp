@@ -57,6 +57,13 @@ namespace RGBDCameraPlugin {
     #define DEFAULT_REQ_TOPIC   "~/rgbd/"
     /// Default response topic
     #define DEFAULT_RES_TOPIC   "~/rgbd/response"
+
+    // Message enums
+
+    /// Request to capture frame
+    #define CAPTURE_REQUEST     grasp::msgs::CameraRequest::CAPTURE
+    /// Request to update pose
+    #define MOVE_REQUEST        grasp::msgs::CameraRequest::MOVE
 }
 
 namespace gazebo {
@@ -86,6 +93,8 @@ namespace gazebo {
 
         /// Pointer to depth camera renderer
         private: rendering::DepthCameraPtr camera;
+        /// Pointer to world update callback connection
+        private: event::ConnectionPtr updateConn;
         /// Pointer to RGB camera callback connection
         private: event::ConnectionPtr newRGBFrameConn;
         /// Pointer to depth camera callback connection
@@ -106,6 +115,11 @@ namespace gazebo {
         private: std::string output_dir;
         /// Rendered output format
         private: std::string output_ext;
+
+        /// Flag for pose update request
+        private: bool update_pose {false};
+        /// New desired pose
+        private: ignition::math::Pose3d new_pose;
 
         // Public methods
 
@@ -145,6 +159,15 @@ namespace gazebo {
             unsigned int _height,
             unsigned int _depth,
             const std::string &_format);
+
+        // Private methods
+
+        /// \brief Callback function for handling world update event
+        private: void onUpdate();
+
+        /// \brief Callback function for handling incoming requests
+        /// \param _msg  The message
+        private: void onRequest(CameraRequestPtr &_msg);
 
         /// TODO
         private: void saveRenderRGB();

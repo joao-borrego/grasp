@@ -124,6 +124,12 @@ void RGBDCameraPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     // Setup communications
     this->data_ptr->node = transport::NodePtr(new transport::Node());
     this->data_ptr->node->Init();
+    // Subcribe to the monitored requests topic
+    this->data_ptr->sub = this->data_ptr->node->Subscribe(
+        req_topic, &RGBDCameraPlugin::onRequest, this);
+    // Setup publisher for the response topic
+    this->data_ptr->pub = this->data_ptr->node->
+        Advertise<grasp::msgs::CameraResponse>(res_topic);
 
     // Create concurrent queues for image frames
     rgb_queue = new ConcurrentQueue<unsigned char*>(queue_size);
@@ -133,6 +139,9 @@ void RGBDCameraPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     thread_rgb = std::thread(&RGBDCameraPlugin::saveRenderRGB, this);
     thread_depth = std::thread(&RGBDCameraPlugin::saveRenderDepth, this);
 
+    // Connect world update callback function
+    this->updateConn = event::Events::ConnectPreRender(
+        std::bind(&RGBDCameraPlugin::onUpdate, this));
     // Connect render callback functions
     this->newRGBFrameConn = this->camera->ConnectNewImageFrame(
         std::bind(&RGBDCameraPlugin::onNewRGBFrame, this,
@@ -151,6 +160,33 @@ void RGBDCameraPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         "   Response topic:    " << res_topic << std::endl;
 
     gzmsg << "[RGBDCameraPlugin] Loaded plugin." << std::endl;
+}
+
+/////////////////////////////////////////////////
+void RGBDCameraPlugin::onRequest(CameraRequestPtr &_msg)
+{
+    if (_msg->type() == CAPTURE_REQUEST) 
+    {
+        this->camera->SetCaptureDataOnce();
+    }
+    else if (_msg->type() == MOVE_REQUEST)
+    {
+        std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+        new_pose = msgs::ConvertIgn(_msg->pose());
+        update_pose = true;
+    }
+}
+
+/////////////////////////////////////////////////
+void RGBDCameraPlugin::onUpdate()
+{
+    std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+
+    if (update_pose)
+    {
+        this->camera->SetWorldPose(new_pose);
+        update_pose = false;
+    }
 }
 
 /////////////////////////////////////////////////
