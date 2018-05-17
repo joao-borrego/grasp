@@ -171,8 +171,12 @@ void RGBDCameraPlugin::onRequest(CameraRequestPtr &_msg)
 {
     if (_msg->type() == CAPTURE_REQUEST) 
     {
-        //this->camera->EnableSaveFrame(true);
+        this->camera->SetCaptureDataOnce();
         gzdbg << "Capture request received" << std::endl;
+
+        std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+        capture = true; 
+    
     }
     else if (_msg->type() == MOVE_REQUEST)
     {
@@ -202,11 +206,23 @@ void RGBDCameraPlugin::onNewRGBFrame(
     unsigned int _depth,
     const std::string &_format)
 {
-    // Copy frame data to save buffer
-    size_t size = rendering::Camera::ImageByteSize(_width, _height, _format);
-    unsigned char *buffer = new unsigned char[size];
-    std::memcpy(buffer, _image, size);
-    this->rgb_queue->enqueue(buffer);
+    bool save = false;
+
+    {
+        std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+        if (capture) {
+            save = true;
+            capture = false;
+        }
+    }
+
+    if (save) {
+        // Copy frame data to save buffer
+        size_t size = rendering::Camera::ImageByteSize(_width, _height, _format);
+        unsigned char *buffer = new unsigned char[size];
+        std::memcpy(buffer, _image, size);
+        this->rgb_queue->enqueue(buffer);        
+    }
 }
 
 /////////////////////////////////////////////////
@@ -217,11 +233,13 @@ void RGBDCameraPlugin::onNewDepthFrame(
     unsigned int _depth,
     const std::string &_format)
 {
+    /*
     // Copy frame data to save buffer
     size_t size = rendering::Camera::ImageByteSize(_width, _height, _format);
     float *buffer = new float[size];
     std::memcpy(buffer, _image, size);
     this->depth_queue->enqueue(buffer);
+    */
 }
 
 //////////////////////////////////////////////////

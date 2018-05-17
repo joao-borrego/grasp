@@ -120,6 +120,8 @@ namespace gazebo {
         /// Rendered output format
         private: std::string output_ext;
 
+        /// Flag for capture request
+        private: bool capture {false};
         /// Flag for pose update request
         private: bool update_pose {false};
         /// New desired pose
