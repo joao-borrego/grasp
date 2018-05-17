@@ -32,7 +32,7 @@
         <max_contacts>0</max_contacts>
         <pose frame=''>0 0 0 0 0 0</pose>
         <geometry>
-        <box>
+          <box>
             <size>0.1 0.1 0.1</size>
           </box>      
         </geometry>
@@ -44,8 +44,8 @@
         <camera name="__default__">
           <horizontal_fov>1.047</horizontal_fov>
           <image>
-            <width>640</width>
-            <height>480</height>
+            <width>1366</width>
+            <height>768</height>
             <format>R8G8B8</format>
           </image>
           <clip>

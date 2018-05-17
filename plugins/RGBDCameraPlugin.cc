@@ -40,14 +40,18 @@ RGBDCameraPlugin::RGBDCameraPlugin() : ModelPlugin(),
 /////////////////////////////////////////////////
 RGBDCameraPlugin::~RGBDCameraPlugin()
 {
-    stop_thread = true;
-    if (thread_rgb.joinable()) thread_rgb.join();
-    if (thread_depth.joinable()) thread_depth.join();
+    gzmsg << "[RGBDCameraPlugin] Closing." << std::endl;
 
+    this->updateConn.reset();
     this->newRGBFrameConn.reset();
     this->newDepthFrameConn.reset();
     this->camera.reset();
     this->data_ptr->node->Fini();
+
+    stop_thread = true;
+    if (thread_rgb.joinable()) thread_rgb.join();
+    if (thread_depth.joinable()) thread_depth.join();
+
     gzmsg << "[RGBDCameraPlugin] Unloaded plugin." << std::endl;
 }
 
@@ -167,7 +171,8 @@ void RGBDCameraPlugin::onRequest(CameraRequestPtr &_msg)
 {
     if (_msg->type() == CAPTURE_REQUEST) 
     {
-        this->camera->SetCaptureDataOnce();
+        //this->camera->EnableSaveFrame(true);
+        gzdbg << "Capture request received" << std::endl;
     }
     else if (_msg->type() == MOVE_REQUEST)
     {
@@ -230,6 +235,9 @@ void RGBDCameraPlugin::saveRenderRGB()
     unsigned int counter = 0;
     std::string extension(".png");
 
+    grasp::msgs::CameraResponse msg;
+    msg.set_type(CAPTURE_RESPONSE);
+
     while(!stop_thread)
     {
         rgb_queue->dequeue(image_rgb);
@@ -238,6 +246,9 @@ void RGBDCameraPlugin::saveRenderRGB()
         rendering::Camera::SaveFrame(image_rgb, width, height,
             depth, format, filename);
         delete [] image_rgb;
+
+        // Notify subscribers
+        this->data_ptr->pub->Publish(msg);
     }
 }
 

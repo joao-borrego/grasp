@@ -210,7 +210,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_hand_base_link.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_hand_base_link.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.796078431372549 0.823529411764706 0.937254901960784 1"/>
@@ -232,7 +232,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_min_phal_1_link.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_min_phal_1_link.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1"/>
@@ -261,7 +261,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_min_phal_1_link_fix.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_min_phal_1_link_fix.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.776470588235294 0.756862745098039 0.737254901960784 1"/>
@@ -289,7 +289,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_min_phal_2_link.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_min_phal_2_link.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1"/>
@@ -318,7 +318,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_min_phal_2_link_fix.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_min_phal_2_link_fix.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.776470588235294 0.756862745098039 0.737254901960784 1"/>
@@ -346,7 +346,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_min_phal_3_link.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_min_phal_3_link.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1"/>
@@ -375,7 +375,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_min_phal_3_link_fix.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_min_phal_3_link_fix.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.776470588235294 0.756862745098039 0.737254901960784 1"/>
@@ -403,7 +403,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_med_phal_1_link.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_med_phal_1_link.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1"/>
@@ -432,7 +432,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_med_phal_1_link_fix.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_med_phal_1_link_fix.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.776470588235294 0.756862745098039 0.737254901960784 1"/>
@@ -460,7 +460,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_med_phal_2_link.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_med_phal_2_link.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1"/>
@@ -489,7 +489,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_med_phal_2_link_fix.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_med_phal_2_link_fix.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.776470588235294 0.756862745098039 0.737254901960784 1"/>
@@ -517,7 +517,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_med_phal_3_link.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_med_phal_3_link.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1"/>
@@ -546,7 +546,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_med_phal_3_link_fix.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_med_phal_3_link_fix.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.776470588235294 0.756862745098039 0.737254901960784 1"/>
@@ -574,7 +574,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_ind_phal_1_link.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_ind_phal_1_link.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1"/>
@@ -603,7 +603,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_ind_phal_1_link_fix.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_ind_phal_1_link_fix.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.776470588235294 0.756862745098039 0.737254901960784 1"/>
@@ -631,7 +631,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_ind_phal_2_link.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_ind_phal_2_link.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1"/>
@@ -660,7 +660,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_ind_phal_2_link_fix.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_ind_phal_2_link_fix.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.776470588235294 0.756862745098039 0.737254901960784 1"/>
@@ -688,7 +688,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_ind_phal_3_link.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_ind_phal_3_link.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1"/>
@@ -717,7 +717,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_ind_phal_3_link_fix.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_ind_phal_3_link_fix.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.776470588235294 0.756862745098039 0.737254901960784 1"/>
@@ -745,7 +745,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_thumb_phal_1_link.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_thumb_phal_1_link.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1"/>
@@ -774,7 +774,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_thumb_phal_1_link_fix.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_thumb_phal_1_link_fix.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1"/>
@@ -802,7 +802,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_thumb_phal_2_link.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_thumb_phal_2_link.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.898039215686275 0.917647058823529 0.929411764705882 1"/>
@@ -831,7 +831,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_thumb_phal_2_link_fix.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_thumb_phal_2_link_fix.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.776470588235294 0.756862745098039 0.737254901960784 1"/>
@@ -866,7 +866,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_thumb_phal_3_link.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_thumb_phal_3_link.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.89804 0.91765 0.92941 1"/>
@@ -888,7 +888,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://vizzy_description/meshes/hand/r_thumb_phal_3_link_fix.STL"/>
+        <mesh filename="package://vizzy_description/meshes/hand/r_thumb_phal_3_link_fix.dae"/>
       </geometry>
       <material name="">
         <color rgba="0.776470588235294 0.756862745098039 0.737254901960784 1"/>

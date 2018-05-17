@@ -25,6 +25,8 @@
 #include "hand.pb.h"
 #include "target_request.pb.h"
 #include "target_response.pb.h"
+#include "camera_request.pb.h"
+#include "camera_response.pb.h"
 
 // Grasp representation
 #include "Grasp.hh"
@@ -45,6 +47,10 @@
 #define TARGET_REQ_TOPIC    "~/grasp/target"
 /// Topic for target plugin responses
 #define TARGET_RES_TOPIC    "~/grasp/target/response"
+/// Topic monitored by camera plugin for incoming requests
+#define CAMERA_REQ_TOPIC    "~/grasp/rgbd"
+/// Topic for camera plugin responses
+#define CAMERA_RES_TOPIC    "~/grasp/rgbd/response"
 /// Topic for Gazebo factory utility
 #define FACTORY_TOPIC       "~/factory"
 /// Topic for generic Gazebo requests
@@ -56,6 +62,8 @@
 #define REQ_GET_POSE   grasp::msgs::TargetRequest::GET_POSE
 /// Set pose request
 #define REQ_SET_POSE   grasp::msgs::TargetRequest::SET_POSE
+/// Request to capture frame
+#define REQ_CAPTURE    grasp::msgs::CameraRequest::CAPTURE
 
 // Message type definitions
 
@@ -74,7 +82,16 @@ typedef grasp::msgs::TargetResponse TargetResponse;
 /// Shared pointer declaration for response message type
 typedef const boost::shared_ptr<const grasp::msgs::TargetResponse>
     TargetResponsePtr;
-
+/// Declaration for request message type
+typedef grasp::msgs::CameraRequest CameraRequest;
+/// Shared pointer declaration for request message type
+typedef const boost::shared_ptr<const grasp::msgs::CameraRequest>
+    CameraRequestPtr;
+/// Declaration for response message type
+typedef grasp::msgs::CameraResponse CameraResponse;
+/// Shared pointer declaration for response message type
+typedef const boost::shared_ptr<const grasp::msgs::CameraResponse>
+    CameraResponsePtr;
 
 // Functions
 
@@ -117,16 +134,25 @@ void tryGrasp(
     gazebo::transport::PublisherPtr pub_target);
 
 /// TODO
+void captureFrame(gazebo::transport::PublisherPtr pub);
+
+/// TODO
 bool waitForTimeout();
 
 /// TODO
 bool waitForTrialEnd();
 
 /// TODO
+bool waitForCapture();
+
+/// TODO
 void onHandResponse(HandMsgPtr & _msg);
 
 /// TODO
 void onTargetResponse(TargetResponsePtr & _msg);
+
+/// TODO
+void onCameraResponse(CameraResponsePtr & _msg);
 
 /// TODO
 void inline waitMs(int delay);

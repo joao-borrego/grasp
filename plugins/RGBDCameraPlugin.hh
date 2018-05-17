@@ -54,9 +54,9 @@ namespace RGBDCameraPlugin {
     /// Default output extension
     #define DEFAULT_EXTENSION   "png"
     /// Default request topic
-    #define DEFAULT_REQ_TOPIC   "~/rgbd/"
+    #define DEFAULT_REQ_TOPIC   "~/grasp/rgbd"
     /// Default response topic
-    #define DEFAULT_RES_TOPIC   "~/rgbd/response"
+    #define DEFAULT_RES_TOPIC   "~/grasp/rgbd/response"
 
     // Message enums
 
@@ -64,6 +64,10 @@ namespace RGBDCameraPlugin {
     #define CAPTURE_REQUEST     grasp::msgs::CameraRequest::CAPTURE
     /// Request to update pose
     #define MOVE_REQUEST        grasp::msgs::CameraRequest::MOVE
+    /// Captured frame response
+    #define CAPTURE_RESPONSE    grasp::msgs::CameraResponse::CAPTURE
+    /// Camera moved response
+    #define MOVE_RSPONSE        grasp::msgs::CameraResponse::MOVE
 }
 
 namespace gazebo {
