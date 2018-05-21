@@ -40,6 +40,12 @@ int main(int _argc, char **_argv)
     // Subscribe to the grasp target topic and link callback function
     gazebo::transport::SubscriberPtr sub_target =
         node->Subscribe(TARGET_RES_TOPIC, onTargetResponse);
+    // Publish to the camera plugin topic
+    gazebo::transport::PublisherPtr pub_camera =
+        node->Advertise<CameraRequest>(CAMERA_REQ_TOPIC);
+    // Subscribe to the camera plugin topic and link callback function
+    gazebo::transport::SubscriberPtr sub_camera =
+        node->Subscribe(CAMERA_RES_TOPIC, onCameraResponse);
     // Publish to gazebo's factory topic
     gazebo::transport::PublisherPtr pub_factory =
         node->Advertise<gazebo::msgs::Factory>(FACTORY_TOPIC);
@@ -53,10 +59,18 @@ int main(int _argc, char **_argv)
     pub_hand->WaitForConnection();
     
     // Spawn target object
-    std::string model_filename("model://Waterglass");
-    ignition::math::Pose3d pose(0,0,0,0,0,0);
-    spawnModelFromFilename(pub_factory, pose, model_filename);
+    std::string model_name ("Waterglass");
+    std::string model_filename = "model://" + model_name;
+    ignition::math::Pose3d model_pose(0,0,0,0,0,0);
+    spawnModelFromFilename(pub_factory, model_pose, model_filename);
     pub_target->WaitForConnection();
+
+    // Spawn camera
+    std::string camera_name("rgbd_camera");
+    std::string camera_filename = "model://" + camera_name;
+    ignition::math::Pose3d camera_pose(0,0,0.8,0,1.57,0);
+    spawnModelFromFilename(pub_factory, camera_pose, camera_filename);
+    pub_camera->WaitForConnection();
 
     // Obtain candidate grasps
     std::vector<Grasp> grasps;
@@ -67,9 +81,12 @@ int main(int _argc, char **_argv)
         tryGrasp(candidate, pub_hand, pub_target);
     }
 
+    captureFrame(pub_camera);
+    while (waitForCapture()) {waitMs(10);}
+
     // Remove target object
-    std::string model_name("Waterglass");
     removeModel(pub_request, model_name);
+    removeModel(pub_request, camera_name);
 
     // Shut down
     gazebo::client::shutdown();
@@ -162,6 +179,14 @@ void tryGrasp(
     waitMs(50);
 }
 
+/////////////////////////////////////////////////
+void captureFrame(gazebo::transport::PublisherPtr pub)
+{
+    CameraRequest msg;
+    msg.set_type(REQ_CAPTURE);
+    pub->Publish(msg);
+}
+
 //////////////////////////////////////////////////
 bool waitForTimeout()
 {
@@ -175,6 +200,17 @@ bool waitForTimeout()
 
 //////////////////////////////////////////////////
 bool waitForTrialEnd()
+{
+    std::lock_guard<std::mutex> lock(g_finished_mutex);
+    if (g_finished) {
+        g_finished = false;
+        return false;
+    }
+    return true;
+}
+
+//////////////////////////////////////////////////
+bool waitForCapture()
 {
     std::lock_guard<std::mutex> lock(g_finished_mutex);
     if (g_finished) {
@@ -206,6 +242,13 @@ void onTargetResponse(TargetResponsePtr & _msg)
         g_finished = true;
         g_success = success;
     }
+}
+
+/////////////////////////////////////////////////
+void onCameraResponse(CameraResponsePtr & _msg)
+{
+    std::lock_guard<std::mutex> lock(g_finished_mutex);
+    g_finished = true;
 }
 
 /////////////////////////////////////////////////

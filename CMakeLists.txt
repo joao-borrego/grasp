@@ -35,3 +35,6 @@ add_subdirectory(plugins)
 add_subdirectory(grasp)
 # Utilities
 add_subdirectory(utils)
+
+# Documentation
+# add_subdirectory(doc)

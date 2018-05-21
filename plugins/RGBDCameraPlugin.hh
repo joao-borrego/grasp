@@ -17,30 +17,67 @@
 #include <gazebo/rendering/DepthCamera.hh>
 #include <gazebo/sensors/sensors.hh>
 #include <gazebo/transport/transport.hh>
+#include <gazebo/common/Events.hh>
+// OGRE
+#include "gazebo/rendering/ogre_gazebo.h"
+// Custom messages
+#include "camera_request.pb.h"
+#include "camera_response.pb.h"
+// Queue for threaded access
+#include "ConcurrentQueue.hh"
+
+
+// TODO - Profiling
+#include <chrono>
 
 namespace RGBDCameraPlugin {
 
-    // Communication topics
+    // SDF parameters
 
-    /// Topic for RGB image stream
-    #define RGB_TOPIC   "~/grasp/camera/rgb"
-    /// Topic for depth image stream
-    #define DEPTH_TOPIC "~/grasp/camera/depth"
-    /// RGB stream update rate in Hertz
-    #define RGB_PUB_FREQ_HZ 60
-    /// Depth stream update rate in Hertz
-    #define DEPTH_PUB_FREQ_HZ 60
+    /// Camera sensor name SDF parameter name
+    #define PARAM_CAMERA        "cameraName"
+    /// Rendering queue maximum size SDF parameter name
+    #define PARAM_QUEUE_SIZE    "renderQueueSize"
+    /// Output directory parameter SDF parameter name
+    #define PARAM_OUTPUT_DIR    "outputDir"
+    /// Output extension SDF parameter name
+    #define PARAM_EXTENSION     "imageFormat"
+    /// Request topic SDF parameter name
+    #define PARAM_REQ_TOPIC     "requestTopic"
+    /// Response topic SDF parameter name
+    #define PARAM_RES_TOPIC     "responseTopic"
 
-    // SDF Parameters
+    // Default values for SDF parameters
 
-    /// TODO
-    #define PARAM_RGB   "rgb"
-    /// TODO
-    #define PARAM_DEPTH "depth"
-    
+    /// Default output directory
+    #define DEFAULT_OUTPUT_DIR  "/tmp/RGBDCameraPlugin"
+    /// Default output extension
+    #define DEFAULT_EXTENSION   "png"
+    /// Default request topic
+    #define DEFAULT_REQ_TOPIC   "~/grasp/rgbd"
+    /// Default response topic
+    #define DEFAULT_RES_TOPIC   "~/grasp/rgbd/response"
+
+    // Message enums
+
+    /// Request to capture frame
+    #define CAPTURE_REQUEST     grasp::msgs::CameraRequest::CAPTURE
+    /// Request to update pose
+    #define MOVE_REQUEST        grasp::msgs::CameraRequest::MOVE
+    /// Captured frame response
+    #define CAPTURE_RESPONSE    grasp::msgs::CameraResponse::CAPTURE
+    /// Camera moved response
+    #define MOVE_RSPONSE        grasp::msgs::CameraResponse::MOVE
 }
 
 namespace gazebo {
+
+    /// Shared pointer declaration for request message type
+    typedef const boost::shared_ptr<const grasp::msgs::CameraRequest>
+        CameraRequestPtr;
+    /// Shared pointer declaration for response message type
+    typedef const boost::shared_ptr<const grasp::msgs::CameraResponse>
+        CameraResponsePtr;
 
     // Forward declaration of private data class
     class RGBDCameraPluginPrivate;
@@ -58,14 +95,37 @@ namespace gazebo {
         /// World
         private: physics::WorldPtr world;
 
-        /// Pointer to rgb camera renderer
-        private: rendering::CameraPtr rgb_camera;
         /// Pointer to depth camera renderer
-        private: rendering::DepthCameraPtr depth_camera;
+        private: rendering::DepthCameraPtr camera;
+        /// Pointer to world update callback connection
+        private: event::ConnectionPtr updateConn;
         /// Pointer to RGB camera callback connection
         private: event::ConnectionPtr newRGBFrameConn;
         /// Pointer to depth camera callback connection
         private: event::ConnectionPtr newDepthFrameConn;
+
+        /// Auxiliar thread for saving RGB frames to disk
+        private: std::thread thread_rgb;
+        /// Auxiliar thread for saving depth frames to disk
+        private: std::thread thread_depth;
+        /// Flag to stop thread execution
+        private: bool stop_thread {false};
+        /// Multithread safe queue for RGB data
+        private: ConcurrentQueue<unsigned char*> *rgb_queue;
+        /// Multithread safe queue for depth data
+        private: ConcurrentQueue<float*> *depth_queue;
+
+        /// Render output directory
+        private: std::string output_dir;
+        /// Rendered output format
+        private: std::string output_ext;
+
+        /// Flag for capture request
+        private: bool capture {false};
+        /// Flag for pose update request
+        private: bool update_pose {false};
+        /// New desired pose
+        private: ignition::math::Pose3d new_pose;
 
         // Public methods
 
@@ -105,6 +165,27 @@ namespace gazebo {
             unsigned int _height,
             unsigned int _depth,
             const std::string &_format);
+
+        // Private methods
+
+        /// \brief Callback function for handling world update event
+        private: void onUpdate();
+
+        /// \brief Callback function for handling incoming requests
+        /// \param _msg  The message
+        private: void onRequest(CameraRequestPtr &_msg);
+
+        /// TODO
+        private: void saveRenderRGB();
+
+        /// TODO
+        private: void saveRenderDepth();
+
+        /// \brief Get the OGRE image pixel format
+        /// As seen in gazebo/rendering/Camera.cc
+        /// \param[in] _format The Gazebo image format
+        /// \return Integer representation of the Ogre image format
+        private: static int OgrePixelFormat(const std::string &_format);
     };
 }
 
