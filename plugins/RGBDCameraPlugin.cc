@@ -48,7 +48,10 @@ RGBDCameraPlugin::~RGBDCameraPlugin()
     this->camera.reset();
     this->data_ptr->node->Fini();
 
-    stop_thread = true;
+    {
+        std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+        stop_thread = true;
+    }
     if (thread_rgb.joinable()) thread_rgb.join();
     if (thread_depth.joinable()) thread_depth.join();
 
@@ -81,7 +84,6 @@ void RGBDCameraPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         gzerr << "Provided RGBD camera not found." << std::endl;
         return;
     }
-
     this->camera = std::dynamic_pointer_cast<sensors::DepthCameraSensor>(
         sensor_manager->GetSensor(camera_name))->DepthCamera();
 
@@ -207,7 +209,6 @@ void RGBDCameraPlugin::onNewRGBFrame(
     const std::string &_format)
 {
     bool save = false;
-
     {
         std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
         if (capture) {
@@ -256,17 +257,23 @@ void RGBDCameraPlugin::saveRenderRGB()
     grasp::msgs::CameraResponse msg;
     msg.set_type(CAPTURE_RESPONSE);
 
-    while(!stop_thread)
+    while(true)
     {
-        rgb_queue->dequeue(image_rgb);
-        std::string filename = output_dir + "/rgb_" + 
-            std::to_string(counter++) + "." + output_ext;
-        rendering::Camera::SaveFrame(image_rgb, width, height,
-            depth, format, filename);
-        delete [] image_rgb;
+        {
+            std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+            if (stop_thread) return;
+        }
+        if (rgb_queue->dequeue(image_rgb))
+        {
+            std::string filename = output_dir + "/rgb_" + 
+                std::to_string(counter++) + "." + output_ext;
+            rendering::Camera::SaveFrame(image_rgb, width, height,
+                depth, format, filename);
+            delete [] image_rgb;
 
-        // Notify subscribers
-        this->data_ptr->pub->Publish(msg);
+            // Notify subscribers
+            this->data_ptr->pub->Publish(msg);            
+        }
     }
 }
 
@@ -281,11 +288,18 @@ void RGBDCameraPlugin::saveRenderDepth()
     unsigned int counter = 0;
     std::string extension(".png");
 
-    while(!stop_thread)
+    while(true)
     {
-        depth_queue->dequeue(image_depth);
-        // TODO Process depth image and save to file
-        delete [] image_depth;
+        {
+            std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+            if (stop_thread) return;
+        }
+
+        if (depth_queue->dequeue(image_depth))
+        {
+            // TODO Process depth image and save to file
+            delete [] image_depth;
+        }
     }
 }
 

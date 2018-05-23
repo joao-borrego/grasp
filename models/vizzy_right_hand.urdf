@@ -180,7 +180,7 @@
       <actuatedJoint name="r_med_phal_1_joint">
         <mimicJoint name="r_med_phal_2_joint" multiplier="0.5" />
         <mimicJoint name="r_med_phal_3_joint" multiplier="0.5" />
-        <mimicJoint name="r_min_phal_1_joint" multiplier="0.5" />
+        <mimicJoint name="r_min_phal_1_joint" multiplier="1.0" />
         <mimicJoint name="r_min_phal_3_joint" multiplier="0.5" />
         <mimicJoint name="r_min_phal_2_joint" multiplier="0.5" />
       </actuatedJoint>
