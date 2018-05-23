@@ -18,7 +18,8 @@ import re
 # Usage
 USAGE = 'options: -i <input mesh directory>\n' +   \
         '         -o <output model directory>\n' + \
-        '         -t <template directory>\n'
+        '         -t <template directory>\n' +     \
+        '         -s <object scale> \n'
 
 # Output mesh format
 MESH_EXT = 'stl'
@@ -34,12 +35,13 @@ def parseArgs(argv):
     in_dir = 'COLLADA'
     out_dir = 'output'
     template = 'template'
+    scale = SCALE
     
     usage = 'usage:   ' + argv[0] + ' [options]\n' + USAGE
 
     try:
         opts, args = getopt.getopt(argv[1:],
-            "hi:o:t:",["in_dir=","out_dir=","template="])
+            "hi:o:t:s:",["in_dir=","out_dir=","template=","scale="])
     except getopt.GetoptError:
         print (usage)
         sys.exit(2)
@@ -54,12 +56,15 @@ def parseArgs(argv):
             out_dir = arg
         elif opt in ("-t", "--template"):
             template = arg
+        elif opt in ("-s", "--scale"):
+            scale = arg
 
     print ('Input mesh directory   ', in_dir)
     print ('Output model directory ', out_dir)
     print ('Template path          ', template)
+    print ('Object scale vector    ', scale)
     
-    return [in_dir, out_dir, template]
+    return [in_dir, out_dir, template, scale]
 
 def search_and_replace(filename, search, replace):
     with fileinput.FileInput(filename, inplace=True) as file:
@@ -69,7 +74,7 @@ def search_and_replace(filename, search, replace):
 def main(argv):
 
     # Obtain command-line arguments
-    [in_dir, out_dir, template] = parseArgs(argv)
+    [in_dir, out_dir, template, scale] = parseArgs(argv)
 
     meshes = [f for f in os.listdir(in_dir) \
         if os.path.isfile(os.path.join(in_dir, f))]
@@ -97,7 +102,7 @@ def main(argv):
         copyfile(template_cfg, out_cfg)
         search_and_replace(out_model, 'TEMPLATE', name)
         search_and_replace(out_model, 'MESH_EXT', 'stl')
-        search_and_replace(out_model, 'SCALE', SCALE)
+        search_and_replace(out_model, 'SCALE', scale)
         search_and_replace(out_cfg, 'TEMPLATE', name)
         search_and_replace(out_cfg, 'DESCRIPTION', name)
 
@@ -112,7 +117,7 @@ def main(argv):
             print(in_mesh + ' not found. Removing model.')
             rmtree(out_dir + '/' + name)
 
-        print("Done!")
+    print("\r\n\nDone!")
 
 if __name__ == "__main__":
     main(sys.argv)

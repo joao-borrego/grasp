@@ -58,19 +58,23 @@ int main(int _argc, char **_argv)
     pub_request->WaitForConnection();
     pub_hand->WaitForConnection();
     
-    // Spawn target object
-    std::string model_name ("Waterglass");
-    std::string model_filename = "model://" + model_name;
-    ignition::math::Pose3d model_pose(0,0,0,0,0,0);
-    spawnModelFromFilename(pub_factory, model_pose, model_filename);
-    pub_target->WaitForConnection();
-
+    /*
     // Spawn camera
     std::string camera_name("rgbd_camera");
     std::string camera_filename = "model://" + camera_name;
     ignition::math::Pose3d camera_pose(0,0,0.8,0,1.57,0);
     spawnModelFromFilename(pub_factory, camera_pose, camera_filename);
     pub_camera->WaitForConnection();
+    */
+
+    // TODO: Foreach object
+
+    // Spawn target object
+    std::string model_name ("Waterglass");
+    std::string model_filename = "model://" + model_name;
+    ignition::math::Pose3d model_pose(0,0,0,0,0,0);
+    spawnModelFromFilename(pub_factory, model_pose, model_filename);
+    pub_target->WaitForConnection();
 
     // Obtain candidate grasps
     std::vector<Grasp> grasps;
@@ -81,12 +85,14 @@ int main(int _argc, char **_argv)
         tryGrasp(candidate, pub_hand, pub_target);
     }
 
+    /*
     captureFrame(pub_camera);
     while (waitForCapture()) {waitMs(10);}
+    removeModel(pub_request, camera_name);
+    */
 
     // Remove target object
     removeModel(pub_request, model_name);
-    removeModel(pub_request, camera_name);
 
     // Shut down
     gazebo::client::shutdown();
@@ -160,7 +166,7 @@ void tryGrasp(
 {
     std::vector<double> velocity_lift {0,0,5,0,0,0};
     std::vector<double> velocity_stop {0,0,0};
-    std::vector<double> velocities_close {5,5,10};
+    std::vector<double> velocities_close {10,10,10};
 
     setPose(pub_hand, grasp.pose, 0.1);
     while (waitForTimeout()) {waitMs(10);}
