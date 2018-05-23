@@ -3,6 +3,7 @@ build/
 # Model datasets
 datasets/3dnet
 datasets/dexnet
+datasets/kit
 datasets/ShapeNetSem
 datasets/ycb
 # Documentation
