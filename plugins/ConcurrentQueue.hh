@@ -13,6 +13,8 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <chrono>
+using namespace std::chrono_literals;
 
 template<typename T>
 
@@ -37,25 +39,35 @@ class ConcurrentQueue
 
     /// \brief Add a data object to tail
     /// \param data Object to add
-    public: void enqueue(T data)
+    public: bool enqueue(T data)
     {
+        bool success = false;
         std::unique_lock<std::mutex> lock(mutex);
-        cond_var.wait(lock, [this](){ return !isFull();});
-        queue.push(data);
+        if (cond_var.wait_for(lock, 200ms, [this](){ return !isFull();}))
+        {
+            queue.push(data);
+            success = true;
+        }
         lock.unlock();
         cond_var.notify_all();
+        return success;
     }
 
     /// \brief Remove data object from head
     /// \param data Removed object
-    public: void dequeue(T &data)
+    public: bool dequeue(T &data)
     {
+        bool success = false;
         std::unique_lock<std::mutex> lock(mutex);
-        cond_var.wait(lock, [this](){ return !isEmpty();});
-        data = queue.front();
-        queue.pop();
+        if (cond_var.wait_for(lock, 200ms, [this](){ return !isEmpty();}))
+        {
+            data = queue.front();
+            queue.pop();
+            success = true;
+        }
         lock.unlock();
-        cond_var.notify_all();   
+        cond_var.notify_all();
+        return success;   
     }
 
     /// \brief  Clear queue

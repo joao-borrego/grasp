@@ -49,7 +49,10 @@ add_dependencies(TargetPlugin
 add_library(RGBDCameraPlugin SHARED
     RGBDCameraPlugin.cc)
 target_link_libraries(RGBDCameraPlugin
+    grasp_msgs
     ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
+add_dependencies(RGBDCameraPlugin
+    grasp_msgs)
 
 # Contact Sensor Gazebo plugin
 add_library(ContactSensorPlugin SHARED ContactSensorPlugin.cc )
