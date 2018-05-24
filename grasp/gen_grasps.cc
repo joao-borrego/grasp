@@ -9,13 +9,27 @@
 
 #include "gen_grasps.hh"
 
-void obtainGrasps(std::vector<Grasp> & grasps)
+void obtainGrasps(std::string file_name, std::vector<Grasp> & grasps)
 {
-    // DEBUG
-    for (int i = 0; i < 10; i++)
+    std::string robot("vizzy");
+    double tmp[6];
+
+    try
     {
-        ignition::math::Pose3d pose(0.0,0.0,0.0,0,1.57,0);
-        grasps.emplace_back(pose);
+        YAML::Node config = YAML::LoadFile(file_name);
+        int num_grasps = config["object"]["grasp_candidates"][robot].size();
+        for (int i = 0; i < num_grasps; i++)
+        {
+            YAML::Node pose_node =
+                config["object"]["grasp_candidates"][robot][i]["pose"];
+            for (int j = 0; j < 6; j++) { tmp[j] = pose_node[j].as<double>(); }
+            ignition::math::Pose3d pose(tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],tmp[5]);
+            grasps.emplace_back(pose);
+        }
+    }
+    catch (YAML::Exception& yamlException)
+    {
+        std::cerr << "Unable to parse " << file_name << "\n";
     }
 }
 

@@ -8,7 +8,11 @@ include (FindPkgConfig)
 if (PKG_CONFIG_FOUND)
   pkg_check_modules(GAZEBO gazebo)
   pkg_check_modules(SDF sdformat)
+  pkg_check_modules(YAML yaml-cpp)
 endif()
+
+find_package(yaml-cpp REQUIRED)
+
 # Include and link Gazebo and SDF libraries
 include_directories(${GAZEBO_INCLUDE_DIRS} ${SDF_INCLUDE_DIRS})
 link_directories(${GAZEBO_LIBRARY_DIRS})
@@ -16,6 +20,10 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 # Include custom messages
 include_directories(${PROJECT_BINARY_DIR}/msgs)
 link_directories(${PROJECT_BINARY_DIR}/msgs)
+
+# Include and link yaml-cpp library
+include_directories(${YAML_CPP_INCLUDE_DIR})
+link_directories(${YAML_CPP_INCLUDE_DIR})
 
 # Run grasping trials script
 add_executable (run_trials
@@ -25,7 +33,8 @@ add_executable (run_trials
 	Grasp.cc)
 target_link_libraries(run_trials
     grasp_msgs
-    ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES} ${SDF_LIBRARIES})
+    ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES}
+    ${YAML_CPP_LIBRARIES})
 add_dependencies(
     run_trials
     grasp_msgs)

@@ -14,11 +14,14 @@
 #include <gazebo/gazebo_client.hh>
 #include <gazebo/gazebo_config.h>
 
+// Open YAML config files
+#include "yaml-cpp/yaml.h"
+
 // Grasp representation
 #include "Grasp.hh"
 
 /// TODO
-void obtainGrasps(std::vector<Grasp> & grasps);
+void obtainGrasps(std::string file_name, std::vector<Grasp> & grasps);
 
 /// \brief Get a random double in a given interval
 ///

@@ -68,15 +68,16 @@ int main(int _argc, char **_argv)
     // TODO: Foreach object
 
     // Spawn target object
-    std::string model_name ("Waterglass");
+    std::string model_name ("Seal");
     std::string model_filename = "model://" + model_name;
     ignition::math::Pose3d model_pose(0,0,0,0,0,0);
     spawnModelFromFilename(pub_factory, model_pose, model_filename);
     pub_target->WaitForConnection();
 
     // Obtain candidate grasps
+    std::string cfg_file("grasp/config/seal.grasp.yml");
     std::vector<Grasp> grasps;
-    obtainGrasps(grasps);
+    obtainGrasps(cfg_file, grasps);
     // Perform trials
     for (auto candidate : grasps)
     {
@@ -176,7 +177,8 @@ void tryGrasp(
     getTargetPose(pub_target);
     while (waitForTrialEnd()) {waitMs(10);}
     
-    std::cout << "Success: " << g_success << std::endl;
+    std::cout << "Success: " << g_success
+        << " - Pose: " << grasp.pose << "\n";
 
     reset(pub_hand);
     waitMs(50);
