@@ -196,7 +196,7 @@
 
   <!-- Vizzy's right hand -->
   <joint name="r_hand_base_joint_fix" type="fixed">
-    <origin rpy="1.570796 0 0" xyz="0.007 -0.076 0.009"/>
+    <origin rpy="1.570796 0 0" xyz="0.0 0.0 0.0"/>
     <parent link="base_footprint"/>
     <child link="r_hand_base_link"/>
     <axis xyz="0 0 0"/>

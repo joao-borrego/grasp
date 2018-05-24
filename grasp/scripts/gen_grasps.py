@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python2
 
 # As seen in https://github.com/mveres01/multi-contact-grasping
 # src/collect_grasps.py
@@ -12,6 +12,8 @@ import trimesh
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+# YAML output
+import yaml
 
 def normalizeVector(vector):
     """Normalizes a vector to have a magnitude of 1."""
@@ -170,12 +172,39 @@ def generateCandidates(mesh, num_samples=1000, noise_level=0.05,
 
     return matrices
 
+def writeOutput(file, object, robot, grasp_candidates):
+    """Write output to file"""
+
+    data = dict(
+        object = dict(
+            name = object,
+            uri = 'model://' + object,
+            grasp_candidates = dict(),
+        )
+    )
+
+    data['object']['grasp_candidates'][robot] = dict()
+    for idx, grasp in enumerate(grasp_candidates):
+        data['object']['grasp_candidates'][robot][idx] = dict()
+        data['object']['grasp_candidates'][robot][idx]['pose'] = grasp[:6].tolist()
+        data['object']['grasp_candidates'][robot][idx]['joints'] = [1,1,1]
+
+    with open(file, 'w') as outfile:
+        yaml.dump(data, outfile, default_flow_style=False)
 
 def main(argv):
     """Main"""
 
-    mesh = loadMesh('/DATA/Datasets/KIT/Seal_800_tex.stl')
-    grasps = generateCandidates(mesh, 100)
+    object_name = 'Seal'
+    file_name = '/DATA/Datasets/KIT/Seal_800_tex.obj'
+    samples = 100
+    robot = 'vizzy'
+    out_file = 'data.yml'
+
+    mesh = loadMesh(file_name)
+    grasps = generateCandidates(mesh, samples)
+    writeOutput(out_file, object_name, robot, grasps)
+
 
 if __name__ == "__main__" :
     main(sys.argv)

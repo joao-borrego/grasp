@@ -1,10 +1,12 @@
 # Compilation
 build/
-# Model datasets
+# 3D object datasets
 datasets/3dnet
 datasets/dexnet
 datasets/kit
 datasets/ShapeNetSem
 datasets/ycb
+# Grasp candidates files
+grasp/config
 # Documentation
 doc/

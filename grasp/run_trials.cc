@@ -58,14 +58,12 @@ int main(int _argc, char **_argv)
     pub_request->WaitForConnection();
     pub_hand->WaitForConnection();
     
-    /*
     // Spawn camera
     std::string camera_name("rgbd_camera");
     std::string camera_filename = "model://" + camera_name;
     ignition::math::Pose3d camera_pose(0,0,0.8,0,1.57,0);
     spawnModelFromFilename(pub_factory, camera_pose, camera_filename);
     pub_camera->WaitForConnection();
-    */
 
     // TODO: Foreach object
 
@@ -85,13 +83,12 @@ int main(int _argc, char **_argv)
         tryGrasp(candidate, pub_hand, pub_target);
     }
 
-    /*
+    // Capture and render frame
     captureFrame(pub_camera);
     while (waitForCapture()) {waitMs(10);}
+    
+    // Cleanup
     removeModel(pub_request, camera_name);
-    */
-
-    // Remove target object
     removeModel(pub_request, model_name);
 
     // Shut down
