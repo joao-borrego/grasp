@@ -80,6 +80,9 @@ namespace gazebo {
         /// Array of virtual x y z r p y joint pointers
         private: std::vector<physics::JointPtr> virtual_joints;
 
+        /// PID controllers for virtual joints
+        private: std::vector<common::PID> pid_controllers;
+
         /// Timeout trigger
         private: bool timer_active {false};
         /// Next timeout
@@ -140,6 +143,10 @@ namespace gazebo {
         /// \param _sdf The root sdf element pointer
         /// \returns Success
         private: bool loadVirtualJoints(sdf::ElementPtr _sdf);
+
+        /// \brief Loads PID controllers for each joint
+        /// \returns Success
+        private: bool loadControllers();
 
         /// \brief Imobilises the hand
         private: void imobilise();
