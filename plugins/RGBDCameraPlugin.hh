@@ -181,6 +181,9 @@ namespace gazebo {
         /// TODO
         private: void saveRenderDepth();
 
+        /// TODO
+        private: void clearQueues();
+
         /// \brief Get the OGRE image pixel format
         /// As seen in gazebo/rendering/Camera.cc
         /// \param[in] _format The Gazebo image format

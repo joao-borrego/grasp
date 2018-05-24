@@ -55,6 +55,8 @@ RGBDCameraPlugin::~RGBDCameraPlugin()
     if (thread_rgb.joinable()) thread_rgb.join();
     if (thread_depth.joinable()) thread_depth.join();
 
+    clearQueues();
+
     gzmsg << "[RGBDCameraPlugin] Unloaded plugin." << std::endl;
 }
 
@@ -303,6 +305,21 @@ void RGBDCameraPlugin::saveRenderDepth()
     }
 }
 
+//////////////////////////////////////////////////
+void RGBDCameraPlugin::clearQueues()
+{
+    unsigned char *rgb_data;
+    float *depth_data;
+
+    while (rgb_queue->dequeue(rgb_data))
+    {
+        delete [] rgb_data;
+    }
+    while (depth_queue->dequeue(depth_data))
+    {
+        delete [] depth_data;
+    }
+}
 
 //////////////////////////////////////////////////
 int RGBDCameraPlugin::OgrePixelFormat(const std::string &_format)

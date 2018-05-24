@@ -39,6 +39,7 @@ class ConcurrentQueue
 
     /// \brief Add a data object to tail
     /// \param data Object to add
+    /// \return true if successful, false otherwise
     public: bool enqueue(T data)
     {
         bool success = false;
@@ -55,6 +56,7 @@ class ConcurrentQueue
 
     /// \brief Remove data object from head
     /// \param data Removed object
+    /// \return true if successful, false otherwise
     public: bool dequeue(T &data)
     {
         bool success = false;
