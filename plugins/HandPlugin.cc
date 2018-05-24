@@ -12,8 +12,7 @@
 namespace gazebo {
 
 /// \brief Class for joint and respective mimics data.
-/// TODO: Maybe refine data structure?
-class FingerJoint
+class JointGroup
 {
     /// Actuated joint
     public: physics::JointPtr actuated;
@@ -22,7 +21,7 @@ class FingerJoint
     /// Vector of corresponding mimic joint's multipliers
     public: std::vector<double> multipliers;
 
-    public: FingerJoint(physics::JointPtr joint)
+    public: JointGroup(physics::JointPtr joint)
     {
         this->actuated = joint;
     }
@@ -76,7 +75,7 @@ void HandPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     // Extract parameters from SDF element
 
     // Finger joints
-    if (loadFingerJoints(_sdf) != true) return;
+    if (loadJointGroups(_sdf) != true) return;
     // Virtual joints for unconstrained movement
     if (loadVirtualJoints(_sdf) != true) return;
     // Enable/disable gravity
@@ -104,7 +103,7 @@ void HandPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 }
 
 /////////////////////////////////////////////////
-bool HandPlugin::loadMimicJoints(sdf::ElementPtr _sdf, FingerJoint & joint)
+bool HandPlugin::loadMimicJoints(sdf::ElementPtr _sdf, JointGroup & joint)
 {
     std::string mimic_name;
     double multiplier;
@@ -136,26 +135,26 @@ bool HandPlugin::loadMimicJoints(sdf::ElementPtr _sdf, FingerJoint & joint)
 }
 
 /////////////////////////////////////////////////
-bool HandPlugin::loadFingerJoints(sdf::ElementPtr _sdf)
+bool HandPlugin::loadJointGroups(sdf::ElementPtr _sdf)
 {
     std::string joint_name;
     int inserted = 0;
 
-    if (_sdf->HasElement(PARAM_FINGER_JOINT))
+    if (_sdf->HasElement(PARAM_JOINT_GROUP))
     {
         sdf::ElementPtr joint_sdf;
-        for (joint_sdf = _sdf->GetElement(PARAM_FINGER_JOINT);
+        for (joint_sdf = _sdf->GetElement(PARAM_JOINT_GROUP);
             joint_sdf != NULL;
             joint_sdf = joint_sdf->GetNextElement())
         {
             if (joint_sdf->HasAttribute(PARAM_NAME))
             {
                 joint_sdf->GetAttribute(PARAM_NAME)->Get<std::string>(joint_name);
-                this->finger_joints.emplace_back(this->model->GetJoint(joint_name));
+                this->joint_groups.emplace_back(this->model->GetJoint(joint_name));
                 gzdbg << "Actuated joint " << joint_name << std::endl;
-                loadMimicJoints(joint_sdf, this->finger_joints.at(inserted++));
+                loadMimicJoints(joint_sdf, this->joint_groups.at(inserted++));
             }
-            else if (joint_sdf->GetName() == PARAM_FINGER_JOINT)
+            else if (joint_sdf->GetName() == PARAM_JOINT_GROUP)
             {
                 gzerr << "[HandPlugin] No joint name provided." << std::endl;
                 return false;
@@ -262,7 +261,7 @@ void HandPlugin::onRequest(HandMsgPtr &_msg)
     if (_msg->joint_velocities_size() > 0) {
         std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
         this->new_joint_velocities.clear();
-        if (_msg->joint_velocities_size() == this->finger_joints.size())
+        if (_msg->joint_velocities_size() == this->joint_groups.size())
         {
             for (const auto velocity : _msg->joint_velocities()) {
                 this->new_joint_velocities.push_back(velocity);
@@ -311,12 +310,12 @@ void HandPlugin::imobilise()
 /////////////////////////////////////////////////
 void HandPlugin::resetJoints()
 {
-    for (int i = 0; i < this->finger_joints.size(); i++)
+    for (int i = 0; i < this->joint_groups.size(); i++)
     {
-        this->finger_joints.at(i).actuated->SetPosition(0, 0);
-        for (int j = 0; j < this->finger_joints.at(i).mimic.size(); j++)
+        this->joint_groups.at(i).actuated->SetPosition(0, 0);
+        for (int j = 0; j < this->joint_groups.at(i).mimic.size(); j++)
         {
-            this->finger_joints.at(i).mimic.at(j)->SetPosition(0, 0);
+            this->joint_groups.at(i).mimic.at(j)->SetPosition(0, 0);
         }
     }
 }
@@ -351,11 +350,11 @@ void HandPlugin::setJointVelocities(std::vector<double> & _velocities)
 {
     for (int i = 0; i < _velocities.size(); i++)
     {
-        this->finger_joints.at(i).actuated->SetVelocity(0, _velocities.at(i));
-        for (int j = 0; j < this->finger_joints.at(i).mimic.size(); j++)
+        this->joint_groups.at(i).actuated->SetVelocity(0, _velocities.at(i));
+        for (int j = 0; j < this->joint_groups.at(i).mimic.size(); j++)
         {
-            physics::JointPtr mimic_joint = this->finger_joints.at(i).mimic.at(j);
-            double multiplier = this->finger_joints.at(i).multipliers.at(j);
+            physics::JointPtr mimic_joint = this->joint_groups.at(i).mimic.at(j);
+            double multiplier = this->joint_groups.at(i).multipliers.at(j);
             mimic_joint->SetVelocity(0, _velocities.at(i) * multiplier);
         }
     }

@@ -32,7 +32,7 @@ namespace HandPlugin {
     /// Mimic joint multiplier SDF attribute
     #define PARAM_MULTIPLIER        "multiplier"
     /// Finger joint name SDF entity
-    #define PARAM_FINGER_JOINT      "actuatedJoint"
+    #define PARAM_JOINT_GROUP       "actuatedJoint"
     /// Mimic joint name SDF entity
     #define PARAM_MIMIC_JOINT       "mimicJoint"
     /// Virtual revolute joint name SDF entity
@@ -57,7 +57,7 @@ namespace gazebo {
         HandMsgPtr;
 
     // Forward declaration of private joint class
-    class FingerJoint;
+    class JointGroup;
 
     // Forward declaration of private data class
     class HandPluginPrivate;
@@ -76,7 +76,7 @@ namespace gazebo {
         private: event::ConnectionPtr update_connection;
 
         /// Array of finger joints
-        private: std::vector<FingerJoint> finger_joints;
+        private: std::vector<JointGroup> joint_groups;
         /// Array of virtual x y z r p y joint pointers
         private: std::vector<physics::JointPtr> virtual_joints;
 
@@ -129,12 +129,12 @@ namespace gazebo {
 
         // Private methods
 
-        private: bool loadMimicJoints(sdf::ElementPtr _sdf, FingerJoint & joint);
+        private: bool loadMimicJoints(sdf::ElementPtr _sdf, JointGroup & joint);
 
         /// \brief Loads finger joints
         /// \param _sdf The root sdf element pointer
         /// \returns Success
-        private: bool loadFingerJoints(sdf::ElementPtr _sdf);
+        private: bool loadJointGroups(sdf::ElementPtr _sdf);
 
         /// \brief Loads virtual joints
         /// \param _sdf The root sdf element pointer
