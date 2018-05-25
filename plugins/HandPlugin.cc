@@ -78,6 +78,8 @@ void HandPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     if (loadJointGroups(_sdf) != true) return;
     // Virtual joints for unconstrained movement
     if (loadVirtualJoints(_sdf) != true) return;
+    // Load PID controllers
+    if (loadControllers() != true) return;
     // Enable/disable gravity
     if (_sdf->HasElement(PARAM_GRAVITY))
     {
@@ -123,7 +125,7 @@ bool HandPlugin::loadMimicJoints(sdf::ElementPtr _sdf, JointGroup & joint)
                 joint.mimic.push_back(this->model->GetJoint(mimic_name));
                 joint.multipliers.push_back(multiplier);
 
-                gzdbg << "Mimic joint " << mimic_name << " k = " << multiplier << std::endl;
+                gzdbg << "   Mimic joint " << mimic_name << " k = " << multiplier << std::endl;
             }
             else if (mimic_sdf->GetName() == PARAM_MIMIC_JOINT)
             {
@@ -201,42 +203,87 @@ bool HandPlugin::loadVirtualJoints(sdf::ElementPtr _sdf)
 }
 
 /////////////////////////////////////////////////
+bool HandPlugin::loadControllers()
+{
+    physics::JointControllerPtr controller = model->GetJointController();
+
+    // Reset existing PIDs
+    std::map<std::string, common::PID> vel = controller->GetVelocityPIDs();
+    for (const auto &entry : vel) {
+        controller->SetVelocityPID(entry.first, common::PID(0,0,0));
+    }
+    std::map<std::string, common::PID> pos = controller->GetPositionPIDs();
+    for (const auto &entry : pos) {
+        controller->SetPositionPID(entry.first, common::PID(0,0,0));
+    }
+
+    for (const auto &joint : virtual_joints)
+    {
+        controller->SetVelocityPID(
+            joint->GetScopedName(), common::PID(2,0,0));
+    }
+    for (const auto &group : joint_groups)
+    {
+        controller->SetPositionPID(
+            group.actuated->GetScopedName(), common::PID(1.5,0,0));
+        for (const auto &joint : group.mimic)
+        {
+            controller->SetPositionPID(
+                joint->GetScopedName(), common::PID(1.5,0,0));
+        }
+    }
+
+    // DEBUG
+    std::map<std::string, common::PID> new_vel = controller->GetVelocityPIDs();
+    std::map<std::string, common::PID> new_pos = controller->GetPositionPIDs();
+    gzdbg << "Position Controllers:" << std::endl;
+    for (const auto &entry : new_pos) {
+        gzdbg << "   " << entry.first
+            << " P: " << entry.second.GetPGain()
+            << " I: " << entry.second.GetIGain()
+            << " D: " << entry.second.GetDGain()
+            << "\n";
+    }
+    gzdbg << "Velocity Controllers:" << std::endl;
+    for (const auto &entry : new_vel) {
+        gzdbg << "   " << entry.first
+            << " P: " << entry.second.GetPGain()
+            << " I: " << entry.second.GetIGain()
+            << " D: " << entry.second.GetDGain()
+            << "\n";
+    }
+
+    return true;
+}
+
+/////////////////////////////////////////////////
 void HandPlugin::onUpdate()
 {
     std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
 
-    uint32_t now = this->world->Iterations();
-    if (now >= this->last_updated + this->update_rate)
-    {
-        this->last_updated = now;
-        if (this->update_joint_velocities) {
-            setJointVelocities(this->new_joint_velocities);
-            setVelocity(this->new_velocity);
-            //this->update_joint_velocities = false;
-        }
+    if (update_joint_velocities) {
+        setJointVelocities(new_joint_velocities);
+        update_joint_velocities = false;
     }
-
-    if (this->update_pose) {
-        setPose(this->new_pose);
-        this->update_pose = false;
+    if (update_pose) {
+        setPose(new_pose);
+        update_pose = false;
     }
-    if (this->update_velocity) {
-        setVelocity(this->new_velocity);
-        this->update_velocity = false;
+    if (update_velocity) {
+        setVelocity(new_velocity);
+        update_velocity = false;
     }
-    if (this->timer_active) {
-        if (this->timeout <= this->world->SimTime()) {
+    if (timer_active) {
+        if (timeout <= world->SimTime()) {
             sendTimeout();
-            this->timer_active = false;
+            timer_active = false;
         }
     }
-    if (this->reset) {
-        this->imobilise();
+    if (reset) {
+        imobilise();
         resetWorld();
-        this->last_updated = 0;
-        this->reset = false;
+        reset = false;
     }
-
 }
 
 /////////////////////////////////////////////////
@@ -295,67 +342,70 @@ void HandPlugin::onRequest(HandMsgPtr &_msg)
 /////////////////////////////////////////////////
 void HandPlugin::imobilise()
 {
-    physics::Link_V links = this->model->GetLinks();
+    physics::Link_V links = model->GetLinks();
     for (auto link : links) { link->ResetPhysicsStates(); }
-    physics::Joint_V joints = this->model->GetJoints();
+    physics::Joint_V joints = model->GetJoints();
     for (auto joint : joints) { joint->SetVelocity(0, 0); }
+    model->GetJointController()->Reset();
 
-    this->new_velocity.clear();
-    this->new_joint_velocities.clear();
-
-    this->update_velocity = false;
-    this->update_joint_velocities = false;
+    new_velocity.clear();
+    new_joint_velocities.clear();
+    update_velocity = false;
+    update_joint_velocities = false;
 }
 
 /////////////////////////////////////////////////
 void HandPlugin::resetJoints()
 {
-    for (int i = 0; i < this->joint_groups.size(); i++)
-    {
-        this->joint_groups.at(i).actuated->SetPosition(0, 0);
-        for (int j = 0; j < this->joint_groups.at(i).mimic.size(); j++)
-        {
-            this->joint_groups.at(i).mimic.at(j)->SetPosition(0, 0);
+    for (const auto &group : joint_groups) {
+        group.actuated->SetPosition(0, 0);
+        for (const auto &mimic_joint : group.mimic) {
+            mimic_joint->SetPosition(0, 0);
         }
     }
 }
-
 
 /////////////////////////////////////////////////
 void HandPlugin::setPose(ignition::math::Pose3d & _pose)
 {
     ignition::math::Vector3d pos = _pose.Pos();
     ignition::math::Quaterniond rot = _pose.Rot();
-    this->virtual_joints.at(0)->SetPosition(0, pos.X());
-    this->virtual_joints.at(1)->SetPosition(0, pos.Y());
-    this->virtual_joints.at(2)->SetPosition(0, pos.Z());
-    this->virtual_joints.at(3)->SetPosition(0, rot.Roll());
-    this->virtual_joints.at(4)->SetPosition(0, rot.Pitch());
-    this->virtual_joints.at(5)->SetPosition(0, rot.Yaw());
+    virtual_joints.at(0)->SetPosition(0, pos.X());
+    virtual_joints.at(1)->SetPosition(0, pos.Y());
+    virtual_joints.at(2)->SetPosition(0, pos.Z());
+    virtual_joints.at(3)->SetPosition(0, rot.Roll());
+    virtual_joints.at(4)->SetPosition(0, rot.Pitch());
+    virtual_joints.at(5)->SetPosition(0, rot.Yaw());
 
-    this->resetJoints();
-    this->imobilise();
+    resetJoints();
+    imobilise();
 }
 
 /////////////////////////////////////////////////
 void HandPlugin::setVelocity(std::vector<double> & _velocity)
 {
+    physics::JointControllerPtr controller = model->GetJointController();
+
     for (int i = 0; i < _velocity.size(); i++) {
-        this->virtual_joints.at(i)->SetVelocity(0, _velocity.at(i));
+        controller->SetVelocityTarget(
+            virtual_joints.at(i)->GetScopedName(), _velocity.at(i));
     }
 }
 
 /////////////////////////////////////////////////
 void HandPlugin::setJointVelocities(std::vector<double> & _velocities)
 {
+    physics::JointControllerPtr controller = model->GetJointController();
+
     for (int i = 0; i < _velocities.size(); i++)
     {
-        this->joint_groups.at(i).actuated->SetVelocity(0, _velocities.at(i));
+        controller->SetPositionTarget(
+            joint_groups.at(i).actuated->GetScopedName(), _velocities.at(i));
         for (int j = 0; j < this->joint_groups.at(i).mimic.size(); j++)
         {
-            physics::JointPtr mimic_joint = this->joint_groups.at(i).mimic.at(j);
-            double multiplier = this->joint_groups.at(i).multipliers.at(j);
-            mimic_joint->SetVelocity(0, _velocities.at(i) * multiplier);
+            controller->SetPositionTarget(
+                joint_groups.at(i).mimic.at(j)->GetScopedName(),
+                _velocities.at(i) * joint_groups.at(i).multipliers.at(j));
         }
     }
 }
@@ -366,14 +416,15 @@ void HandPlugin::sendTimeout()
     HandMsg msg;
     msg.set_timeout(this->timeout.Double());
     this->data_ptr->pub->Publish(msg);
+    model->GetJointController()->Reset();
 }
 
 /////////////////////////////////////////////////
 void HandPlugin::resetWorld()
 {
-    this->world->SetPhysicsEnabled(false);
-    this->world->Reset();
-    this->world->SetPhysicsEnabled(true);
+    world->SetPhysicsEnabled(false);
+    world->Reset();
+    world->SetPhysicsEnabled(true);
 }
 
 }

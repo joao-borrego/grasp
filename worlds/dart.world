@@ -4,6 +4,13 @@
 
     <physics type="dart">
       <real_time_update_rate>0.000000</real_time_update_rate>
+      <!--
+      <dart>
+        <solver>
+          <solver_type>pgs</solver_type>
+        </solver>
+      </dart>
+      -->
     </physics>
 
     <include>

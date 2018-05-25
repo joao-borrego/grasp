@@ -37,4 +37,4 @@ add_subdirectory(grasp)
 add_subdirectory(utils)
 
 # Documentation
-# add_subdirectory(doc)
+add_subdirectory(doc)

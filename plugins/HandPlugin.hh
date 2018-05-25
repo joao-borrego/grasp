@@ -100,11 +100,6 @@ namespace gazebo {
         /// Flag to reset
         private: bool reset                         {false};
 
-        /// Update rate value in physics engine iterations
-        private: uint32_t update_rate               {5};
-        /// Last updated
-        private: uint32_t last_updated              {0};
-
         // Protected attributes
 
         // Public methods
@@ -129,6 +124,7 @@ namespace gazebo {
 
         // Private methods
 
+        /// TODO
         private: bool loadMimicJoints(sdf::ElementPtr _sdf, JointGroup & joint);
 
         /// \brief Loads finger joints
@@ -140,6 +136,10 @@ namespace gazebo {
         /// \param _sdf The root sdf element pointer
         /// \returns Success
         private: bool loadVirtualJoints(sdf::ElementPtr _sdf);
+
+        /// \brief Loads PID controllers for each joint
+        /// \returns Success
+        private: bool loadControllers();
 
         /// \brief Imobilises the hand
         private: void imobilise();
