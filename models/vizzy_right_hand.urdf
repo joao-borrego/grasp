@@ -250,7 +250,8 @@
     <parent link="r_hand_base_link"/>
     <child link="r_min_phal_1_link"/>
     <axis xyz="1 0 0"/>
-    <limit effort="0" lower="0" upper="1.57" velocity="0"/>
+    <limit lower="0.0" upper="1.57" effort="2.11" velocity="2.11" />
+    <dynamics damping="0.1" />
   </joint>
   <link name="r_min_phal_1_link_fix">
     <inertial>
@@ -307,7 +308,8 @@
     <parent link="r_min_phal_1_link"/>
     <child link="r_min_phal_2_link"/>
     <axis xyz="0 0 1"/>
-    <limit effort="0" lower="0" upper="1.57" velocity="0"/>
+    <limit lower="0.0" upper="1.57" effort="2.11" velocity="2.11" />
+    <dynamics damping="0.1" />
   </joint>
   <link name="r_min_phal_2_link_fix">
     <inertial>
@@ -364,7 +366,8 @@
     <parent link="r_min_phal_2_link"/>
     <child link="r_min_phal_3_link"/>
     <axis xyz="0 0 1"/>
-    <limit effort="0" lower="0" upper="1.57" velocity="0"/>
+    <limit lower="0.0" upper="1.57" effort="2.11" velocity="2.11" />
+    <dynamics damping="0.1" />
   </joint>
   <link name="r_min_phal_3_link_fix">
     <inertial>
@@ -421,7 +424,8 @@
     <parent link="r_hand_base_link"/>
     <child link="r_med_phal_1_link"/>
     <axis xyz="1 0 0"/>
-    <limit effort="0" lower="0" upper="1.57" velocity="0"/>
+    <limit lower="0.0" upper="1.57" effort="2.11" velocity="2.11" />
+    <dynamics damping="0.1" />
   </joint>
   <link name="r_med_phal_1_link_fix">
     <inertial>
@@ -478,7 +482,8 @@
     <parent link="r_med_phal_1_link"/>
     <child link="r_med_phal_2_link"/>
     <axis xyz="0 0 1"/>
-    <limit effort="0" lower="0" upper="1.57" velocity="0"/>
+    <limit lower="0.0" upper="1.57" effort="2.11" velocity="2.11" />
+    <dynamics damping="0.1" />
   </joint>
   <link name="r_med_phal_2_link_fix">
     <inertial>
@@ -535,7 +540,8 @@
     <parent link="r_med_phal_2_link"/>
     <child link="r_med_phal_3_link"/>
     <axis xyz="0 0 1"/>
-    <limit effort="0" lower="0" upper="1.57" velocity="0"/>
+    <limit lower="0.0" upper="1.57" effort="2.11" velocity="2.11" />
+    <dynamics damping="0.1" />
   </joint>
   <link name="r_med_phal_3_link_fix">
     <inertial>
@@ -592,7 +598,8 @@
     <parent link="r_hand_base_link"/>
     <child link="r_ind_phal_1_link"/>
     <axis xyz="1 0 0"/>
-    <limit effort="0" lower="0" upper="1.57" velocity="0"/>
+    <limit lower="0.0" upper="1.57" effort="2.11" velocity="2.11" />
+    <dynamics damping="0.1" />
   </joint>
   <link name="r_ind_phal_1_link_fix">
     <inertial>
@@ -649,7 +656,8 @@
     <parent link="r_ind_phal_1_link"/>
     <child link="r_ind_phal_2_link"/>
     <axis xyz="0 0 1"/>
-    <limit effort="0" lower="0" upper="1.57" velocity="0"/>
+    <limit lower="0.0" upper="1.57" effort="2.11" velocity="2.11" />
+    <dynamics damping="0.1" />
   </joint>
   <link name="r_ind_phal_2_link_fix">
     <inertial>
@@ -706,7 +714,8 @@
     <parent link="r_ind_phal_2_link"/>
     <child link="r_ind_phal_3_link"/>
     <axis xyz="0 0 1"/>
-    <limit effort="0" lower="0" upper="1.57" velocity="0"/>
+    <limit lower="0.0" upper="1.57" effort="2.11" velocity="2.11" />
+    <dynamics damping="0.1" />
   </joint>
   <link name="r_ind_phal_3_link_fix">
     <inertial>
@@ -763,7 +772,8 @@
     <parent link="r_hand_base_link"/>
     <child link="r_thumb_phal_1_link"/>
     <axis xyz="0 0 1"/>
-    <limit effort="0" lower="0" upper="1.57" velocity="0"/>
+    <limit lower="0.0" upper="1.57" effort="2.11" velocity="2.11" />
+    <dynamics damping="0.1" />
   </joint>
   <link name="r_thumb_phal_1_link_fix">
     <inertial>
@@ -820,7 +830,8 @@
     <parent link="r_thumb_phal_1_link"/>
     <child link="r_thumb_phal_2_link"/>
     <axis xyz="1 0 0"/>
-    <limit effort="0" lower="0" upper="1.57" velocity="0"/>
+    <limit lower="0.0" upper="1.57" effort="2.11" velocity="2.11" />
+    <dynamics damping="0.1" />
   </joint>
   <link name="r_thumb_phal_2_link_fix">
     <inertial>
@@ -855,7 +866,8 @@
     <parent link="r_thumb_phal_2_link"/>
     <child link="r_thumb_phal_3_link"/>
     <axis xyz="0 0 1"/>
-    <limit effort="0" lower="0" upper="1.57" velocity="0"/>
+    <limit lower="0.0" upper="1.57" effort="2.11" velocity="2.11" />
+    <dynamics damping="0.1" />
   </joint>
   <link name="r_thumb_phal_3_link">
     <inertial>

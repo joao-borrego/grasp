@@ -80,9 +80,6 @@ namespace gazebo {
         /// Array of virtual x y z r p y joint pointers
         private: std::vector<physics::JointPtr> virtual_joints;
 
-        /// PID controllers for virtual joints
-        private: std::vector<common::PID> pid_controllers;
-
         /// Timeout trigger
         private: bool timer_active {false};
         /// Next timeout
@@ -102,11 +99,6 @@ namespace gazebo {
         private: bool update_joint_velocities       {false};
         /// Flag to reset
         private: bool reset                         {false};
-
-        /// Update rate value in physics engine iterations
-        private: uint32_t update_rate               {5};
-        /// Last updated
-        private: uint32_t last_updated              {0};
 
         // Protected attributes
 
@@ -132,6 +124,7 @@ namespace gazebo {
 
         // Private methods
 
+        /// TODO
         private: bool loadMimicJoints(sdf::ElementPtr _sdf, JointGroup & joint);
 
         /// \brief Loads finger joints

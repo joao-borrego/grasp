@@ -37,7 +37,7 @@ int main(int _argc, char **_argv)
         // Change pose request
         if (command == "pose")
         {
-            ignition::math::Pose3d pose(0.07,0.12,0.1,0,1.57,0);
+            ignition::math::Pose3d pose(0,0.0,0.1,0,1.57,0);
             setPose(pub, pose);
         }
         // Change velocity request
@@ -49,7 +49,7 @@ int main(int _argc, char **_argv)
         // Close hand
         else if (command == "close")
         {
-            std::vector<double> velocities_close {6,6,6};
+            std::vector<double> velocities_close {1.56,1.56,1.56};
             std::vector<double> velocity {0,0,0,0,0,0};
             setJointVelocities(pub, velocities_close);
             setVelocity(pub, velocity);
@@ -121,16 +121,16 @@ void reset(gazebo::transport::PublisherPtr pub)
 /////////////////////////////////////////////////
 void tryGrasp(gazebo::transport::PublisherPtr pub)
 {
-    ignition::math::Pose3d pose(0.07,0.12,0.1,0,1.57,0);
-    std::vector<double> velocity_lift {0,0,20,0,0,0};
+    ignition::math::Pose3d pose(0,0,0.1,0,1.57,0);
+    std::vector<double> velocity_lift {0,0,10,0,0,0};
     std::vector<double> velocity_stop {0,0,0,0,0,0};
-    std::vector<double> velocities_close {8,8,8};
+    std::vector<double> velocities_close {1.56,1.56,1.56};
     std::vector<double> velocities_open {0,0,0};
 
     setPose(pub, pose);
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    setJointVelocities(pub, velocities_close);
     setVelocity(pub, velocity_stop);
+    setJointVelocities(pub, velocities_close);
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     setVelocity(pub, velocity_lift);
     std::this_thread::sleep_for(std::chrono::milliseconds(3000));
