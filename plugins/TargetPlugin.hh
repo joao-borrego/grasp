@@ -36,8 +36,8 @@ namespace TargetPlugin {
     /// Get updated resting pose request
     #define REQ_GET_REST_POSE   grasp::msgs::TargetRequest::GET_REST_POSE
 
-    /// Maximum kinetic energy for an object to be considered static
-    #define KIN_ENER_EPSILON 0.001
+    /// Maximum velocity for an object to be considered static
+    #define VELOCITY_EPSILON 0.0000001
 }
 
 namespace gazebo {

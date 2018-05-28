@@ -96,8 +96,19 @@ void TargetPlugin::onUpdate()
         }
         if (this->update_rest_pose)
         {
-            // If object is stopped (kinetic energy < epsilon)
-            if (model->GetWorldEnergyKinetic() < KIN_ENER_EPSILON)
+            bool resting = true;
+            double epsilon = VELOCITY_EPSILON;
+            ignition::math::Vector3d lin_vel = model->WorldLinearVel(); 
+            ignition::math::Vector3d ang_vel = model->WorldAngularVel();
+
+            // Object is resting iif vel_i < epsilon, for all i
+            for (int i = 0; i < 3 && resting; i++) {
+                if (lin_vel[i] > epsilon) { resting = false; }
+            }
+            for (int i = 0; i < 3 && resting; i++) {
+                if (ang_vel[i] > epsilon) { resting = false; }
+            }
+            if (resting)
             {
                 init_pose = model->WorldPose();
                 update_rest_pose = false;
