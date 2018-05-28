@@ -226,10 +226,12 @@ bool HandPlugin::loadControllers()
     {
         controller->SetPositionPID(
             group.actuated->GetScopedName(), common::PID(1.5,0,0));
+        controller->SetPositionTarget(group.actuated->GetScopedName(), 0);
         for (const auto &joint : group.mimic)
         {
             controller->SetPositionPID(
                 joint->GetScopedName(), common::PID(1.5,0,0));
+            controller->SetPositionTarget(joint->GetScopedName(), 0);
         }
     }
 

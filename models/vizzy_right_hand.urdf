@@ -162,7 +162,7 @@
     <dynamics damping="100000" friction="10.0"/>
   </joint>
 
-  <!-- Gazebo gripper plugin -->
+  <!-- Gazebo hand plugin -->
   <gazebo>
     <plugin name="hand_plugin" filename="libHandPlugin.so">
       <!-- Reference names -->
