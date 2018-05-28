@@ -1,5 +1,7 @@
 # Compilation
 build/
+# URDF generation test models
+models/scripts/*.urdf
 # 3D object datasets
 datasets/3dnet
 datasets/dexnet
