@@ -12,10 +12,12 @@ message TargetRequest
     /// Type of request 
     enum Type
     {
-        // Request grasp target current pose
+        /// Request grasp target current pose
         GET_POSE = 1;
-        // Change grasp target current pose
+        /// Change grasp target current pose
         SET_POSE = 2;
+        /// Request grasp target updated resting pose
+        GET_REST_POSE = 3;
     }
 
     /// Type of request

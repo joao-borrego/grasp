@@ -30,9 +30,14 @@ namespace TargetPlugin {
     #define RESPONSE_TOPIC  "~/grasp/target/response"
 
     /// Get pose request
-    #define REQ_GET_POSE   grasp::msgs::TargetRequest::GET_POSE
+    #define REQ_GET_POSE        grasp::msgs::TargetRequest::GET_POSE
     /// Set pose request
-    #define REQ_SET_POSE   grasp::msgs::TargetRequest::SET_POSE
+    #define REQ_SET_POSE        grasp::msgs::TargetRequest::SET_POSE
+    /// Get updated resting pose request
+    #define REQ_GET_REST_POSE   grasp::msgs::TargetRequest::GET_REST_POSE
+
+    /// Maximum kinetic energy for an object to be considered static
+    #define KIN_ENER_EPSILON 0.001
 }
 
 namespace gazebo {
@@ -69,6 +74,8 @@ namespace gazebo {
         private: bool get_pose {false};
         /// Flag for pending set pose request
         private: bool set_pose {false};
+        /// Falg for pending update resting pose request
+        private: bool update_rest_pose {false};
         /// Initial pose
         private: ignition::math::Pose3d init_pose;
         /// New pose

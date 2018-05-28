@@ -80,23 +80,36 @@ void TargetPlugin::onUpdate()
 {
     bool reply_pose = false;
     TargetResponse msg;
-    std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
-
-    if (this->get_pose)
+    
     {
-        this->get_pose = false;
-        reply_pose = true;
-    }
-    if (this->set_pose)
-    {
-        this->model->SetWorldPose(this->new_pose);
-        this->set_pose = false;
-        reply_pose = true;
+        std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+        if (this->get_pose)
+        {
+            this->get_pose = false;
+            reply_pose = true;
+        }
+        if (this->set_pose)
+        {
+            model->SetWorldPose(new_pose);
+            set_pose = false;
+            reply_pose = true;
+        }
+        if (this->update_rest_pose)
+        {
+            // If object is stopped (kinetic energy < epsilon)
+            if (model->GetWorldEnergyKinetic() < KIN_ENER_EPSILON)
+            {
+                init_pose = model->WorldPose();
+                update_rest_pose = false;
+                reply_pose = true;        
+            }
+        }
     }
 
-    if (reply_pose) {
+    if (reply_pose)
+    {
         gazebo::msgs::Pose *pose_msg = new gazebo::msgs::Pose();
-        gazebo::msgs::Set(pose_msg, this->model->WorldPose());
+        gazebo::msgs::Set(pose_msg, model->WorldPose());
         msg.set_allocated_pose(pose_msg);
         this->data_ptr->pub->Publish(msg);
     }
@@ -126,6 +139,11 @@ void TargetPlugin::onRequest(TargetRequestPtr &_msg)
             std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
             this->set_pose = true;
             this->new_pose = msgs::ConvertIgn(_msg->pose());
+        }
+        else if (type == REQ_GET_REST_POSE)
+        {
+            std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+            this->update_rest_pose = true;
         }
     }
 }
