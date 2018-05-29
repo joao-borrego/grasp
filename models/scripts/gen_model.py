@@ -65,6 +65,10 @@ class MainApp(Frame):
     self.root = data['xml']
     self.links = data['links']
     self.all_joints = data['joints']
+    # List of existing joints
+    self.joints = [None] * len(self.all_joints)
+    for [idx, joint] in enumerate(self.all_joints) :
+      self.joints[idx] = [joint, "False", "-", "-"]
 
     self.setupWidgets()
 
@@ -75,7 +79,7 @@ class MainApp(Frame):
     m_pad = {'padx': 20, 'pady': 10}
     font_h1 = "Helvetica 18 bold"
     font_h2 = "Helvetica 15"
-    style_h1 = {'padx': 20, 'pady': 20}
+    style_h1 = {'padx': 15, 'pady': 15}
     style_h2 = {'padx': 10, 'pady': 5}
 
     # Main window
@@ -95,8 +99,8 @@ class MainApp(Frame):
     ent_name = Entry(parent, textvariable=self.v_name)
     ent_prefix = Entry(parent, textvariable=self.v_prefix)
     self.ent_gravity = Checkbutton(parent)
-    self.btn_add_joint = Button(frame_btn, text="+")
-    self.btn_rmv_joint = Button(frame_btn, text="-")
+    self.btn_add_joint = Button(frame_btn, text="+", command=self.onAddJoint)
+    self.btn_rmv_joint = Button(frame_btn, text="-", command=self.onRemoveJoint)
     self.btn_clr_joint = Button(frame_btn, text="Clear")
     self.btn_save = Button(parent, text="Save", command=self.onSave)
 
@@ -122,14 +126,14 @@ class MainApp(Frame):
     self.ent_gravity.grid(row=2, column=3, **style_h2)
 
     Label(parent, text="Real Joints").grid(row=3, **style_h1)
-    frame_btn.grid(row=3, column=3)
-    self.btn_rmv_joint.pack(side="left")
+    frame_btn.grid(row=3, column=3, sticky="e", padx=10)
     self.btn_add_joint.pack(side="left")
+    self.btn_rmv_joint.pack(side="left")
     self.btn_clr_joint.pack(side="right")
 
-    frame_tree.grid(row=4, column=0, columnspan=4)
+    frame_tree.grid(row=4, column=0, columnspan=4, padx=10, pady=5)
 
-    self.btn_save.grid(row=5, column=3, **style_h2)
+    self.btn_save.grid(row=5, column=3, sticky="e", padx=10, pady=5)
 
   def createTree(self, frame):
     """TODO"""
@@ -158,12 +162,26 @@ class MainApp(Frame):
       self.tree.heading(col, text=col.title())
       self.tree.column(col)
 
-    for row in self.all_joints:
-      self.tree.insert("","end", values=[row, "", "", ""])
+    for row in self.joints:
+      self.tree.insert("","end", values=row)
 
   def onSave(self):
     """TODO"""
     f = asksaveasfile(mode='w', defaultextension=".urdf")
+
+  def onAddJoint(self):
+    """TODO"""
+    print("AH!")
+
+  def onRemoveJoint(self):
+    """TODO"""
+    sel_id = self.tree.selection()
+    names = [self.tree.item(row_id)["values"][0] for row_id in sel_id]
+    self.joints = [x for x in self.joints if x[0] not in names]
+    print(names)
+
+    self.tree.delete(*self.tree.get_children())
+    self.buildTree()
 
 def main(argv):
   """TODO: Main Application"""
