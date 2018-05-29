@@ -82,11 +82,11 @@ class MainApp(Frame):
     """TODO"""
 
     # Styling
-    m_pad = {'padx': 20, 'pady': 10}
-    font_h1 = "Helvetica 18 bold"
-    font_h2 = "Helvetica 15"
-    style_h1 = {'padx': 15, 'pady': 15}
-    style_h2 = {'padx': 10, 'pady': 5}
+    style_h1 = {'padx': 15, 'pady': 15, 'sticky' : "w"}
+    style_h2 = {'padx': 30, 'pady': 5, 'sticky' : "w"}
+    text_h1 = {'font': "Helvetica 18 bold"}
+    text_h2 = {'font': "Helvetica 15 bold"}
+    text_p = {'font': "Helvetica 15"}
 
     # Main window
     parent = self.parent
@@ -98,32 +98,42 @@ class MainApp(Frame):
     # Variables
     self.var_name = StringVar()
     self.var_name.set(self.name)
+    self.var_base = StringVar()
+    self.var_base.set(self.links[0])
     self.var_prefix = StringVar()
     self.var_prefix.set('virtual_')
 
     # Entry
     ent_name = Entry(parent, textvariable=self.var_name)
+    base_dropdown = ttk.Combobox(parent, textvariable=self.var_base,
+      values=self.links)
     ent_prefix = Entry(parent, textvariable=self.var_prefix)
-    self.ent_gravity = Checkbutton(parent,text="Gravity")
-    self.btn_add_joint = Button(frame_btn, text="+", command=self.onAddJoint)
-    self.btn_rmv_joint = Button(frame_btn, text="-", command=self.onRemoveJoint)
-    self.btn_clr_joint = Button(frame_btn, text="Clear")
-    self.btn_save = Button(parent, text="Save", command=self.onSave)
+    self.ent_gravity = Checkbutton(parent)
+    self.btn_add_joint = Button(frame_btn, text="+",
+      command=self.onAddJoint, **text_p)
+    self.btn_rmv_joint = Button(frame_btn, text="-",
+      command=self.onRemoveJoint, **text_p)
+    self.btn_clr_joint = Button(frame_btn, text="Clear",
+      command=self.onClear, **text_p)
+    self.btn_save = Button(parent, text="Save", command=self.onSave, **text_p)
 
     # Layout
 
-    Label(parent, text="Model Name").grid(row=0, **style_h1)
+    Label(parent, text="Model Name", **text_h1).grid(row=0, **style_h1)
     ent_name.grid(row=0, column=1, **style_h2)
+    Label(parent, text="Base Link", **text_h1).grid(row=0, column=2, **style_h1)
+    base_dropdown.grid(row=0, column=3, **style_h2)
 
-    Label(parent, text="Virtual Joints").grid(row=1, **style_h1)
+    Label(parent, text="Virtual Joints", **text_h1).grid(row=1, **style_h1)
     text = 'Virtual joints for unconstrained floating behaviour'
-    Label(parent, text=text).grid(row=1, column=1, columnspan=4, **style_h1)
+    Label(parent, text=text, **text_h2).grid(row=1, column=1, columnspan=4, **style_h1)
 
-    Label(parent, text="Joint name prefix").grid(row=2, **style_h2)
+    Label(parent, text="Joint name prefix", **text_h2).grid(row=2, **style_h2)
     ent_prefix.grid(row=2, column=1, **style_h2)
+    Label(parent, text="Enable gravity", **text_h2).grid(row=2, column=2, **style_h2)
     self.ent_gravity.grid(row=2, column=3, **style_h2)
 
-    Label(parent, text="Real Joints").grid(row=3, **style_h1)
+    Label(parent, text="Real Joints", **text_h1).grid(row=3, **style_h1)
     frame_btn.grid(row=3, column=3, sticky="e", padx=10)
     self.btn_add_joint.pack(side="left")
     self.btn_rmv_joint.pack(side="left")
@@ -156,17 +166,22 @@ class MainApp(Frame):
 
   def buildTree(self):
     """TODO"""
+    
+    self.tree.delete(*self.tree.get_children())
     for col in self.header:
       self.tree.heading(col, text=col.title())
       self.tree.column(col)
-
     for row in self.joints:
       self.tree.insert("","end", values=row)
 
   def onSave(self):
     """TODO"""
-    f = asksaveasfile(mode='w', defaultextension=".urdf")
-    # TODO
+    name = self.var_name.get()
+    base_link = self.var_base.get()
+    prefix = self.var_prefix.get()
+
+    save_dir = asksaveasfile(mode='w', defaultextension=".urdf")
+    
 
   def onAddJoint(self):
     """TODO"""
@@ -177,27 +192,28 @@ class MainApp(Frame):
         m_pad = {'padx': 20, 'pady': 10}
 
         self.toplevel = Toplevel()
-        self.toplevel.title("Add Joint")
-        self.toplevel.protocol("WM_DELETE_WINDOW", self.onCloseToplevel)
-        self.toplevel.resizable(width=0, height=0)
+        toplevel = self.toplevel
+        toplevel.title("Add Joint")
+        toplevel.protocol("WM_DELETE_WINDOW", self.onCloseToplevel)
+        toplevel.resizable(width=0, height=0)
 
-        self.var_joint = StringVar(self.toplevel)
+        self.var_joint = StringVar(toplevel)
         self.var_joint.set(self.removed_joints[0])
-        self.var_mimic = IntVar(self.toplevel)
+        self.var_mimic = IntVar(toplevel)
         self.var_mimic.set(0)
-        self.var_parent = StringVar(self.toplevel)
+        self.var_parent = StringVar(toplevel)
         self.var_parent.set("-")
-        self.var_mult = DoubleVar(self.toplevel)
+        self.var_mult = DoubleVar(toplevel)
         self.var_mult.set(0.0)
         
-        joint_dropdown = ttk.Combobox(self.toplevel, textvariable=self.var_joint,
+        joint_dropdown = ttk.Combobox(toplevel, textvariable=self.var_joint,
           values=self.removed_joints)
-        ent_mimic = Checkbutton(self.toplevel, text="Is mimic joint", 
+        ent_mimic = Checkbutton(toplevel, text="Is mimic joint", 
           variable=self.var_mimic)
-        parent_dropdown = ttk.Combobox(self.toplevel, textvariable=self.var_parent,
+        parent_dropdown = ttk.Combobox(toplevel, textvariable=self.var_parent,
           values=self.added_joints)
-        ent_mult = Entry(self.toplevel, textvariable=self.var_mult)
-        btn_save = Button(self.toplevel, text="Add", command=self.addJoint)
+        ent_mult = Entry(toplevel, textvariable=self.var_mult)
+        btn_save = Button(toplevel, text="Add", command=self.addJoint)
 
         joint_dropdown.grid(row=0, column=0, **m_pad)
         ent_mimic.grid(row=1, column=0, **m_pad)
@@ -207,6 +223,13 @@ class MainApp(Frame):
 
       else:
         messagebox.showinfo("Add Joint","Every joint is already instanced!")
+
+  def onClear(self):
+    """TODO"""
+    self.added_joints = []
+    self.joints = []
+    self.removed_joints = list(self.all_joints)
+    self.buildTree()
 
   def onCloseToplevel(self):
     self.toplevel.destroy()
@@ -249,8 +272,6 @@ class MainApp(Frame):
       self.added_joints = [x for x in self.added_joints if x not in names]
       for name in names:  
         self.removed_joints.append(name)
-
-      self.tree.delete(*self.tree.get_children())
       self.buildTree()
     else:
       messagebox.showinfo("Remove Joint","No joint is selected!")
