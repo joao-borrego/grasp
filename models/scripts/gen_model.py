@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 from tkinter import *
 from tkinter import ttk
 from tkinter import font
-from tkinter.filedialog import asksaveasfile
+from tkinter.filedialog import asksaveasfilename
 from tkinter import messagebox
 
 def removeElemAttrMatch(root, element, attr, blacklist):
@@ -65,8 +65,8 @@ class MainApp(Frame):
     self.name = data['name']
     self.root = data['xml']
     self.links = data['links']
-    self.all_joints = data['joints']
-    self.added_joints = data['joints']
+    self.all_joints = list(data['joints'])
+    self.added_joints = list(data['joints'])
     self.removed_joints = []
     # List of existing joints
     self.joints = [None] * len(self.all_joints)
@@ -96,19 +96,21 @@ class MainApp(Frame):
     self.createTree(frame_tree)
 
     # Variables
-    self.var_name = StringVar()
+    self.var_name = StringVar(parent)
     self.var_name.set(self.name)
-    self.var_base = StringVar()
+    self.var_base = StringVar(parent)
     self.var_base.set(self.links[0])
-    self.var_prefix = StringVar()
-    self.var_prefix.set('virtual_')
+    self.var_prefix = StringVar(parent)
+    self.var_prefix.set('virtual')
+    self.var_gravity = IntVar(parent)
+    self.var_gravity.set(0)
 
     # Entry
     ent_name = Entry(parent, textvariable=self.var_name)
     base_dropdown = ttk.Combobox(parent, textvariable=self.var_base,
       values=self.links)
     ent_prefix = Entry(parent, textvariable=self.var_prefix)
-    self.ent_gravity = Checkbutton(parent)
+    self.ent_gravity = Checkbutton(parent, variable=self.var_gravity)
     self.btn_add_joint = Button(frame_btn, text="+",
       command=self.onAddJoint, **text_p)
     self.btn_rmv_joint = Button(frame_btn, text="-",
@@ -179,9 +181,50 @@ class MainApp(Frame):
     name = self.var_name.get()
     base_link = self.var_base.get()
     prefix = self.var_prefix.get()
+    gravity = self.var_gravity.get()
 
-    save_dir = asksaveasfile(mode='w', defaultextension=".urdf")
-    
+    out_file = asksaveasfilename(defaultextension=".urdf")
+
+    template = './template.urdf'
+    tree = ET.parse(template)  
+    root = tree.getroot()
+
+    virtual_names = ["_px_", "_py_", "_pz_", "_rr_", "_ry_", "_rz_"]
+    virtual_joints = [prefix + s + "joint" for s in virtual_names]
+
+    # Virtual Joints
+    for elem in root.iter('joint'):
+      elem.attrib['name'] = prefix + elem.attrib['name']
+      for subelem in elem.iter('parent'):
+        if subelem.attrib['link'] != "world":
+          subelem.attrib['link'] = prefix + subelem.attrib['link']
+      for subelem in elem.iter('child'):
+        if subelem.attrib['link'] != "base_link":
+          subelem.attrib['link'] = prefix + subelem.attrib['link']
+        else:
+          subelem.attrib['link'] = base_link
+
+    # Plugin parameters
+    tree_gazebo = root.find('gazebo')
+    tree_plugin = tree_gazebo.find('plugin')
+    tree_model = tree_plugin.find('model')
+    tree_model.text = name
+    tree_virtual = tree_plugin.find('virtualJoints')
+    tree_virtual.text = " ".join(str(x) for x in virtual_joints)
+    tree_gravity = tree_plugin.find('gravity')
+    tree_gravity.text = str(gravity)
+
+    # Actuated and Mimic Joints
+    for actuated in [x for x in self.joints if x[1] == 'False']:
+      new_actuated = ET.SubElement(tree_plugin, "actuatedJoint")
+      new_actuated.set('name', actuated[0])
+      for mimic in [x for x in self.joints if x[2] == actuated[0]]:
+        new_mimic = ET.SubElement(new_actuated, "mimicJoint")
+        new_mimic.set('name', mimic[0])
+        new_mimic.set('multiplier', str(mimic[3]))
+
+    # Input file tree
+    tree.write(out_file)
 
   def onAddJoint(self):
     """TODO"""
