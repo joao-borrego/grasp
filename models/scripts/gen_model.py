@@ -203,6 +203,9 @@ class MainApp(Frame):
           subelem.attrib['link'] = prefix + subelem.attrib['link']
         else:
           subelem.attrib['link'] = base_link
+    # Virtual links
+    for elem in root.iter('link'):
+      elem.attrib['name'] = prefix + elem.attrib['name']
 
     # Plugin parameters
     tree_gazebo = root.find('gazebo')
@@ -223,8 +226,10 @@ class MainApp(Frame):
         new_mimic.set('name', mimic[0])
         new_mimic.set('multiplier', str(mimic[3]))
 
-    # Input file tree
-    tree.write(out_file)
+    # Output tree
+    for elem in root:
+      self.root.getroot().append(elem)
+    self.root.write(out_file)
 
   def onAddJoint(self):
     """TODO"""
@@ -342,7 +347,7 @@ def main(argv):
   # Encapsulate data in structure
   data = {
     'name': name,
-    'xml': root,
+    'xml': tree,
     'links': links,
     'joints': joints}
 
