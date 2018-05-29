@@ -9,6 +9,7 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import font
 from tkinter.filedialog import asksaveasfile
+from tkinter import messagebox
 
 def removeElemAttrMatch(root, element, attr, blacklist):
   """Removes elements matching given attribute values specified in a list
@@ -65,10 +66,15 @@ class MainApp(Frame):
     self.root = data['xml']
     self.links = data['links']
     self.all_joints = data['joints']
+    self.added_joints = data['joints']
+    self.removed_joints = []
     # List of existing joints
     self.joints = [None] * len(self.all_joints)
     for [idx, joint] in enumerate(self.all_joints) :
       self.joints[idx] = [joint, "False", "-", "-"]
+
+    # Add joint dialog toplevel window
+    self.toplevel = None
 
     self.setupWidgets()
 
@@ -90,26 +96,19 @@ class MainApp(Frame):
     self.createTree(frame_tree)
 
     # Variables
-    self.v_name = StringVar()
-    self.v_name.set(self.name)
-    self.v_prefix = StringVar()
-    self.v_prefix.set('virtual_')
+    self.var_name = StringVar()
+    self.var_name.set(self.name)
+    self.var_prefix = StringVar()
+    self.var_prefix.set('virtual_')
 
     # Entry
-    ent_name = Entry(parent, textvariable=self.v_name)
-    ent_prefix = Entry(parent, textvariable=self.v_prefix)
-    self.ent_gravity = Checkbutton(parent)
+    ent_name = Entry(parent, textvariable=self.var_name)
+    ent_prefix = Entry(parent, textvariable=self.var_prefix)
+    self.ent_gravity = Checkbutton(parent,text="Gravity")
     self.btn_add_joint = Button(frame_btn, text="+", command=self.onAddJoint)
     self.btn_rmv_joint = Button(frame_btn, text="-", command=self.onRemoveJoint)
     self.btn_clr_joint = Button(frame_btn, text="Clear")
     self.btn_save = Button(parent, text="Save", command=self.onSave)
-
-    """
-    joint_var = StringVar(parent)
-    joint_var.set(self.joints[0])
-    joint_dropdown = ttk.Combobox(parent, textvariable=joint_var, values=self.joints)
-    joint_dropdown.grid(row=2, column=1, **style_h2)
-    """
 
     # Layout
 
@@ -122,7 +121,6 @@ class MainApp(Frame):
 
     Label(parent, text="Joint name prefix").grid(row=2, **style_h2)
     ent_prefix.grid(row=2, column=1, **style_h2)
-    Label(parent, text="Gravity").grid(row=2, column=2, **style_h2)
     self.ent_gravity.grid(row=2, column=3, **style_h2)
 
     Label(parent, text="Real Joints").grid(row=3, **style_h1)
@@ -168,20 +166,94 @@ class MainApp(Frame):
   def onSave(self):
     """TODO"""
     f = asksaveasfile(mode='w', defaultextension=".urdf")
+    # TODO
 
   def onAddJoint(self):
     """TODO"""
-    print("AH!")
+    if self.toplevel is None:
+
+      if self.removed_joints:
+
+        m_pad = {'padx': 20, 'pady': 10}
+
+        self.toplevel = Toplevel()
+        self.toplevel.title("Add Joint")
+        self.toplevel.protocol("WM_DELETE_WINDOW", self.onCloseToplevel)
+        self.toplevel.resizable(width=0, height=0)
+
+        self.var_joint = StringVar(self.toplevel)
+        self.var_joint.set(self.removed_joints[0])
+        self.var_mimic = IntVar(self.toplevel)
+        self.var_mimic.set(0)
+        self.var_parent = StringVar(self.toplevel)
+        self.var_parent.set("-")
+        self.var_mult = DoubleVar(self.toplevel)
+        self.var_mult.set(0.0)
+        
+        joint_dropdown = ttk.Combobox(self.toplevel, textvariable=self.var_joint,
+          values=self.removed_joints)
+        ent_mimic = Checkbutton(self.toplevel, text="Is mimic joint", 
+          variable=self.var_mimic)
+        parent_dropdown = ttk.Combobox(self.toplevel, textvariable=self.var_parent,
+          values=self.added_joints)
+        ent_mult = Entry(self.toplevel, textvariable=self.var_mult)
+        btn_save = Button(self.toplevel, text="Add", command=self.addJoint)
+
+        joint_dropdown.grid(row=0, column=0, **m_pad)
+        ent_mimic.grid(row=1, column=0, **m_pad)
+        parent_dropdown.grid(row=1, column=1, **m_pad)
+        ent_mult.grid(row=1, column=2, **m_pad)
+        btn_save.grid(row=2, column=1, **m_pad)
+
+      else:
+        messagebox.showinfo("Add Joint","Every joint is already instanced!")
+
+  def onCloseToplevel(self):
+    self.toplevel.destroy()
+    self.toplevel = None
+
+  def addJoint(self):
+    """TODO"""
+    error = "Incorrect data provided!\n" +\
+      "If joint is mimic then a valid parent joint must be specified, " +\
+      "and its multiplier (between 0.0 and 1.0) must be given."
+    try:
+      name = self.var_joint.get()
+      mimic = self.var_mimic.get()
+      parent = self.var_parent.get()
+      multiplier = self.var_mult.get()
+    except TclError:
+      messagebox.showerror("Error", error)
+      return
+
+    if mimic:
+      if parent == "-" or ( multiplier < 0 or multiplier > 1):
+        messagebox.showerror("Error", error)
+        return
+    else:
+      parent = multiplier = "-"
+    
+    self.added_joints.append(name)
+    self.joints.append ([name,bool(mimic),parent,multiplier])
+    self.removed_joints.remove(name)
+
+    self.onCloseToplevel()
+    self.buildTree()
 
   def onRemoveJoint(self):
     """TODO"""
     sel_id = self.tree.selection()
-    names = [self.tree.item(row_id)["values"][0] for row_id in sel_id]
-    self.joints = [x for x in self.joints if x[0] not in names]
-    print(names)
+    if sel_id:
+      names = [self.tree.item(row_id)["values"][0] for row_id in sel_id]
+      self.joints = [x for x in self.joints if x[0] not in names]
+      self.added_joints = [x for x in self.added_joints if x not in names]
+      for name in names:  
+        self.removed_joints.append(name)
 
-    self.tree.delete(*self.tree.get_children())
-    self.buildTree()
+      self.tree.delete(*self.tree.get_children())
+      self.buildTree()
+    else:
+      messagebox.showinfo("Remove Joint","No joint is selected!")
 
 def main(argv):
   """TODO: Main Application"""
