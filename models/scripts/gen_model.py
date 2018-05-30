@@ -3,13 +3,20 @@
 # Command line args
 import sys, getopt
 # XML
-import xml.etree.ElementTree as ET
+from lxml import etree as ET
 # GUI
 from tkinter import *
 from tkinter import ttk
 from tkinter import font
 from tkinter.filedialog import asksaveasfilename
 from tkinter import messagebox
+
+# Styling
+style_h1 = {'padx': 15, 'pady': 15, 'sticky' : "w"}
+style_h2 = {'padx': 30, 'pady': 5, 'sticky' : "w"}
+text_h1 = {'font': "Helvetica 20 bold"}
+text_h2 = {'font': "Helvetica 15"}
+text_p = {'font': "Helvetica 12"}
 
 def removeElemAttrMatch(root, element, attr, blacklist):
   """Removes elements matching given attribute values specified in a list
@@ -81,12 +88,6 @@ class MainApp(Frame):
   def setupWidgets(self):
     """TODO"""
 
-    # Styling
-    style_h1 = {'padx': 15, 'pady': 15, 'sticky' : "w"}
-    style_h2 = {'padx': 30, 'pady': 5, 'sticky' : "w"}
-    text_h1 = {'font': "Helvetica 18 bold"}
-    text_h2 = {'font': "Helvetica 15 bold"}
-    text_p = {'font': "Helvetica 15"}
 
     # Main window
     parent = self.parent
@@ -121,29 +122,34 @@ class MainApp(Frame):
 
     # Layout
 
-    Label(parent, text="Model Name", **text_h1).grid(row=0, **style_h1)
-    ent_name.grid(row=0, column=1, **style_h2)
-    Label(parent, text="Base Link", **text_h1).grid(row=0, column=2, **style_h1)
-    base_dropdown.grid(row=0, column=3, **style_h2)
+    Label(parent, text="Model", **text_h1).grid(row=0, **style_h1)
+    text = 'Main model Properties'
+    Label(parent, text=text, **text_h2).grid(row=0, column=1, columnspan=4, **style_h2)
+    Label(parent, text="Model Name", **text_h2).grid(row=1, **style_h2)
+    ent_name.grid(row=1, column=1, **style_h2)
+    Label(parent, text="Base Link", **text_h2).grid(row=1, column=2, **style_h2)
+    base_dropdown.grid(row=1, column=3, **style_h2)
 
-    Label(parent, text="Virtual Joints", **text_h1).grid(row=1, **style_h1)
+    Label(parent, text="Virtual Joints", **text_h1).grid(row=2, **style_h1)
     text = 'Virtual joints for unconstrained floating behaviour'
-    Label(parent, text=text, **text_h2).grid(row=1, column=1, columnspan=4, **style_h1)
+    Label(parent, text=text, **text_h2).grid(row=2, column=1, columnspan=4, **style_h2)
 
-    Label(parent, text="Joint name prefix", **text_h2).grid(row=2, **style_h2)
-    ent_prefix.grid(row=2, column=1, **style_h2)
-    Label(parent, text="Enable gravity", **text_h2).grid(row=2, column=2, **style_h2)
-    self.ent_gravity.grid(row=2, column=3, **style_h2)
+    Label(parent, text="Joint name prefix", **text_h2).grid(row=3, **style_h2)
+    ent_prefix.grid(row=3, column=1, **style_h2)
+    Label(parent, text="Enable gravity", **text_h2).grid(row=3, column=2, **style_h2)
+    self.ent_gravity.grid(row=3, column=3, **style_h2)
 
-    Label(parent, text="Real Joints", **text_h1).grid(row=3, **style_h1)
-    frame_btn.grid(row=3, column=3, sticky="e", padx=10)
+    Label(parent, text="Finger Joints", **text_h1).grid(row=4, **style_h1)
+    text = 'Actuated and underactuated (mimic) finger joints'
+    Label(parent, text=text, **text_h2).grid(row=4, column=1, columnspan=3, **style_h2)
+    frame_btn.grid(row=4, column=3, sticky="e", padx=10)
     self.btn_add_joint.pack(side="left")
     self.btn_rmv_joint.pack(side="left")
     self.btn_clr_joint.pack(side="right")
 
-    frame_tree.grid(row=4, column=0, columnspan=4, padx=10, pady=5)
+    frame_tree.grid(row=5, column=0, columnspan=4, padx=10, pady=5)
 
-    self.btn_save.grid(row=5, column=3, sticky="e", padx=10, pady=5)
+    self.btn_save.grid(row=6, column=3, sticky="e", padx=10, pady=5)
 
   def createTree(self, frame):
     """TODO"""
@@ -229,15 +235,16 @@ class MainApp(Frame):
     # Output tree
     for elem in root:
       self.root.getroot().append(elem)
-    self.root.write(out_file)
+
+    self.root.write(out_file,
+      xml_declaration=True, encoding='utf-8',
+      method="xml", pretty_print=True)
 
   def onAddJoint(self):
     """TODO"""
     if self.toplevel is None:
 
       if self.removed_joints:
-
-        m_pad = {'padx': 20, 'pady': 10}
 
         self.toplevel = Toplevel()
         toplevel = self.toplevel
@@ -256,28 +263,33 @@ class MainApp(Frame):
         
         joint_dropdown = ttk.Combobox(toplevel, textvariable=self.var_joint,
           values=self.removed_joints)
-        ent_mimic = Checkbutton(toplevel, text="Is mimic joint", 
-          variable=self.var_mimic)
+        ent_mimic = Checkbutton(toplevel, variable=self.var_mimic)
         parent_dropdown = ttk.Combobox(toplevel, textvariable=self.var_parent,
           values=self.added_joints)
         ent_mult = Entry(toplevel, textvariable=self.var_mult)
         btn_save = Button(toplevel, text="Add", command=self.addJoint)
 
-        joint_dropdown.grid(row=0, column=0, **m_pad)
-        ent_mimic.grid(row=1, column=0, **m_pad)
-        parent_dropdown.grid(row=1, column=1, **m_pad)
-        ent_mult.grid(row=1, column=2, **m_pad)
-        btn_save.grid(row=2, column=1, **m_pad)
+        Label(toplevel, text="Joint name", **text_p).grid(row=0, **style_h2)
+        joint_dropdown.grid(row=0, column=1, **style_h2)
+        Label(toplevel, text="Is mimic joint?", **text_p).grid(row=1, **style_h2)
+        ent_mimic.grid(row=1, column=1, **style_h2)
+        Label(toplevel, text="Parent joint", **text_p).grid(row=2, **style_h2)
+        parent_dropdown.grid(row=2, column=1, **style_h2)
+        Label(toplevel, text="Multiplier", **text_p).grid(row=2, column=2, **style_h2)
+        ent_mult.grid(row=2, column=3, **style_h2)
+        btn_save.grid(row=3, column=3, **style_h2)
 
       else:
         messagebox.showinfo("Add Joint","Every joint is already instanced!")
 
   def onClear(self):
     """TODO"""
-    self.added_joints = []
-    self.joints = []
-    self.removed_joints = list(self.all_joints)
-    self.buildTree()
+    result = messagebox.askokcancel("Clear joints","Are you sure?")
+    if result:
+      self.added_joints = []
+      self.joints = []
+      self.removed_joints = list(self.all_joints)
+      self.buildTree()
 
   def onCloseToplevel(self):
     self.toplevel.destroy()
