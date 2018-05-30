@@ -1,0 +1,161 @@
+<?xml version="1.0" ?>
+<root>
+  <link name="world"/>
+  <joint name="_px_joint" type="prismatic">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <parent link="world"/>
+    <child link="_px_link"/>
+    <limit effort="5.0" lower="-0.5" upper="0.5" velocity="5.0"/>
+    <dynamics damping="600.0" friction="10.0"/>
+  </joint>
+  <link name="_px_link">
+    <visual>
+      <origin rpy="0 0 0.0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.005"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <mass value="0.001"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.0 -20.0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.005"/>
+      </geometry>
+    </collision>
+  </link>
+    <joint name="_py_joint" type="prismatic">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <parent link="_px_link"/>
+    <child link="_py_link"/>
+    <limit effort="5.0" lower="-0.5" upper="0.5" velocity="5.0"/>
+    <dynamics damping="600.0" friction="10.0"/>
+  </joint>
+  <link name="_py_link">
+    <visual>
+      <origin rpy="0 0 0.0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.005"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <mass value="0.001"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.0 -20.0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.005"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="_pz_joint" type="prismatic">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <parent link="_py_link"/>
+    <child link="_pz_link"/>
+    <limit effort="20.0" lower="0.0" upper="1.0" velocity="20.0"/>
+    <dynamics damping="50.0" friction="0.0"/>
+  </joint>
+  <link name="_pz_link">
+    <visual>
+      <origin rpy="0 0 0.0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.005"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <mass value="0.001"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.0 -20.0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.005"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="_ry_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <parent link="_pz_link"/>
+    <child link="_ry_link"/>
+    <limit lower="-1.57" upper="1.57" effort="10.01" velocity="0.0"/>
+    <dynamics damping="100000" friction="10.0"/>
+  </joint>
+  <link name="_ry_link">
+    <visual>
+      <origin rpy="0 0 0.0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.005"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <mass value="0.001"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.0 -20.0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.005"/>
+      </geometry>
+    </collision>
+  </link>
+    <joint name="_rp_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <parent link="_ry_link"/>
+    <child link="_rp_link"/>
+    <limit lower="-1.57" upper="1.57" effort="10.01" velocity="0.0"/>
+    <dynamics damping="100000" friction="10.0"/>
+  </joint>
+  <link name="_rp_link">
+    <visual>
+      <origin rpy="0 0 0.0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.005"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <mass value="0.001"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.0 -20.0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.005"/>
+      </geometry>
+    </collision>
+  </link>
+    <joint name="_rr_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <parent link="_rp_link"/>
+    <child link="base_link"/>
+    <limit lower="-1.57" upper="1.57" effort="10.01" velocity="0.0"/>
+    <dynamics damping="100000" friction="10.0"/>
+  </joint>
+  <gazebo>
+    <plugin name="hand_plugin" filename="libHandPlugin.so">
+      <model>
+        MODEL_NAME
+      </model>
+      <virtualJoints>
+        VIRTUAL_JOINTS
+      </virtualJoints>
+      <gravity>
+        GRAVITY
+      </gravity>
+    </plugin>
+  </gazebo>
+
+</root>
