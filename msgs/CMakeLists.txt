@@ -22,12 +22,18 @@ set (msgs
   # Contact sensor messages
   contact_sensor_request.proto
   contact_sensor_response.proto
+  # Contact messages
+  contact_request.proto
+  contact_response.proto
   # Message dependencies
   ${PROTOBUF_IMPORT_DIRS}/header.proto
   ${PROTOBUF_IMPORT_DIRS}/time.proto
   ${PROTOBUF_IMPORT_DIRS}/vector3d.proto
   ${PROTOBUF_IMPORT_DIRS}/quaternion.proto
   ${PROTOBUF_IMPORT_DIRS}/pose.proto
+  ${PROTOBUF_IMPORT_DIRS}/contact.proto
+  ${PROTOBUF_IMPORT_DIRS}/joint_wrench.proto
+  ${PROTOBUF_IMPORT_DIRS}/wrench.proto
 )
 
 # Generate Protobuf sources

@@ -54,6 +54,14 @@ target_link_libraries(RGBDCameraPlugin
 add_dependencies(RGBDCameraPlugin
     grasp_msgs)
 
+# Contact manager Gazebo World plugin
+add_library(ContactWorldPlugin SHARED ContactWorldPlugin.cc )
+target_link_libraries(ContactWorldPlugin
+    grasp_msgs
+    ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
+add_dependencies(ContactWorldPlugin
+    grasp_msgs)
+
 # Contact Sensor Gazebo plugin
 add_library(ContactSensorPlugin SHARED ContactSensorPlugin.cc )
 target_link_libraries(ContactSensorPlugin

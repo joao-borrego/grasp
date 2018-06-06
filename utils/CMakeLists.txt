@@ -43,3 +43,12 @@ target_link_libraries(target_example
 add_dependencies(
     target_example
     grasp_msgs)
+
+# Contact world plugin example client
+add_executable (contacts_example contacts_example.cc)
+target_link_libraries(contacts_example
+    grasp_msgs
+    ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES} ${SDF_LIBRARIES})
+add_dependencies(
+    contacts_example
+    grasp_msgs)

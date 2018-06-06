@@ -33,7 +33,7 @@ GZ_REGISTER_SENSOR_PLUGIN(ContactSensorPlugin)
 ContactSensorPlugin::ContactSensorPlugin() : SensorPlugin(),
     data_ptr(new ContactSensorPluginPrivate)
 {
-    gzmsg << "[ContactSensorPlugin] Loaded plugin." << std::endl;
+    gzmsg << "[ContactSensorPlugin] Launched plugin." << std::endl;
 }
 
 /////////////////////////////////////////////////
@@ -69,6 +69,8 @@ void ContactSensorPlugin::Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf)
     // Setup publisher for the response topic
     this->data_ptr->pub = this->data_ptr->node->
         Advertise<ContactSensorResponse>(RESPONSE_TOPIC);
+
+    gzmsg << "[ContactSensorPlugin] Loaded plugin." << std::endl;
 }
 
 /////////////////////////////////////////////////

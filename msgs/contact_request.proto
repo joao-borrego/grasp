@@ -1,0 +1,20 @@
+syntax = "proto2";
+package grasp.msgs;
+
+/// \ingroup grasp_msgs
+/// \interface Contact Request
+/// \brief Contact plugin request
+
+message ContactRequest
+{
+    /// Collision pairs to test for contacts
+    repeated Collision pairs = 1;
+}
+
+message Collision
+{
+    /// First collision object
+    required string collision1 = 1;
+    /// Second collision object
+    required string collision2 = 2;   
+}
