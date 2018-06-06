@@ -65,7 +65,7 @@ void ContactWorldPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
     data_ptr->sub_res = data_ptr->node->Subscribe(res_topic,
         &ContactWorldPlugin::onResponse, this);
     // Publish to the response topic
-    data_ptr->pub = data_ptr->node->Advertise<ContactSensorResponse>(res_topic);
+    data_ptr->pub = data_ptr->node->Advertise<ContactResponse>(res_topic);
 
     // Connect to world update event
     update_connection = event::Events::ConnectWorldUpdateEnd(
@@ -81,6 +81,8 @@ void ContactWorldPlugin::onUpdate()
 
     if (recv_msg)
     {
+        ContactResponse msg;
+
         physics::ContactManager *manager = world->Physics()->GetContactManager();
         unsigned int num_contacts = manager->GetContactCount();
         for (int i = 0; i < num_contacts; i++) {
@@ -93,11 +95,17 @@ void ContactWorldPlugin::onUpdate()
                     strstr(tmp_col1.c_str(), col2.c_str())))
             {
                 gzdbg << "Contact: " << col1 << " and " << col2 << std::endl;
+                gazebo::msgs::Contact *contact = msg.add_contacts();
+                gazebo::msgs::Time *time = new gazebo::msgs::Time();
+                time->set_sec(world->RealTime().sec);
+                time->set_nsec(world->RealTime().nsec);
+                contact->set_collision1(tmp_col1);
+                contact->set_collision2(tmp_col2);
+                contact->set_allocated_time(time);
+                contact->set_world(world->Name());
             }
         }
-
-        ContactSensorResponse msg;
-        msg.set_in_contact("Dummy");
+        msg.set_success(true);
         data_ptr->pub->Publish(msg);
 
         enabled = false;
@@ -116,7 +124,7 @@ void ContactWorldPlugin::onContact(ConstContactsPtr & _msg)
 }
 
 /////////////////////////////////////////////////
-void ContactWorldPlugin::onRequest(ContactSensorRequestPtr & _msg)
+void ContactWorldPlugin::onRequest(ContactRequestPtr & _msg)
 {
     std::lock_guard<std::mutex> lock(data_ptr->mutex);
 
@@ -125,13 +133,13 @@ void ContactWorldPlugin::onRequest(ContactSensorRequestPtr & _msg)
         data_ptr->sub_con = data_ptr->node->Subscribe("~/physics/contacts",
             &ContactWorldPlugin::onContact, this);
     }
-    col1 = "ground_plane";
-    col2 = "box";
+    col1 = _msg->pairs(0).collision1();
+    col2 = _msg->pairs(0).collision2();
     enabled = true;
 }
 
 /////////////////////////////////////////////////
-void ContactWorldPlugin::onResponse(ContactSensorResponsePtr & _msg)
+void ContactWorldPlugin::onResponse(ContactResponsePtr & _msg)
 {
     std::lock_guard<std::mutex> lock(data_ptr->mutex);
 

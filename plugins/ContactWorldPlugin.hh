@@ -18,8 +18,8 @@
 #include <gazebo/transport/transport.hh>
 
 // Custom messages
-#include "contact_sensor_request.pb.h"
-#include "contact_sensor_response.pb.h"
+#include "contact_request.pb.h"
+#include "contact_response.pb.h"
 
 namespace ContactWorldPlugin {
 
@@ -29,26 +29,20 @@ namespace ContactWorldPlugin {
     #define REQUEST_TOPIC   "~/grasp/contact/world"
      /// Topic for outgoing responses
     #define RESPONSE_TOPIC  "~/grasp/contact/world/response"
-
-    /// Request for test contact
-    #define REQ_IN_CONTACT   grasp::msgs::ContactSensorRequest::IN_CONTACT
-
-    /// Response for test contact
-    #define RES_IN_CONTACT   grasp::msgs::ContactSensorResponse::IN_CONTACT
 }
 
 namespace gazebo {
 
     /// Declaration for request message type
-    typedef grasp::msgs::ContactSensorRequest ContactSensorRequest;
+    typedef grasp::msgs::ContactRequest ContactRequest;
     /// Shared pointer declaration for request message type
-    typedef const boost::shared_ptr<const grasp::msgs::ContactSensorRequest>
-        ContactSensorRequestPtr;
+    typedef const boost::shared_ptr<const grasp::msgs::ContactRequest>
+        ContactRequestPtr;
     /// Declaration for response message type
-    typedef grasp::msgs::ContactSensorResponse ContactSensorResponse;
+    typedef grasp::msgs::ContactResponse ContactResponse;
     /// Shared pointer declaration for response message type
-    typedef const boost::shared_ptr<const grasp::msgs::ContactSensorResponse>
-        ContactSensorResponsePtr;
+    typedef const boost::shared_ptr<const grasp::msgs::ContactResponse>
+        ContactResponsePtr;
 
     // Forward declaration of private data class
     class ContactWorldPluginPrivate;
@@ -94,11 +88,11 @@ namespace gazebo {
 
         /// \brief Callback function for handling incoming requests
         /// \param _msg  The message
-        public: void onRequest(ContactSensorRequestPtr & _msg);
+        public: void onRequest(ContactRequestPtr & _msg);
 
         /// \brief Callback function for handling outgoing responses
         /// \param _msg  The message
-        public: void onResponse(ContactSensorResponsePtr & _msg);
+        public: void onResponse(ContactResponsePtr & _msg);
     };
 }
 

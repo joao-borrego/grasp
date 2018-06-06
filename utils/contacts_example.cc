@@ -20,7 +20,7 @@ int main(int _argc, char **_argv)
 
     // Publish to the target plugin request topic
     gazebo::transport::PublisherPtr pub =
-        node->Advertise<grasp::msgs::ContactSensorRequest>(REQUEST_TOPIC);
+        node->Advertise<grasp::msgs::ContactRequest>(REQUEST_TOPIC);
 
     // Wait for a subscriber to connect to this publisher
     pub->WaitForConnection();
@@ -47,8 +47,9 @@ void getContactBetween(gazebo::transport::PublisherPtr pub,
     const std::string & collision1,
     const std::string & collision2)
 {
-    ContactSensorRequest msg;
-    msg.set_type(REQ_IN_CONTACT);
-    msg.set_in_contact(collision1);
+    ContactRequest msg;
+    Collision *pair = msg.add_pairs();
+    pair->set_collision1(collision1);
+    pair->set_collision2(collision2);
     pub->Publish(msg);
 }

@@ -1,0 +1,16 @@
+syntax = "proto2";
+package grasp.msgs;
+
+/// \ingroup grasp_msgs
+/// \interface Contact Response
+/// \brief Contact plugin response
+
+import "contact.proto";
+
+message ContactResponse
+{
+    /// Detected contacts
+    repeated gazebo.msgs.Contact    contacts = 1;
+    /// Success flag
+    optional bool                   success = 2;
+}
