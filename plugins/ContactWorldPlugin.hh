@@ -95,6 +95,10 @@ namespace gazebo {
         /// \brief Callback function for handling incoming requests
         /// \param _msg  The message
         public: void onRequest(ContactSensorRequestPtr & _msg);
+
+        /// \brief Callback function for handling outgoing responses
+        /// \param _msg  The message
+        public: void onResponse(ContactSensorResponsePtr & _msg);
     };
 }
 

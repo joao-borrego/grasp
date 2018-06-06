@@ -21,6 +21,8 @@ class ContactWorldPluginPrivate
     public: transport::SubscriberPtr sub_req;
     /// Gazebo contacts topic subscriber
     public: transport::SubscriberPtr sub_con;
+    /// Gazebo response topic subscriber
+    public: transport::SubscriberPtr sub_res;
     /// Gazebo topic publisher
     public: transport::PublisherPtr pub;
 
@@ -59,11 +61,12 @@ void ContactWorldPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
     // Subcribe to the monitored requests topic
     data_ptr->sub_req = data_ptr->node->Subscribe(req_topic,
         &ContactWorldPlugin::onRequest, this);
-    // Subcribe to the monitored contacts topic
-    data_ptr->sub_con = data_ptr->node->Subscribe("~/physics/contacts",
-            &ContactWorldPlugin::onContact, this);
-    // Publish to the hand plugin topic
-    data_ptr->pub = data_ptr->node->Advertise<ContactSensorRequest>(res_topic);
+    // Subscribe to the response topic (Workaround)
+    data_ptr->sub_res = data_ptr->node->Subscribe(res_topic,
+        &ContactWorldPlugin::onResponse, this);
+    // Publish to the response topic
+    data_ptr->pub = data_ptr->node->Advertise<ContactSensorResponse>(res_topic);
+
     // Connect to world update event
     update_connection = event::Events::ConnectWorldUpdateEnd(
         std::bind(&ContactWorldPlugin::onUpdate, this));
@@ -92,6 +95,11 @@ void ContactWorldPlugin::onUpdate()
                 gzdbg << "Contact: " << col1 << " and " << col2 << std::endl;
             }
         }
+
+        ContactSensorResponse msg;
+        msg.set_in_contact("Dummy");
+        data_ptr->pub->Publish(msg);
+
         enabled = false;
         recv_msg = false;
     }
@@ -112,9 +120,24 @@ void ContactWorldPlugin::onRequest(ContactSensorRequestPtr & _msg)
 {
     std::lock_guard<std::mutex> lock(data_ptr->mutex);
 
+    if (!data_ptr->sub_con) {
+        // Subcribe to the monitored contacts topic
+        data_ptr->sub_con = data_ptr->node->Subscribe("~/physics/contacts",
+            &ContactWorldPlugin::onContact, this);
+    }
     col1 = "ground_plane";
     col2 = "box";
     enabled = true;
+}
+
+/////////////////////////////////////////////////
+void ContactWorldPlugin::onResponse(ContactSensorResponsePtr & _msg)
+{
+    std::lock_guard<std::mutex> lock(data_ptr->mutex);
+
+    if (!enabled && !recv_msg) {
+        data_ptr->sub_con.reset();
+    }
 }
 
 }
