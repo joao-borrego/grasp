@@ -81,6 +81,8 @@ void ContactWorldPlugin::onUpdate()
 
     if (recv_msg)
     {
+        gzdbg << "[ContactWorldPlugin] Processing message" << std::endl;
+
         ContactResponse msg;
 
         physics::ContactManager *manager = world->Physics()->GetContactManager();
@@ -126,6 +128,8 @@ void ContactWorldPlugin::onContact(ConstContactsPtr & _msg)
 /////////////////////////////////////////////////
 void ContactWorldPlugin::onRequest(ContactRequestPtr & _msg)
 {
+    gzdbg << "[ContactWorldPlugin] Received message" << std::endl;
+
     std::lock_guard<std::mutex> lock(data_ptr->mutex);
 
     if (!data_ptr->sub_con) {

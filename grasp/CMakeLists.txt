@@ -17,13 +17,16 @@ find_package(yaml-cpp REQUIRED)
 include_directories(${GAZEBO_INCLUDE_DIRS} ${SDF_INCLUDE_DIRS})
 link_directories(${GAZEBO_LIBRARY_DIRS})
 
-# Include custom messages
-include_directories(${PROJECT_BINARY_DIR}/msgs)
-link_directories(${PROJECT_BINARY_DIR}/msgs)
-
 # Include and link yaml-cpp library
 include_directories(${YAML_CPP_INCLUDE_DIR})
 link_directories(${YAML_CPP_INCLUDE_DIR})
+
+# Include custom messages
+include_directories(${PROJECT_BINARY_DIR}/msgs)
+link_directories(${PROJECT_BINARY_DIR}/msgs)
+# Include custom utilities
+include_directories(${PROJECT_BINARY_DIR}/utils)
+link_directories(${PROJECT_BINARY_DIR}/utils)
 
 # Run grasping trials script
 add_executable (run_trials

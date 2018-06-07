@@ -52,3 +52,7 @@ target_link_libraries(contacts_example
 add_dependencies(
     contacts_example
     grasp_msgs)
+
+# Configure header-only debug utilities 
+configure_file (${PROJECT_SOURCE_DIR}/utils/debug.hh.in
+  ${CMAKE_CURRENT_BINARY_DIR}/debug.hh )

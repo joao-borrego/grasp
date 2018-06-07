@@ -2,6 +2,10 @@
 <sdf version="1.6">
   <world name="default">
 
+  	<plugin name="contact_world_plugin" filename="libContactWorldPlugin.so">
+      <topic>grasp/contact/world</topic>
+    </plugin>
+
     <physics type="dart">
       <real_time_update_rate>0.000000</real_time_update_rate>
       <!--

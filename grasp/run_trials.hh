@@ -23,12 +23,13 @@
 
 // Custom messages
 #include "MessageTypes.hh"
-
 // Grasp representation
 #include "Grasp.hh"
 // Tools
 #include "gen_grasps.hh"
 #include "object_utils.hh"
+// Debug streams
+#include "debug.hh"
 
 // Height threshold
 #define Z_LIFTED 0.2
@@ -95,6 +96,8 @@ typedef grasp::msgs::TargetResponse TargetResponse;
 typedef const boost::shared_ptr<const grasp::msgs::TargetResponse>
     TargetResponsePtr;
 
+/// Declaration for request aux message type
+typedef grasp::msgs::Collision Collision;
 /// Declaration for request message type
 typedef grasp::msgs::ContactRequest ContactRequest;
 /// Shared pointer declaration for request message type
@@ -135,6 +138,14 @@ void setPose(gazebo::transport::PublisherPtr pub,
     ignition::math::Pose3d pose,
     double timeout=-1);
 
+/// \brief Requests collisions in the world
+/// \param pub Publisher to contact topic
+/// \param target The target object name
+/// \param hand The hand model name
+void getContacts(gazebo::transport::PublisherPtr pub,
+    std::string & target,
+    std::string & hand);
+
 /// \brief Sets hand velocity
 /// \param pub 		Publisher to hand's topic
 /// \param pose 	New hand velocity vector
@@ -163,8 +174,8 @@ void reset(gazebo::transport::PublisherPtr pub);
 /// \param pub   Publisher to grasp target topic
 void tryGrasp(
     Grasp & grasp,
-    gazebo::transport::PublisherPtr pub_hand,
-    gazebo::transport::PublisherPtr pub_target);
+    std::map<std::string, gazebo::transport::PublisherPtr> & pubs,
+    std::string & model_name);
 
 /// TODO
 void captureFrame(gazebo::transport::PublisherPtr pub);

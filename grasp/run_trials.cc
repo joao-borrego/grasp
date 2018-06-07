@@ -28,6 +28,9 @@ std::mutex g_finished_mutex;
 /// Global trial outcome
 bool g_success  {false};
 
+/// Robot name - TODO - make parameter
+std::string g_hand_name {"vizzy_right_hand"};
+
 int main(int _argc, char **_argv)
 {
     // Load gazebo as a client
@@ -38,11 +41,6 @@ int main(int _argc, char **_argv)
     std::map<std::string, gazebo::transport::PublisherPtr> pubs;
     std::map<std::string, gazebo::transport::SubscriberPtr> subs;
     setupCommunications(node, pubs, subs);
-
-    // Wait for subscribers to connect
-    pubs["factory"]->WaitForConnection();
-    pubs["requests"]->WaitForConnection();
-    pubs["hand"]->WaitForConnection();
     
     // Spawn camera
     std::string camera_name("rgbd_camera");
@@ -50,6 +48,7 @@ int main(int _argc, char **_argv)
     ignition::math::Pose3d camera_pose(0,0,0.8,0,1.57,0);
     spawnModelFromFilename(pubs["factory"], camera_pose, camera_filename);
     pubs["camera"]->WaitForConnection();
+    debugPrintTrace("Camera connected");
 
     // TODO: Foreach object
 
@@ -59,6 +58,7 @@ int main(int _argc, char **_argv)
     ignition::math::Pose3d model_pose(0,0,0,0,0,0);
     spawnModelFromFilename(pubs["factory"], model_pose, model_filename);
     pubs["target"]->WaitForConnection();
+    debugPrintTrace("Target connected");
 
     // Obtain candidate grasps
     std::string cfg_file("grasp/config/seal.grasp.yml");
@@ -72,7 +72,7 @@ int main(int _argc, char **_argv)
     // Perform trials
     for (auto candidate : grasps)
     {
-        tryGrasp(candidate, pubs["hand"], pubs["target"]);
+        tryGrasp(candidate, pubs, model_name);
     }
 
     // Capture and render frame
@@ -97,20 +97,25 @@ void setupCommunications(
     // Create the communication node
     node->Init();
 
+    // Instance publishers and subscribers
     pubs["hand"] = node->Advertise<HandMsg>(HAND_REQ_TOPIC);
     subs["hand"] = node->Subscribe(HAND_RES_TOPIC, onHandResponse);
-    
     pubs["target"] = node->Advertise<TargetRequest>(TARGET_REQ_TOPIC);
     subs["target"] = node->Subscribe(TARGET_RES_TOPIC, onTargetResponse);
-    
-    pubs["contacts"] = node->Advertise<ContactRequest>(CONTACT_REQ_TOPIC);
-    subs["contacts"] = node->Subscribe(CONTACT_RES_TOPIC, onContactResponse);
-
+    pubs["contact"] = node->Advertise<ContactRequest>(CONTACT_REQ_TOPIC);
+    subs["contact"] = node->Subscribe(CONTACT_RES_TOPIC, onContactResponse);
     pubs["camera"] = node->Advertise<CameraRequest>(CAMERA_REQ_TOPIC);
     subs["camera"] = node->Subscribe(CAMERA_RES_TOPIC, onCameraResponse);
-
     pubs["factory"] = node->Advertise<gazebo::msgs::Factory>(FACTORY_TOPIC);
     pubs["request"] = node->Advertise<gazebo::msgs::Request>(REQUEST_TOPIC);
+
+    // Wait for subscribers to connect
+    pubs["factory"]->WaitForConnection();
+    pubs["request"]->WaitForConnection();
+    pubs["contact"]->WaitForConnection();
+    debugPrintTrace("Gazebo connected");
+    pubs["hand"]->WaitForConnection();
+    debugPrintTrace("Hand connected");
 }
 
 /////////////////////////////////////////////////
@@ -125,6 +130,21 @@ void setPose(gazebo::transport::PublisherPtr pub,
     if (timeout > 0) {
         msg.set_timeout(timeout);
     }
+    pub->Publish(msg);
+}
+
+/////////////////////////////////////////////////
+void getContacts(gazebo::transport::PublisherPtr pub,
+    std::string & target,
+    std::string & hand)
+{
+    ContactRequest msg;
+    Collision *msg_col_gnd = msg.add_pairs();
+    msg_col_gnd->set_collision1("ground_plane");
+    msg_col_gnd->set_collision2(hand);
+    Collision *msg_col_tgt = msg.add_pairs();
+    msg_col_tgt->set_collision1(target);
+    msg_col_tgt->set_collision2(hand);
     pub->Publish(msg);
 }
 
@@ -176,31 +196,49 @@ void reset(gazebo::transport::PublisherPtr pub)
 /////////////////////////////////////////////////
 void tryGrasp(
     Grasp & grasp,
-    gazebo::transport::PublisherPtr pub_hand,
-    gazebo::transport::PublisherPtr pub_target)
+    std::map<std::string, gazebo::transport::PublisherPtr> & pubs,
+    std::string & target)
 {
     std::vector<double> velocity_lift {0,0,5,0,0,0};
     std::vector<double> velocity_stop {0,0,0};
-    std::vector<double> velocities_close {10,10,10};
+    std::vector<double> velocities_close {1.56,1.56,1.56};
 
-    setPose(pub_hand, grasp.pose, 0.1);
+    // Teleport hand to grasp candidate pose
+    // Add the resting position transformation first
+    setPose(pubs["hand"], grasp.pose + g_pose, 0.1);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
+    debugPrintTrace("Hand moved to grasp candidate pose");
     // Check if hand is already in collision
-
-    setJointVelocities(pub_hand, velocities_close, 0.5);
+    getContacts(pubs["contact"], target, g_hand_name);
+    while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
+    if (!g_success) {
+        grasp.success = false;
+        debugPrintTrace("Collisions detected. Aborting grasp");
+        return;
+    }
+    debugPrintTrace("No collisions detected");
+    // Close fingers
+    setVelocity(pubs["hand"], velocity_stop, 0.2);
+    setJointVelocities(pubs["hand"], velocities_close, 0.5);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
-    setVelocity(pub_hand, velocity_lift, 0.1);
+    debugPrintTrace("Fingers closed");
+    // Lift object
+    setVelocity(pubs["hand"], velocity_lift, 0.7);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
-    setVelocity(pub_hand, velocity_stop, 0.5);
-    while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
-    getTargetPose(pub_target, false);
+    debugPrintTrace("Object lifted");
+    // Stop lifting
+    //setVelocity(pubs["hand"], velocity_stop, 0.5);
+    //while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
+    // Check if object was grasped
     // TODO - Replace by collision check
+    getTargetPose(pubs["target"], false);
     while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
 
-    std::cout << "Success: " << g_success
-        << " - Pose: " << grasp.pose << "\n";
+   debugPrintTrace("Success: " << g_success
+        << " - Pose: " << grasp.pose);
 
-    reset(pub_hand);
+    grasp.success = g_success;
+    reset(pubs["hand"]);
     waitMs(50);
 }
 
@@ -235,6 +273,7 @@ void onHandResponse(HandMsgPtr & _msg)
 /////////////////////////////////////////////////
 void onTargetResponse(TargetResponsePtr & _msg)
 {
+    debugPrintTrace("Target plugin response");
     if (_msg->has_pose()) {
         if (_msg->type() == RES_POSE)
         {
@@ -259,12 +298,16 @@ void onTargetResponse(TargetResponsePtr & _msg)
 /////////////////////////////////////////////////
 void onContactResponse(ContactResponsePtr & _msg)
 {
-
+    debugPrintTrace("Contact plugin response");
+    std::lock_guard<std::mutex> lock(g_finished_mutex);
+    g_finished = true;
+    g_success = (_msg->contacts_size() == 0);
 }
 
 /////////////////////////////////////////////////
 void onCameraResponse(CameraResponsePtr & _msg)
 {
+    debugPrintTrace("Camera plugin response");
     std::lock_guard<std::mutex> lock(g_finished_mutex);
     g_finished = true;
 }

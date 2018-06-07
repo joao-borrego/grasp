@@ -86,6 +86,7 @@ void TargetPlugin::onUpdate()
         if (this->get_pose)
         {
             this->get_pose = false;
+            msg.set_type(RES_POSE);
             reply_pose = true;
         }
         if (this->set_pose)

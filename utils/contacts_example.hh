@@ -28,10 +28,10 @@
  /// Topic for outgoing responses
 #define RESPONSE_TOPIC  "~/grasp/contact/response"
 
-/// Declaration for request message type
-typedef grasp::msgs::ContactRequest ContactRequest;
 /// Declaration for request aux message type
 typedef grasp::msgs::Collision Collision;
+/// Declaration for request message type
+typedef grasp::msgs::ContactRequest ContactRequest;
 /// Shared pointer declaration for response message type
 typedef const boost::shared_ptr<const grasp::msgs::ContactResponse>
     ContactResponsePtr;
