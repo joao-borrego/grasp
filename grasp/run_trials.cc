@@ -28,6 +28,8 @@ int main(int _argc, char **_argv)
     // Create the communication node
     gazebo::transport::NodePtr node(new gazebo::transport::Node());
     node->Init();
+
+    // TODO - Cleanup, dictionary of publishers and subscribers
     // Publish to the hand plugin topic
     gazebo::transport::PublisherPtr pub_hand =
         node->Advertise<HandMsg>(HAND_REQ_TOPIC);
@@ -78,6 +80,10 @@ int main(int _argc, char **_argv)
     std::string cfg_file("grasp/config/seal.grasp.yml");
     std::vector<Grasp> grasps;
     obtainGrasps(cfg_file, grasps);
+
+    // TODO - Obtain object resting position
+
+
     // Perform trials
     for (auto candidate : grasps)
     {

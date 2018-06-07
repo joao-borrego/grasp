@@ -22,11 +22,7 @@
 #include <thread>
 
 // Custom messages
-#include "hand.pb.h"
-#include "target_request.pb.h"
-#include "target_response.pb.h"
-#include "camera_request.pb.h"
-#include "camera_response.pb.h"
+#include "MessageTypes.hh"
 
 // Grasp representation
 #include "Grasp.hh"

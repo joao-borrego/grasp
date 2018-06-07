@@ -43,12 +43,13 @@ add_library(grasp_msgs SHARED ${PROTO_SRCS})
 # Link Protobuf library
 target_link_libraries(grasp_msgs ${PROTOBUF_LIBRARY})
 
-# Obtain name of generated headers
-set (message_headers)
+# Obtain header include string
+set (headers_list)
 foreach(FIL ${msgs})
   get_filename_component(FIL_WE ${FIL} NAME_WE)
-  set(message_headers ${message_headers} "\n\#include \"${FIL_WE}.pb.h\"")
+  set(headers_list ${headers_list} "\n\#include \"${FIL_WE}.pb.h\"")
 endforeach()
+string(REPLACE ";" "" message_headers "${headers_list}")
 
 # Configure header for message types
 configure_file (${PROJECT_SOURCE_DIR}/msgs/MessageTypes.hh.in
