@@ -54,10 +54,21 @@
 
 // Type enums
 
+// Target Plugin
+
 /// Get pose request
 #define REQ_GET_POSE   grasp::msgs::TargetRequest::GET_POSE
 /// Set pose request
 #define REQ_SET_POSE   grasp::msgs::TargetRequest::SET_POSE
+/// Update rest pose request
+#define REQ_REST_POSE  grasp::msgs::TargetRequest::GET_REST_POSE
+/// Current pose response
+#define RES_POSE       grasp::msgs::TargetResponse::POSE
+/// Updated rest pose response
+#define RES_REST_POSE  grasp::msgs::TargetResponse::REST_POSE
+
+// Camera plugin
+
 /// Request to capture frame
 #define REQ_CAPTURE    grasp::msgs::CameraRequest::CAPTURE
 
@@ -114,7 +125,7 @@ void setJointVelocities(gazebo::transport::PublisherPtr pub,
     double timeout=-1);
 
 /// TODO
-void getTargetPose(gazebo::transport::PublisherPtr pub);
+void getTargetPose(gazebo::transport::PublisherPtr pub, bool rest);
 
 /// \brief Resets simulation world
 /// \param pub Publisher to hand's topic
@@ -132,14 +143,11 @@ void tryGrasp(
 /// TODO
 void captureFrame(gazebo::transport::PublisherPtr pub);
 
-/// TODO
-bool waitForTimeout();
-
-/// TODO
-bool waitForTrialEnd();
-
-/// TODO
-bool waitForCapture();
+/// \brief Returns whether to keep waiting for trigger
+/// \param mutex   Mutex that protects trigger variable
+/// \param trigger Trigger boolean variable
+/// \return True as long as trigger is false, false otherwise
+bool waitingTrigger(std::mutex & mutex, bool & trigger);
 
 /// TODO
 void onHandResponse(HandMsgPtr & _msg);

@@ -8,7 +8,18 @@ package grasp.msgs;
 import "pose.proto";
 
 message TargetResponse
-{
+{ 
+	/// Type of response 
+    enum Type
+    {
+    	/// Current pose
+        POSE = 1;
+        /// Updated rest pose
+        REST_POSE = 2;
+    }
+
+    /// Type of request
+    required Type             type = 1;
     /// Target current pose
-    optional gazebo.msgs.Pose pose = 1;
+    optional gazebo.msgs.Pose pose = 2;
 }

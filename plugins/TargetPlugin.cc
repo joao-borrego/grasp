@@ -92,6 +92,7 @@ void TargetPlugin::onUpdate()
         {
             model->SetWorldPose(new_pose);
             set_pose = false;
+            msg.set_type(RES_POSE);
             reply_pose = true;
         }
         if (this->update_rest_pose)
@@ -112,7 +113,8 @@ void TargetPlugin::onUpdate()
             {
                 init_pose = model->WorldPose();
                 update_rest_pose = false;
-                reply_pose = true;        
+                msg.set_type(RES_REST_POSE);
+                reply_pose = true;
             }
         }
     }
