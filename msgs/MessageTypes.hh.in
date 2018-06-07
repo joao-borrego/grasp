@@ -3,4 +3,10 @@
     \brief Protobuf message types header
     \author João Borrego : jsbruglie
 */
+
+#ifndef _MESSAGE_TYPES_HH_
+#define _MESSAGE_TYPES_HH_
+
 ${message_headers}
+
+#endif

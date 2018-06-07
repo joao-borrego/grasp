@@ -26,9 +26,9 @@ namespace ContactWorldPlugin {
     // Plugin messages
 
     /// Topic for incoming requests
-    #define REQUEST_TOPIC   "~/grasp/contact/world"
+    #define REQUEST_TOPIC   "~/grasp/contact/"
      /// Topic for outgoing responses
-    #define RESPONSE_TOPIC  "~/grasp/contact/world/response"
+    #define RESPONSE_TOPIC  "~/grasp/contact/response"
 }
 
 namespace gazebo {

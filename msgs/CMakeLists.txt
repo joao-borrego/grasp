@@ -54,3 +54,6 @@ string(REPLACE ";" "" message_headers "${headers_list}")
 # Configure header for message types
 configure_file (${PROJECT_SOURCE_DIR}/msgs/MessageTypes.hh.in
   ${CMAKE_CURRENT_BINARY_DIR}/MessageTypes.hh )
+# Configure header for default message topics 
+configure_file (${PROJECT_SOURCE_DIR}/msgs/MessageTopics.hh.in
+  ${CMAKE_CURRENT_BINARY_DIR}/MessageTopics.hh )

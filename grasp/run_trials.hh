@@ -43,6 +43,10 @@
 #define TARGET_REQ_TOPIC    "~/grasp/target"
 /// Topic for target plugin responses
 #define TARGET_RES_TOPIC    "~/grasp/target/response"
+/// Topic monitored by contacts plugin for incoming requests
+#define CONTACT_REQ_TOPIC   "~/grasp/contact"
+/// Topic for contacts plugin responses
+#define CONTACT_RES_TOPIC   "~/grasp/contact/response"
 /// Topic monitored by camera plugin for incoming requests
 #define CAMERA_REQ_TOPIC    "~/grasp/rgbd"
 /// Topic for camera plugin responses
@@ -79,6 +83,7 @@ typedef grasp::msgs::Hand HandMsg;
 /// Shared pointer declaration for hand message type
 typedef const boost::shared_ptr<const grasp::msgs::Hand>
     HandMsgPtr;
+
 /// Declaration for request message type
 typedef grasp::msgs::TargetRequest TargetRequest;
 /// Shared pointer declaration for request message type
@@ -89,6 +94,18 @@ typedef grasp::msgs::TargetResponse TargetResponse;
 /// Shared pointer declaration for response message type
 typedef const boost::shared_ptr<const grasp::msgs::TargetResponse>
     TargetResponsePtr;
+
+/// Declaration for request message type
+typedef grasp::msgs::ContactRequest ContactRequest;
+/// Shared pointer declaration for request message type
+typedef const boost::shared_ptr<const grasp::msgs::ContactRequest>
+    ContactRequestPtr;
+/// Declaration for response message type
+typedef grasp::msgs::ContactResponse ContactResponse;
+/// Shared pointer declaration for response message type
+typedef const boost::shared_ptr<const grasp::msgs::ContactResponse>
+    ContactResponsePtr;
+
 /// Declaration for request message type
 typedef grasp::msgs::CameraRequest CameraRequest;
 /// Shared pointer declaration for request message type
@@ -101,6 +118,15 @@ typedef const boost::shared_ptr<const grasp::msgs::CameraResponse>
     CameraResponsePtr;
 
 // Functions
+
+/// \brief Sets up gazebo communication pubs/subs
+/// \param node Gazebo communication node pointer
+/// \param pubs Resulting map of publishers
+/// \param subs Resulting map of subscribers
+void setupCommunications(
+    gazebo::transport::NodePtr & node,
+    std::map<std::string, gazebo::transport::PublisherPtr> & pubs,
+    std::map<std::string, gazebo::transport::SubscriberPtr> & subs);
 
 /// \brief Sets hand pose
 /// \param pub Publisher to hand's topic
@@ -154,6 +180,9 @@ void onHandResponse(HandMsgPtr & _msg);
 
 /// TODO
 void onTargetResponse(TargetResponsePtr & _msg);
+
+/// TODO
+void onContactResponse(ContactResponsePtr & _msg);
 
 /// TODO
 void onCameraResponse(CameraResponsePtr & _msg);
