@@ -42,3 +42,14 @@ PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${msgs})
 add_library(grasp_msgs SHARED ${PROTO_SRCS})
 # Link Protobuf library
 target_link_libraries(grasp_msgs ${PROTOBUF_LIBRARY})
+
+# Obtain name of generated headers
+set (message_headers)
+foreach(FIL ${msgs})
+  get_filename_component(FIL_WE ${FIL} NAME_WE)
+  set(message_headers ${message_headers} "\n\#include \"${FIL_WE}.pb.h\"")
+endforeach()
+
+# Configure header for message types
+configure_file (${PROJECT_SOURCE_DIR}/msgs/MessageTypes.hh.in
+  ${CMAKE_CURRENT_BINARY_DIR}/MessageTypes.hh )

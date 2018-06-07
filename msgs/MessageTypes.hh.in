@@ -1,0 +1,6 @@
+/*!
+    \file msgs/MessageTypes.hh
+    \brief Protobuf message types header
+    \author João Borrego : jsbruglie
+*/
+${message_headers}
