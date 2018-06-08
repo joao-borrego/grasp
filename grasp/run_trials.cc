@@ -29,7 +29,7 @@ std::mutex g_finished_mutex;
 bool g_success  {false};
 
 /// Robot name - TODO - make parameter
-std::string g_hand_name {"vizzy_right_hand"};
+std::string g_hand_name {"vizzy_hand"};
 
 int main(int _argc, char **_argv)
 {

@@ -64,8 +64,8 @@ namespace gazebo {
         private: bool recv_msg  {false};
         /// Flag for resetting contacts topic subscriber
         private: bool enabled   {false};
-        /// Collisions to check
-        private: std::string col1, col2;
+        /// Queue with collisions to check
+        private: std::queue <std::pair<std::string, std::string>> pairs;
 
         // Public methods
 

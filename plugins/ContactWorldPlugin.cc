@@ -87,24 +87,36 @@ void ContactWorldPlugin::onUpdate()
 
         physics::ContactManager *manager = world->Physics()->GetContactManager();
         unsigned int num_contacts = manager->GetContactCount();
-        for (int i = 0; i < num_contacts; i++) {
-            physics::Contact *contact = manager->GetContact(i);
-            std::string tmp_col1(contact->collision1->GetScopedName());
-            std::string tmp_col2(contact->collision2->GetScopedName());
-            if ((strstr(tmp_col1.c_str(), col1.c_str()) && 
-                    strstr(tmp_col2.c_str(), col2.c_str())) ||
-                (strstr(tmp_col2.c_str(), col1.c_str()) && 
-                    strstr(tmp_col1.c_str(), col2.c_str())))
-            {
-                gzdbg << "Contact: " << col1 << " and " << col2 << std::endl;
-                gazebo::msgs::Contact *contact = msg.add_contacts();
-                gazebo::msgs::Time *time = new gazebo::msgs::Time();
-                time->set_sec(world->RealTime().sec);
-                time->set_nsec(world->RealTime().nsec);
-                contact->set_collision1(tmp_col1);
-                contact->set_collision2(tmp_col2);
-                contact->set_allocated_time(time);
-                contact->set_world(world->Name());
+
+        while (!pairs.empty())
+        {
+            auto pair = pairs.front();
+            std::string col1(pair.first), col2(pair.second);
+            pairs.pop();
+
+            gzdbg << "Test " << col1 << " and " << col2 << std::endl;
+
+            for (int i = 0; i < num_contacts; i++) {
+                physics::Contact *contact = manager->GetContact(i);
+                std::string tmp_col1(contact->collision1->GetScopedName());
+                std::string tmp_col2(contact->collision2->GetScopedName());
+
+                if ((strstr(tmp_col1.c_str(), col1.c_str()) &&
+                        strstr(tmp_col2.c_str(), col2.c_str())) ||
+                    (strstr(tmp_col2.c_str(), col1.c_str()) &&
+                        strstr(tmp_col1.c_str(), col2.c_str())))
+                {
+                    gzdbg << "Contact: " << col1 <<
+                        " and " << col2 << std::endl;
+                    gazebo::msgs::Contact *contact = msg.add_contacts();
+                    gazebo::msgs::Time *time = new gazebo::msgs::Time();
+                    time->set_sec(world->RealTime().sec);
+                    time->set_nsec(world->RealTime().nsec);
+                    contact->set_collision1(tmp_col1);
+                    contact->set_collision2(tmp_col2);
+                    contact->set_allocated_time(time);
+                    contact->set_world(world->Name());
+                }
             }
         }
         msg.set_success(true);
@@ -137,8 +149,11 @@ void ContactWorldPlugin::onRequest(ContactRequestPtr & _msg)
         data_ptr->sub_con = data_ptr->node->Subscribe("~/physics/contacts",
             &ContactWorldPlugin::onContact, this);
     }
-    col1 = _msg->pairs(0).collision1();
-    col2 = _msg->pairs(0).collision2();
+
+    for (auto & pair : _msg->pairs())
+    {
+        pairs.emplace(pair.collision1(), pair.collision2());
+    }
     enabled = true;
 }
 
