@@ -96,6 +96,9 @@ namespace gazebo {
 
         /// TODO
         public: void checkCollision(ContactResponse & _msg);
+
+        /// TODO
+        public: void changeSurface(ContactResponse & _msg);
     };
 }
 

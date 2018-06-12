@@ -84,32 +84,19 @@ void ContactWorldPlugin::onUpdate()
     {
         gzdbg << "[ContactWorldPlugin] Processing message" << std::endl;
 
+        // Create response message
         ContactResponse msg;
+        msg.set_success(true);
 
         // Check for collisions between entities
         checkCollision(msg);
+        // Handle change surface properties request
+        changeSurface(msg);
 
-        // TODO - Else if set contact properties
-        if (false)
-        {
-            physics::ModelPtr model = world->ModelByName("model");
-            physics::LinkPtr link = model->GetLink("link");
-            physics::CollisionPtr col = link->GetCollision("collision");
-            physics::SurfaceParamsPtr surface = col->GetSurface();
-            physics::FrictionPyramidPtr friction = surface->FrictionPyramid();
-
-            double elastic_modulus = friction->ElasticModulus();
-            double mu_primary = friction->MuPrimary();
-            double mu_secondary = friction->MuSecondary();
-            double mu_torsion = friction->MuTorsion();
-            double patch_radius = friction->PatchRadius();
-            double poisson_ratio = friction->PoissonsRatio();
-            bool use_patch_radius = friction->UsePatchRadius();
-        }
-
-        msg.set_success(true);
+        // Publish response
         data_ptr->pub->Publish(msg);
 
+        // Cleanup and accept new requests
         msg_req.reset();
         enabled = false;
         recv_msg = false;
@@ -195,6 +182,25 @@ void ContactWorldPlugin::checkCollision(ContactResponse & _msg)
                     contact->set_world(world->Name());
                 }
             }
+        }
+    }
+}
+
+/////////////////////////////////////////////////
+void ContactWorldPlugin::changeSurface(ContactResponse & _msg)
+{
+    if (msg_req)
+    {
+        for (auto & request : msg_req->surface())
+        {
+            physics::ModelPtr model =
+                world->ModelByName(request.model());
+            physics::LinkPtr link = model->GetLink(request.link());
+            physics::CollisionPtr col = 
+                link->GetCollision(request.collision());
+            physics::SurfaceParamsPtr surface = col->GetSurface();
+            // Update surface properties
+            surface->ProcessMsg(request.surface());
         }
     }
 }
