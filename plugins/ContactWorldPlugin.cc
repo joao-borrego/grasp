@@ -85,6 +85,8 @@ void ContactWorldPlugin::onUpdate()
 
         ContactResponse msg;
 
+        // TODO - If get contacts request
+
         physics::ContactManager *manager = world->Physics()->GetContactManager();
         unsigned int num_contacts = manager->GetContactCount();
 
@@ -119,6 +121,25 @@ void ContactWorldPlugin::onUpdate()
                 }
             }
         }
+
+        // TODO - Else if set contact properties
+        if (false)
+        {
+            physics::ModelPtr model = world->ModelByName("model");
+            physics::LinkPtr link = model->GetLink("link");
+            physics::CollisionPtr col = link->GetCollision("collision");
+            physics::SurfaceParamsPtr surface = col->GetSurface();
+            physics::FrictionPyramidPtr friction = surface->FrictionPyramid();
+
+            double elastic_modulus = friction->ElasticModulus();
+            double mu_primary = friction->MuPrimary();
+            double mu_secondary = friction->MuSecondary();
+            double mu_torsion = friction->MuTorsion();
+            double patch_radius = friction->PatchRadius();
+            double poisson_ratio = friction->PoissonsRatio();
+            bool use_patch_radius = friction->UsePatchRadius();
+        }
+
         msg.set_success(true);
         data_ptr->pub->Publish(msg);
 

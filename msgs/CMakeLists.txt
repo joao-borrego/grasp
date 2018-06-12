@@ -22,6 +22,8 @@ set (msgs
   # Contact sensor messages
   contact_sensor_request.proto
   contact_sensor_response.proto
+  # Friction properties message
+  friction.proto
   # Contact messages
   contact_request.proto
   contact_response.proto

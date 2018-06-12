@@ -44,6 +44,32 @@ namespace gazebo {
     typedef const boost::shared_ptr<const grasp::msgs::ContactResponse>
         ContactResponsePtr;
 
+    /// \brief Friction pyramid parameters
+    class FrictionParams
+    {
+        /// Name of the parent collision
+        public: std::string collision;
+        /// Elastic modulus
+        public: double elastic_modulus  {1.0};
+        /// Friction coefficient in the primary direction 
+        public: double mu               {1.0};
+        /// Friction coefficient in the secondary direction
+        public: double mu2              {0.0};
+        /// Torsional friction coefficient
+        public: double mu_torsion       {1.0};
+        /// Use surface radius
+        public: bool use_radius         {true};
+        /// Torsional patch radius
+        public: double patch_radius     {1.0};
+        /// Poisson's ratio
+        public: double poisson_ratio    {1.0};
+
+        /// \brief Constructs the object
+        public: FrictionParams();
+        /// \brief Destroys the object
+        public: virtual ~FrictionParams();
+    };
+
     // Forward declaration of private data class
     class ContactWorldPluginPrivate;
 
