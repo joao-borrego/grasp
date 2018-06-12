@@ -22,8 +22,6 @@ set (msgs
   # Contact sensor messages
   contact_sensor_request.proto
   contact_sensor_response.proto
-  # Friction properties message
-  friction.proto
   # Contact messages
   contact_request.proto
   contact_response.proto
@@ -36,6 +34,8 @@ set (msgs
   ${PROTOBUF_IMPORT_DIRS}/contact.proto
   ${PROTOBUF_IMPORT_DIRS}/joint_wrench.proto
   ${PROTOBUF_IMPORT_DIRS}/wrench.proto
+  ${PROTOBUF_IMPORT_DIRS}/friction.proto
+  ${PROTOBUF_IMPORT_DIRS}/surface.proto
 )
 
 # Generate Protobuf sources

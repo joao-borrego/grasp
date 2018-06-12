@@ -24,7 +24,7 @@
 #define PROMPT "> "
 
 /// Topic for incoming requests
-#define REQUEST_TOPIC   "~/grasp/contact/"
+#define REQUEST_TOPIC   "~/grasp/contact"
  /// Topic for outgoing responses
 #define RESPONSE_TOPIC  "~/grasp/contact/response"
 

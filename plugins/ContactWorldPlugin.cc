@@ -79,48 +79,15 @@ void ContactWorldPlugin::onUpdate()
 {
     std::lock_guard<std::mutex> lock(data_ptr->mutex);
 
+    // Process received message
     if (recv_msg)
     {
         gzdbg << "[ContactWorldPlugin] Processing message" << std::endl;
 
         ContactResponse msg;
 
-        // TODO - If get contacts request
-
-        physics::ContactManager *manager = world->Physics()->GetContactManager();
-        unsigned int num_contacts = manager->GetContactCount();
-
-        while (!pairs.empty())
-        {
-            auto pair = pairs.front();
-            std::string col1(pair.first), col2(pair.second);
-            pairs.pop();
-
-            gzdbg << "Test " << col1 << " and " << col2 << std::endl;
-
-            for (int i = 0; i < num_contacts; i++) {
-                physics::Contact *contact = manager->GetContact(i);
-                std::string tmp_col1(contact->collision1->GetScopedName());
-                std::string tmp_col2(contact->collision2->GetScopedName());
-
-                if ((strstr(tmp_col1.c_str(), col1.c_str()) &&
-                        strstr(tmp_col2.c_str(), col2.c_str())) ||
-                    (strstr(tmp_col2.c_str(), col1.c_str()) &&
-                        strstr(tmp_col1.c_str(), col2.c_str())))
-                {
-                    gzdbg << "Contact: " << col1 <<
-                        " and " << col2 << std::endl;
-                    gazebo::msgs::Contact *contact = msg.add_contacts();
-                    gazebo::msgs::Time *time = new gazebo::msgs::Time();
-                    time->set_sec(world->RealTime().sec);
-                    time->set_nsec(world->RealTime().nsec);
-                    contact->set_collision1(tmp_col1);
-                    contact->set_collision2(tmp_col2);
-                    contact->set_allocated_time(time);
-                    contact->set_world(world->Name());
-                }
-            }
-        }
+        // Check for collisions between entities
+        checkCollision(msg);
 
         // TODO - Else if set contact properties
         if (false)
@@ -143,6 +110,7 @@ void ContactWorldPlugin::onUpdate()
         msg.set_success(true);
         data_ptr->pub->Publish(msg);
 
+        msg_req.reset();
         enabled = false;
         recv_msg = false;
     }
@@ -171,11 +139,11 @@ void ContactWorldPlugin::onRequest(ContactRequestPtr & _msg)
             &ContactWorldPlugin::onContact, this);
     }
 
-    for (auto & pair : _msg->pairs())
+    if (!msg_req)
     {
-        pairs.emplace(pair.collision1(), pair.collision2());
+        msg_req = _msg;
+        enabled = true;
     }
-    enabled = true;
 }
 
 /////////////////////////////////////////////////
@@ -185,6 +153,49 @@ void ContactWorldPlugin::onResponse(ContactResponsePtr & _msg)
 
     if (!enabled && !recv_msg) {
         data_ptr->sub_con.reset();
+    }
+}
+
+/////////////////////////////////////////////////
+void ContactWorldPlugin::checkCollision(ContactResponse & _msg)
+{
+    if (msg_req)
+    {
+        physics::ContactManager *manager =
+            world->Physics()->GetContactManager();
+        unsigned int num_contacts = manager->GetContactCount();
+
+        for (auto & pair : msg_req->pairs())
+        {
+            std::string col1(pair.collision1());
+            std::string col2(pair.collision2());
+            
+            gzdbg << "Test " << col1 << " and " << col2 << std::endl;
+
+            for (int i = 0; i < num_contacts; i++)
+            {
+                physics::Contact *contact = manager->GetContact(i);
+                std::string tmp_col1(contact->collision1->GetScopedName());
+                std::string tmp_col2(contact->collision2->GetScopedName());
+
+                if ((strstr(tmp_col1.c_str(), col1.c_str()) &&
+                        strstr(tmp_col2.c_str(), col2.c_str())) ||
+                    (strstr(tmp_col2.c_str(), col1.c_str()) &&
+                        strstr(tmp_col1.c_str(), col2.c_str())))
+                {
+                    gzdbg << "Contact: " << col1 <<
+                        " and " << col2 << std::endl;
+                    gazebo::msgs::Contact *contact = _msg.add_contacts();
+                    gazebo::msgs::Time *time = new gazebo::msgs::Time();
+                    time->set_sec(world->RealTime().sec);
+                    time->set_nsec(world->RealTime().nsec);
+                    contact->set_collision1(tmp_col1);
+                    contact->set_collision2(tmp_col2);
+                    contact->set_allocated_time(time);
+                    contact->set_world(world->Name());
+                }
+            }
+        }
     }
 }
 
