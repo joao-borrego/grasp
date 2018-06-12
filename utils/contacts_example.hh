@@ -29,7 +29,9 @@
 #define RESPONSE_TOPIC  "~/grasp/contact/response"
 
 /// Declaration for request aux message type
-typedef grasp::msgs::Collision Collision;
+typedef grasp::msgs::CollisionRequest CollisionRequest;
+/// Declaration for request aux message type
+typedef grasp::msgs::SurfaceRequest SurfaceRequest;
 /// Declaration for request message type
 typedef grasp::msgs::ContactRequest ContactRequest;
 /// Shared pointer declaration for response message type
@@ -37,6 +39,14 @@ typedef const boost::shared_ptr<const grasp::msgs::ContactResponse>
     ContactResponsePtr;
 
 // Functions
+
+/// TODO
 void getContactBetween(gazebo::transport::PublisherPtr pub,
     const std::string & collision1,
     const std::string & collision2);
+
+/// TODO
+void changeSurface(gazebo::transport::PublisherPtr pub,
+    const std::string & model,
+    const std::string & link,
+    const std::string & collision);

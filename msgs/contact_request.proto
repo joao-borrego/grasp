@@ -10,13 +10,13 @@ import "surface.proto";
 message ContactRequest
 {
     /// Collision pairs to test for contacts
-    repeated Collision pairs            = 1;
+    repeated CollisionRequest collision = 1;
     /// New friction properties for a given collision
     repeated SurfaceRequest surface     = 2;
 }
 
 /// Pair of collision entities
-message Collision
+message CollisionRequest
 {
     /// First collision object
     required string collision1 = 1;

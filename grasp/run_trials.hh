@@ -97,7 +97,7 @@ typedef const boost::shared_ptr<const grasp::msgs::TargetResponse>
     TargetResponsePtr;
 
 /// Declaration for request aux message type
-typedef grasp::msgs::Collision Collision;
+typedef grasp::msgs::CollisionRequest CollisionRequest;
 /// Declaration for request message type
 typedef grasp::msgs::ContactRequest ContactRequest;
 /// Shared pointer declaration for request message type

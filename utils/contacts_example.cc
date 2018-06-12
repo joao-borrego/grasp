@@ -33,8 +33,19 @@ int main(int _argc, char **_argv)
         getline(std::cin, line);
         std::stringstream input_stream(line);
         std::string command = input_stream.str();
-        std::string col1("ground_plane"), col2("box");
-        getContactBetween(pub, col1, col2);
+        
+        // Check for collision between box and ground plane
+        if (command == "check")
+        {
+            std::string col1("ground_plane"), col2("box");
+            getContactBetween(pub, col1, col2);
+        }
+        else if (command == "change")
+        {
+            std::string model("box"), link("link"),
+                collision("box_collision");
+            changeSurface(pub, model, link, collision);
+        }
     }
 
     // Shut down
@@ -48,8 +59,31 @@ void getContactBetween(gazebo::transport::PublisherPtr pub,
     const std::string & collision2)
 {
     ContactRequest msg;
-    Collision *pair = msg.add_pairs();
+    CollisionRequest *pair = msg.add_collision();
     pair->set_collision1(collision1);
     pair->set_collision2(collision2);
     pub->Publish(msg);
 }
+
+/////////////////////////////////////////////////
+void changeSurface(gazebo::transport::PublisherPtr pub,
+    const std::string & model,
+    const std::string & link,
+    const std::string & collision)
+{
+    ContactRequest msg;
+    SurfaceRequest *req = msg.add_surface();
+    req->set_model(model);
+    req->set_link(link);
+    req->set_collision(collision);
+    gazebo::msgs::Surface *surface = new gazebo::msgs::Surface();
+    gazebo::msgs::Friction *friction = new gazebo::msgs::Friction();
+
+    friction->set_mu(1.0);
+    friction->set_mu2(1.0);
+    surface->set_allocated_friction(friction);
+    req->set_allocated_surface(surface);
+
+    pub->Publish(msg);
+}
+

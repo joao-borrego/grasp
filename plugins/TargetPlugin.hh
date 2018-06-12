@@ -36,9 +36,9 @@ namespace TargetPlugin {
     /// Get updated resting pose request
     #define REQ_GET_REST_POSE   grasp::msgs::TargetRequest::GET_REST_POSE
     /// Current pose response
-    #define RES_POSE       grasp::msgs::TargetResponse::POSE
+    #define RES_POSE            grasp::msgs::TargetResponse::POSE
     /// Updated rest pose response
-    #define RES_REST_POSE  grasp::msgs::TargetResponse::REST_POSE
+    #define RES_REST_POSE       grasp::msgs::TargetResponse::REST_POSE
 
     /// Maximum velocity for an object to be considered static
     #define VELOCITY_EPSILON 0.0000001

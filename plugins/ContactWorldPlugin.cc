@@ -82,7 +82,7 @@ void ContactWorldPlugin::onUpdate()
     // Process received message
     if (recv_msg)
     {
-        gzdbg << "[ContactWorldPlugin] Processing message" << std::endl;
+        gzdbg << "Processing message" << std::endl;
 
         // Create response message
         ContactResponse msg;
@@ -116,7 +116,7 @@ void ContactWorldPlugin::onContact(ConstContactsPtr & _msg)
 /////////////////////////////////////////////////
 void ContactWorldPlugin::onRequest(ContactRequestPtr & _msg)
 {
-    gzdbg << "[ContactWorldPlugin] Received message" << std::endl;
+    gzdbg << "Received message" << std::endl;
 
     std::lock_guard<std::mutex> lock(data_ptr->mutex);
 
@@ -152,7 +152,7 @@ void ContactWorldPlugin::checkCollision(ContactResponse & _msg)
             world->Physics()->GetContactManager();
         unsigned int num_contacts = manager->GetContactCount();
 
-        for (auto & pair : msg_req->pairs())
+        for (auto & pair : msg_req->collision())
         {
             std::string col1(pair.collision1());
             std::string col2(pair.collision2());
@@ -195,12 +195,22 @@ void ContactWorldPlugin::changeSurface(ContactResponse & _msg)
         {
             physics::ModelPtr model =
                 world->ModelByName(request.model());
+            if (!model) { return; }
+
             physics::LinkPtr link = model->GetLink(request.link());
+            if (!link) { return; }
+            
             physics::CollisionPtr col = 
                 link->GetCollision(request.collision());
+            if (!col) { return; }           
+
             physics::SurfaceParamsPtr surface = col->GetSurface();
+            if (!surface) { return; }
+            
             // Update surface properties
             surface->ProcessMsg(request.surface());
+        
+            gzdbg << "Changed surface properties" << std::endl;
         }
     }
 }

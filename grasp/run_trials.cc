@@ -139,10 +139,10 @@ void getContacts(gazebo::transport::PublisherPtr pub,
     std::string & hand)
 {
     ContactRequest msg;
-    Collision *msg_col_gnd = msg.add_pairs();
+    CollisionRequest *msg_col_gnd = msg.add_collision();
     msg_col_gnd->set_collision1("ground_plane");
     msg_col_gnd->set_collision2(hand);
-    Collision *msg_col_tgt = msg.add_pairs();
+    CollisionRequest *msg_col_tgt = msg.add_collision();
     msg_col_tgt->set_collision1(target);
     msg_col_tgt->set_collision2(hand);
     pub->Publish(msg);
