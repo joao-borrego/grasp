@@ -42,7 +42,9 @@ def getRotationMat(a, b):
     """
 
     def reflection(u, n):
-        return u - 2 * n * np.dot(n.T, u) / (np.dot(n.T, n) + 1e-8)
+        if not np.dot(n.T, n).any: 
+            return u
+        return u - 2 * n * np.dot(n.T, u) / np.dot(n.T, n)
 
     u = np.atleast_2d(normalizeVector(a)).T
     v = np.atleast_2d(normalizeVector(b)).T
@@ -135,8 +137,8 @@ def plotMeshWithNormals(mesh, matrices, direction_vec, axis=None):
 
     return axis
 
-def generateCandidates(mesh, num_samples=1000, noise_level=0.05,
-                        gripper_offset=-0.1, augment=True):
+def generateCandidates(mesh, num_samples=1000, gripper_offset=-0.1,
+        noise_level=0.05, augment=True):
     """Generates grasp candidates via surface normals of the object."""
 
     # Defines the up-vector for the workspace frame
@@ -196,7 +198,7 @@ def main(argv):
     """Main"""
 
     object_name = 'Seal'
-    file_name = '/DATA/Datasets/KIT/Seal_800_tex.obj'
+    file_name = '/DATA/Datasets/KIT/BakingSoda_800_tex.obj'
     samples = 100
     robot = 'vizzy'
     out_file = 'data.yml'
