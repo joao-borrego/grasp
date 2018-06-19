@@ -33,7 +33,7 @@ def parseArgs(argv):
     in_dir = 'COLLADA'
     out_dir = 'output'
     template = 'template'
-    scale = 'script.mlx'
+    script = 'script.mlx'
     
     usage = 'usage:   ' + argv[0] + ' [options]\n' + USAGE
 
@@ -100,6 +100,7 @@ def main(argv):
         copyfile(template_cfg, out_cfg)
         search_and_replace(out_model, 'TEMPLATE', name)
         search_and_replace(out_model, 'MESH_EXT', 'stl')
+        search_and_replace(out_model, 'SCALE', '1 1 1')
         search_and_replace(out_cfg, 'TEMPLATE', name)
         search_and_replace(out_cfg, 'DESCRIPTION', name)
 
