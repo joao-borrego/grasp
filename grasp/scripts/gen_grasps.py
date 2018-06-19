@@ -1,7 +1,10 @@
 #!/usr/bin/python2
 
-# As seen in https://github.com/mveres01/multi-contact-grasping
-# src/collect_grasps.py
+"""
+All heavy lifting performed by mveres01 at
+https://github.com/mveres01/multi-contact-grasping
+src/collect_grasps.py
+"""
 
 # Command line args
 import sys, getopt
@@ -15,33 +18,29 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 # YAML output
 import yaml
 
-def normalizeVector(vector):
-    """Normalizes a vector to have a magnitude of 1."""
-    return vector / np.sqrt(np.sum(vector ** 2))
-
-def meshCentroid(trimesh_mesh, center_type='vrep'):
-    """Calculates the center of a mesh according to three different metrics.
+def loadMesh(mesh_path):
+    """Loads mesh from file
     """
-    if center_type == 'centroid':
-        return trimesh_mesh.centroid
-    elif center_type == 'com':
-        return trimesh_mesh.center_mass
-    elif center_type == 'vrep':  # How V-REP assigns object centroid
-        maxv = np.max(trimesh_mesh.vertices, axis=0)
-        minv = np.min(trimesh_mesh.vertices, axis=0)
-        return 0.5 * (minv + maxv)
+    mesh = trimesh.load(mesh_path)
+    return mesh
+
+def normalizeVector(vector):
+    """Normalizes a vector to have a magnitude of 1
+    """
+    return vector / np.sqrt(np.sum(vector ** 2))
 
 def getRotationMat(a, b):
     """Calculates the rotation needed to bring two axes coincident.
 
-    Uses the reflection approach from:
-    ----------------------------------
-    T L Davis (https://math.stackexchange.com/users/411024/t-l-davis),
+    Uses the reflection approach from T L Davis (https://math.stackexchange.com/users/411024/t-l-davis),
     Calculate Rotation Matrix to align Vector A to Vector B in 3d?,
     URL (version: 2017-04-13): https://math.stackexchange.com/q/2161631
+
+    Returns 4 x 4 homogenous rotation matrix
     """
 
     def reflection(u, n):
+        """Aux reflection function"""
         if not np.dot(n.T, n).any: 
             return u
         return u - 2 * n * np.dot(n.T, u) / np.dot(n.T, n)
@@ -55,6 +54,35 @@ def getRotationMat(a, b):
     eye = np.eye(4)
     eye[:3, :3] = R
     return eye
+
+def generateCandidates(mesh, samples, offset, palm_normal):
+    """Generates grasp candidates via surface normals of the object
+    """
+    points, face_indices = trimesh.sample.sample_surface_even(mesh, samples)
+
+    matrices = []
+    for point, face_idx in zip(points, face_indices):
+
+        # Obtain normalized surface normal
+        obj_normal = normalizeVector(mesh.triangles_cross[face_idx])
+        # Obtain 4x4 rotation matrix that aligns the surface normal of the
+        # palm with that of the object
+        rot_mat = getRotationMat(palm_normal, obj_normal)
+
+        # Apply rotation to surface point
+        rot_mat[:3, 3] = point
+        # Apply offset along the outer normal direction
+        offset_vec = palm_normal * offset
+        offset_vec = np.append(offset_vec, [1])
+        rot_mat[:3, 3] = np.dot(rot_mat, offset_vec.T)[:3]
+
+        # Store rotation matrix
+        matrices.append(rot_mat[:3].flatten())
+
+    # Merge into single array
+    matrices = np.vstack(matrices)
+
+    return matrices
 
 def plotEqualAspectRatio(vertices, axis):
     """Forces the plot to maintain an equal aspect ratio
@@ -87,14 +115,6 @@ def formatHtMatrix(matrix_in):
     ht_matrix = np.eye(4)
     ht_matrix[:3] = matrix_in
     return ht_matrix
-
-def loadMesh(mesh_path):
-    """Loads mesh from file and computes its centroid.
-    """
-    mesh = trimesh.load(mesh_path)
-    center = meshCentroid(mesh, center_type='vrep')
-    #mesh.vertices -= center
-    return mesh
 
 def plotMeshWithNormals(mesh, matrices, direction_vec, axis=None):
     """Visualize where we will sample grasp candidates from
@@ -135,46 +155,9 @@ def plotMeshWithNormals(mesh, matrices, direction_vec, axis=None):
 
         axis.scatter(*gripper_point.flatten(), c='b', marker='o', s=10)
 
-    return axis
-
-def generateCandidates(mesh, num_samples=1000, gripper_offset=-0.1,
-        noise_level=0.05, augment=True):
-    """Generates grasp candidates via surface normals of the object."""
-
-    # Defines the up-vector for the workspace frame
-    up_vector = np.asarray([0, 0, -1])
-
-    points, face_idx = trimesh.sample.sample_surface_even(mesh, num_samples)
-
-    matrices = []
-    for p, face in zip(points, face_idx):
-        normal = normalizeVector(mesh.triangles_cross[face])
-        #print(normal, mesh.triangles_cross[face])
-
-        # Add random noise to the surface normals, centered around 0
-        if augment is True:
-            normal += np.random.uniform(-noise_level, noise_level)
-            normal = normalizeVector(normal)
-
-        # Since we need to set a pose for the gripper, we need to calculate the
-        # rotation matrix from a given surface normal
-        matrix = getRotationMat(up_vector, normal)
-        matrix[:3, 3] = p
-
-        # Calculate an offset for the gripper from the object.
-        matrix[:3, 3] = np.dot(matrix, np.array([0, 0, gripper_offset, 1]).T)[:3]
-
-        matrices.append(matrix[:3].flatten())
-
-    matrices = np.vstack(matrices)
-
-    # Uncomment to view the generated grasp candidates
-    plotMeshWithNormals(mesh, matrices, up_vector)
     plt.show()
 
-    return matrices
-
-def writeOutput(file, object, robot, grasp_candidates):
+def writeOutput(file, object, robot, matrices):
     """Write output to file"""
 
     data = dict(
@@ -186,27 +169,33 @@ def writeOutput(file, object, robot, grasp_candidates):
     )
 
     data['object']['grasp_candidates'][robot] = dict()
-    for idx, grasp in enumerate(grasp_candidates):
-        data['object']['grasp_candidates'][robot][idx] = dict()
-        data['object']['grasp_candidates'][robot][idx]['pose'] = grasp[:6].tolist()
-        data['object']['grasp_candidates'][robot][idx]['joints'] = [1,1,1]
+
+    for i in range(0, len(matrices)):
+
+        data['object']['grasp_candidates'][robot][i] = dict()
+        data['object']['grasp_candidates'][robot][i]['tf'] = \
+            matrices[i].tolist()
+        # formatHtMatrix(matrices[i]).tolist()
+        #data['object']['grasp_candidates'][robot][i]['joints'] = [1,1,1]
 
     with open(file, 'w') as outfile:
         yaml.dump(data, outfile, default_flow_style=False)
 
 def main(argv):
-    """Main"""
-
-    object_name = 'Seal'
+    """Main method
+    """
+    object_name = 'BakingSoda'
     file_name = '/DATA/Datasets/KIT/BakingSoda_800_tex.obj'
     samples = 100
     robot = 'vizzy'
-    out_file = 'data.yml'
+    palm_normal = np.array([0,1,0])
+    palm_offset = 0.1 # [m]
+    out_file = object_name + '.grasp.yml'
 
     mesh = loadMesh(file_name)
-    grasps = generateCandidates(mesh, samples)
+    grasps = generateCandidates(mesh, samples, palm_offset, palm_normal)
+    plotMeshWithNormals(mesh, grasps, palm_normal)
     writeOutput(out_file, object_name, robot, grasps)
-
 
 if __name__ == "__main__" :
     main(sys.argv)
