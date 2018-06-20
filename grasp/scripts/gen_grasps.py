@@ -150,7 +150,7 @@ def plotMeshWithNormals(mesh, matrices, direction_vec, axis=None):
         direction = np.dot(transform[:3, :3], dvec)
         direction = np.atleast_2d(direction).T
 
-        a = np.hstack([gripper_point, -direction]).flatten()
+        a = np.hstack([gripper_point, direction]).flatten()
         axis.quiver(*a, color='k', length=0.1)
 
         axis.scatter(*gripper_point.flatten(), c='b', marker='o', s=10)
@@ -188,8 +188,8 @@ def main(argv):
     file_name = '/DATA/Datasets/KIT/BakingSoda_800_tex.obj'
     samples = 100
     robot = 'vizzy'
-    palm_normal = np.array([0,1,0])
-    palm_offset = 0.1 # [m]
+    palm_normal = np.array([0,-1,0])
+    palm_offset = 0.05 # [m]
     out_file = object_name + '.grasp.yml'
 
     mesh = loadMesh(file_name)

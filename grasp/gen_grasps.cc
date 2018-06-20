@@ -9,12 +9,12 @@
 
 #include "gen_grasps.hh"
 
-using namespace Eigen;
+using namespace ignition::math;
 
 void obtainGrasps(std::string file_name, std::vector<Grasp> & grasps)
 {
     std::string robot("vizzy");
-    Matrix4d tf_mat = Matrix4d::Identity();
+    Matrix4d tf_mat (Matrix4d::Identity);
 
     try
     {
@@ -29,6 +29,7 @@ void obtainGrasps(std::string file_name, std::vector<Grasp> & grasps)
             }
             grasps.emplace_back(tf_mat);
         }
+        std::cout << tf_mat << std::endl;
     }
     catch (YAML::Exception& yamlException)
     {

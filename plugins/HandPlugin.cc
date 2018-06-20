@@ -87,6 +87,10 @@ void HandPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
         this->model->SetGravityMode(gravity_enabled);
     }
 
+    // Set default pose
+    ignition::math::Pose3d init_pose(0,0,1,0,0,0);
+    setPose(init_pose);
+
     // Connect to world update event
     this->update_connection = event::Events::ConnectWorldUpdateBegin(
         std::bind(&HandPlugin::onUpdate, this));

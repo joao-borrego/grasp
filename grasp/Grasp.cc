@@ -8,7 +8,14 @@
 #include "Grasp.hh"
 
 //////////////////////////////////////////////////
-Grasp::Grasp(Eigen::Matrix4d _tf_matrix):
+Grasp::Grasp(ignition::math::Matrix4d _tf_matrix):
     tf_matrix(_tf_matrix)
 {
+}
+
+//////////////////////////////////////////////////
+ignition::math::Pose3d Grasp::getPose(
+    ignition::math::Pose3d ref_pose)
+{
+    return tf_matrix.Pose() + ref_pose;
 }
