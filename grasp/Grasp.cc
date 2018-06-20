@@ -8,8 +8,7 @@
 #include "Grasp.hh"
 
 //////////////////////////////////////////////////
-Grasp::Grasp(
-    const ignition::math::Pose3d & _pose) :
-        pose(_pose)
+Grasp::Grasp(Eigen::Matrix4d _tf_matrix):
+    tf_matrix(_tf_matrix)
 {
 }

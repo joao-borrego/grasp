@@ -9,10 +9,12 @@
 
 #include "gen_grasps.hh"
 
+using namespace Eigen;
+
 void obtainGrasps(std::string file_name, std::vector<Grasp> & grasps)
 {
     std::string robot("vizzy");
-    double tmp[6];
+    Matrix4d tf_mat = Matrix4d::Identity();
 
     try
     {
@@ -20,11 +22,12 @@ void obtainGrasps(std::string file_name, std::vector<Grasp> & grasps)
         int num_grasps = config["object"]["grasp_candidates"][robot].size();
         for (int i = 0; i < num_grasps; i++)
         {
-            YAML::Node pose_node =
-                config["object"]["grasp_candidates"][robot][i]["pose"];
-            for (int j = 0; j < 6; j++) { tmp[j] = pose_node[j].as<double>(); }
-            ignition::math::Pose3d pose(tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],tmp[5]);
-            grasps.emplace_back(pose);
+            YAML::Node transform_mat_node =
+                config["object"]["grasp_candidates"][robot][i]["tf"];
+            for (int j = 0; j < 12; j++) {
+                tf_mat(j/4,j%4) = transform_mat_node[j].as<double>();
+            }
+            grasps.emplace_back(tf_mat);
         }
     }
     catch (YAML::Exception& yamlException)

@@ -13,7 +13,8 @@
 // Gazebo
 #include <gazebo/gazebo_client.hh>
 #include <gazebo/gazebo_config.h>
-
+// Eigen
+#include <Eigen/Dense>
 // Open YAML config files
 #include "yaml-cpp/yaml.h"
 

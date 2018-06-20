@@ -20,7 +20,7 @@ bool g_resting  {false};
 /// Mutex for global object resting flag
 std::mutex g_resting_mutex;
 /// Global object resting pose
-ignition::math::Pose3d g_pose;
+ignition::math::Pose3d g_pose {0,0,0,0,0,0};
 /// Global setp finished flag
 bool g_finished {false};
 /// Mutex for global step finished flag
@@ -43,17 +43,19 @@ int main(int _argc, char **_argv)
     setupCommunications(node, pubs, subs);
     
     // Spawn camera
+    /*
     std::string camera_name("rgbd_camera");
     std::string camera_filename = "model://" + camera_name;
     ignition::math::Pose3d camera_pose(0,0,0.8,0,1.57,0);
     spawnModelFromFilename(pubs["factory"], camera_pose, camera_filename);
     pubs["camera"]->WaitForConnection();
     debugPrintTrace("Camera connected");
+    */
 
     // TODO: Foreach object
 
     // Spawn target object
-    std::string model_name ("Seal");
+    std::string model_name ("BakingSoda");
     std::string model_filename = "model://" + model_name;
     ignition::math::Pose3d model_pose(0,0,0,0,0,0);
     spawnModelFromFilename(pubs["factory"], model_pose, model_filename);
@@ -61,13 +63,15 @@ int main(int _argc, char **_argv)
     debugPrintTrace("Target connected");
 
     // Obtain candidate grasps
-    std::string cfg_file("grasp/config/seal.grasp.yml");
+    std::string cfg_file("grasp/config/BakingSoda.grasp.yml");
     std::vector<Grasp> grasps;
     obtainGrasps(cfg_file, grasps);
 
     // Obtain object resting position
-    getTargetPose(pubs["target"], true);
+    getTargetPose(pubs["target"], false);
+    /*
     while (waitingTrigger(g_resting_mutex, g_resting)) {waitMs(10);}
+    */
 
     // Perform trials
     for (auto candidate : grasps)
@@ -76,11 +80,15 @@ int main(int _argc, char **_argv)
     }
 
     // Capture and render frame
+    /*
     captureFrame(pubs["camera"]);
-    while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
-    
+    while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}    
+    */
+
     // Cleanup
+    /*
     removeModel(pubs["request"], camera_name);
+    */
     removeModel(pubs["request"], model_name);
 
     // Shut down
@@ -203,12 +211,15 @@ void tryGrasp(
     std::vector<double> velocity_stop {0,0,0};
     std::vector<double> velocities_close {1.56,1.56,1.56};
 
+    debugPrintTrace("Candidate " << grasp.pose << " Target " << g_pose);
+
     // Teleport hand to grasp candidate pose
     // Add the resting position transformation first
     setPose(pubs["hand"], grasp.pose + g_pose, 0.1);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
     debugPrintTrace("Hand moved to grasp candidate pose");
     // Check if hand is already in collision
+    /*
     getContacts(pubs["contact"], target, g_hand_name);
     while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
     if (!g_success) {
@@ -239,6 +250,7 @@ void tryGrasp(
 
     grasp.success = g_success;
     reset(pubs["hand"]);
+    */
     waitMs(50);
 }
 
