@@ -14,6 +14,9 @@ from shutil import copyfile, rmtree
 import fileinput
 # Regex
 import re
+# Triangular meshes
+import numpy as np
+import trimesh
 
 # Usage
 USAGE = 'options: -i <input mesh directory>\n' +   \
@@ -82,6 +85,8 @@ def main(argv):
     meshes_num = len(meshes)
     for idx, mesh in enumerate(meshes):
 
+    	# Preprocessing - dataset specific
+
         # Erase suffix and extension
         name = mesh.replace('_800_tex', '')
         name = name.replace('.obj', '')
@@ -96,13 +101,7 @@ def main(argv):
         in_mesh = in_dir + '/' + mesh
         out_mesh = out_dir + '/' + name + '/meshes/' + name + '.' + MESH_EXT
 
-        copyfile(template_model, out_model)
-        copyfile(template_cfg, out_cfg)
-        search_and_replace(out_model, 'TEMPLATE', name)
-        search_and_replace(out_model, 'MESH_EXT', 'stl')
-        search_and_replace(out_model, 'SCALE', '1 1 1')
-        search_and_replace(out_cfg, 'TEMPLATE', name)
-        search_and_replace(out_cfg, 'DESCRIPTION', name)
+        # Model mesh
 
         # Open null stream to surpress shell command output
         FNULL = open(os.devnull, 'w')
@@ -115,6 +114,22 @@ def main(argv):
             # Some models do not have poisson filtered meshes; discard them
             print(in_mesh + ' not found. Removing model.')
             rmtree(out_dir + '/' + name)
+
+        # Model description files
+        copyfile(template_model, out_model)
+        copyfile(template_cfg, out_cfg)
+
+        # Open mesh and compute inertia tensor estimation
+        mesh = trimesh.load(out_mesh)
+        properties = trimesh.triangles.mass_properties(mesh.triangles)
+        inertia = properties['inertia']
+        # TODO - Write inertia tensor to output
+
+        search_and_replace(out_model, 'TEMPLATE', name)
+        search_and_replace(out_model, 'MESH_EXT', 'stl')
+        search_and_replace(out_model, 'SCALE', '1 1 1')
+        search_and_replace(out_cfg, 'TEMPLATE', name)
+        search_and_replace(out_cfg, 'DESCRIPTION', name)
 
     print("\r\n\nDone!")
 
