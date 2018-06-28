@@ -29,7 +29,6 @@ void obtainGrasps(std::string file_name, std::vector<Grasp> & grasps)
             }
             grasps.emplace_back(tf_mat);
         }
-        std::cout << tf_mat << std::endl;
     }
     catch (YAML::Exception& yamlException)
     {

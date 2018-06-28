@@ -29,7 +29,12 @@ std::mutex g_finished_mutex;
 bool g_success  {false};
 
 /// Robot name - TODO - make parameter
+#ifdef SHADOWHAND
+std::string g_hand_name {"shadowhand"};
+#endif
+#ifndef SHADOWHAND
 std::string g_hand_name {"vizzy_hand"};
+#endif
 
 int main(int _argc, char **_argv)
 {
@@ -66,11 +71,12 @@ int main(int _argc, char **_argv)
     std::string cfg_file("grasp/config/"+model_name+".grasp.yml");
     std::vector<Grasp> grasps;
     obtainGrasps(cfg_file, grasps);
+    if (grasps.empty()) {
+        errorPrintTrace("No valid grasps retrieved from file");
+        exit(EXIT_FAILURE);
+    }
 
     // Obtain object resting position
-/*
-    getTargetPose(pubs["target"], true);
-*/
     getTargetPose(pubs["target"], true);
     while (waitingTrigger(g_resting_mutex, g_resting)) {waitMs(10);}
 
