@@ -184,13 +184,13 @@ def writeOutput(file, object, robot, matrices):
 def main(argv):
     """Main method
     """
-    object_name = 'BakingSoda'
-    file_name = '/DATA/Datasets/KIT/BakingSoda_800_tex.obj'
-    samples = 100
+    object_name = 'Pitcher'
+    file_name = 'datasets/kit/Pitcher/meshes/Pitcher.stl'
+    samples = 200
     robot = 'vizzy'
     palm_normal = np.array([0,-1,0])
-    palm_offset = 0.05 # [m]
-    out_file = object_name + '.grasp.yml'
+    palm_offset = 0.01 # [m]
+    out_file = 'grasp/config/' + object_name + '.grasp.yml'
 
     mesh = loadMesh(file_name)
     grasps = generateCandidates(mesh, samples, palm_offset, palm_normal)
