@@ -85,20 +85,12 @@ namespace gazebo {
         /// Next timeout
         private: common::Time timeout;
 
-        /// New pose
-        private: ignition::math::Pose3d new_pose;
-        /// New velocity vector
-        private: std::vector<double> new_velocity;
-        /// New joint velocities vector
-        private: std::vector<double> new_joint_velocities;
-        /// Flag to update pose
-        private: bool update_pose                   {false};
-        /// Flag to update velocity
-        private: bool update_velocity               {false};
-        /// Flag to update joints velocity
-        private: bool update_joint_velocities       {false};
-        /// Flag to reset
-        private: bool reset                         {false};
+        /// Initial pose
+        private: ignition::math::Pose3d init_pose {0,0,1,0,0,0};
+        /// Flag for message received
+        private: bool recv_msg {false};
+        /// Last received request message
+        private: boost::shared_ptr<HandMsg const> msg_req;
 
         // Protected attributes
 
@@ -147,22 +139,39 @@ namespace gazebo {
         /// \brief Resets finger joints to default pose
         private: void resetJoints();
 
+        // Requests
+
         /// \brief Changes hand's pose
         ///
         /// Since the hand is fixed to the world, the pose can not be set
         /// directly, and instead must be obtained using the virtual
         /// joints.
         ///
-        /// \param pose The hand's new pose
-        private: void setPose(ignition::math::Pose3d & _pose);
+        /// \param pose The new pose
+        private: void setPose(const ignition::math::Pose3d & pose);
 
-        /// \brief Changes hand's velocity
-        /// \param pose The hand's new velocity vector
-        private: void setVelocity(std::vector<double> & _velocity);
+        /// \brief Changes hand's pose on request
+        /// \param _msg The request message
+        private: void updatePose(HandMsgPtr & _msg);
 
-        /// \brief Changes hand's finger joints velocities
-        /// \param pose The new finger joint velocities
-        private: void setJointVelocities(std::vector<double> & _velocities);
+        /// \brief Updates internal timer
+        /// \param _msg The request message
+        private: void updateTimer(HandMsgPtr & _msg);
+
+        /// \brief Change PID target
+        /// \param type Type of PID control
+        /// \param joint Scoped name of controlled joint
+        /// \param value Desired target value
+        private: void setPIDTarget(
+            int type, const std::string & joint, double value);
+
+        /// \brief Changes hand's pid controller targets
+        /// \param _msg The request message
+        private: void updatePIDTargets(HandMsgPtr & _msg);
+
+        /// \brief Resets world on request
+        /// \param _msg The request message
+        private: void checkReset(HandMsgPtr & _msg);
 
         /// \brief Broadcasts a timeout message
         private: void sendTimeout();

@@ -6,19 +6,16 @@ package grasp.msgs;
 /// \brief TODO
 
 import "pose.proto";
+import "target.proto";
 
 message Hand
 {
     /// New hand pose
     optional gazebo.msgs.Pose   pose                = 1;
-    /// New hand velocity vector
-    repeated double             velocity            = 2;
-    /// Actuated joints velocity vector
-    repeated double             joint_velocities    = 3;
-    /// Controller rate
-    optional double             rate                = 4;
+    /// New pid targets
+    repeated Target             pid_targets         = 2;
     /// Controller timeout
-    optional double             timeout             = 5;
+    optional double             timeout             = 3;
     /// Reset
-    optional bool               reset               = 6;
+    optional bool               reset               = 4;
 }

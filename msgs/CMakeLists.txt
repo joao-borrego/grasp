@@ -11,6 +11,7 @@ endforeach()
 # Obtain set of proto messages definitions
 set (msgs
   # Custom messages
+  target.proto
   gripper.proto
   hand.proto
   # Grasp target messages

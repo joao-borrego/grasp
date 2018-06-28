@@ -55,15 +55,15 @@ int main(int _argc, char **_argv)
     // TODO: Foreach object
 
     // Spawn target object
-    std::string model_name ("BakingSoda");
+    std::string model_name ("Pitcher");
     std::string model_filename = "model://" + model_name;
-    ignition::math::Pose3d model_pose(0,0,0.5,0,0,0);
+    ignition::math::Pose3d model_pose(0,0,0.1,0,0,0);
     spawnModelFromFilename(pubs["factory"], model_pose, model_filename);
     pubs["target"]->WaitForConnection();
     debugPrintTrace("Target connected");
 
     // Obtain candidate grasps
-    std::string cfg_file("grasp/config/BakingSoda.grasp.yml");
+    std::string cfg_file("grasp/config/"+model_name+".grasp.yml");
     std::vector<Grasp> grasps;
     obtainGrasps(cfg_file, grasps);
 
@@ -158,30 +158,85 @@ void getContacts(gazebo::transport::PublisherPtr pub,
 }
 
 /////////////////////////////////////////////////
-void setVelocity(gazebo::transport::PublisherPtr pub,
-    std::vector<double> & velocity,
-    double timeout)
+void closeFingers(gazebo::transport::PublisherPtr pub, double timeout)
 {
-    HandMsg msg;
-    google::protobuf::RepeatedField<double> data(velocity.begin(), velocity.end());
-    msg.mutable_velocity()->Swap(&data);
-    if (timeout > 0) {
-        msg.set_timeout(timeout);
+    grasp::msgs::Hand msg;
+    std::vector<std::string> joints;
+    std::vector<double> values;
+    double value = 1.57; 
+
+    #ifdef SHADOWHAND // Shadowhand
+    joints = {
+        "rh_FFJ4","rh_FFJ3","rh_FFJ2",
+        "rh_MFJ4","rh_MFJ3","rh_MFJ2",
+        "rh_RFJ4","rh_RFJ3","rh_RFJ2",
+        "rh_FFJ4","rh_LFJ3","rh_LFJ2",
+        "rh_THJ5","rh_THJ4","rh_THJ3","rh_THJ2",
+    };
+    values = {
+        0.0, value, value,
+        0.0, value, value,
+        0.0, value, value,
+        0.0, value, value,
+        0.0, 0.0, value, value,
+    };
+    #endif
+    #ifndef SHADOWHAND // Vizzy
+    joints = {
+        "r_thumb_phal_1_joint",
+        "r_ind_phal_1_joint",
+        "r_med_phal_1_joint"
+    };
+    values = {value, value, value};
+    #endif
+    
+    for (unsigned int i = 0; i < joints.size(); i++)
+    {
+        grasp::msgs::Target *target = msg.add_pid_targets();
+        target->set_type(POSITION);
+        target->set_joint(joints.at(i));
+        target->set_value(values.at(i));
     }
+
+    joints = {
+        "virtual_px_joint","virtual_py_joint", "virtual_pz_joint",
+        "virtual_rr_joint","virtual_rp_joint", "virtual_ry_joint"
+    };
+    values = {0,0,0,0,0,0};
+
+    for (unsigned int i = 0; i < joints.size(); i++)
+    {
+        grasp::msgs::Target *target = msg.add_pid_targets();
+        target->set_type(VELOCITY);
+        target->set_joint(joints.at(i));
+        target->set_value(values.at(i));
+    }
+    if (timeout > 0) { msg.set_timeout(timeout); }
+
     pub->Publish(msg);
 }
 
 /////////////////////////////////////////////////
-void setJointVelocities(gazebo::transport::PublisherPtr pub,
-    std::vector<double> & velocities,
-    double timeout)
+void liftHand(gazebo::transport::PublisherPtr pub, double timeout)
 {
-    HandMsg msg;
-    google::protobuf::RepeatedField<double> data(velocities.begin(), velocities.end());
-    msg.mutable_joint_velocities()->Swap(&data);
-    if (timeout > 0) {
-        msg.set_timeout(timeout);
+    grasp::msgs::Hand msg;
+    std::vector<std::string> joints;
+    std::vector<double> values;
+
+    joints = {
+        "virtual_px_joint","virtual_py_joint", "virtual_pz_joint",
+        "virtual_rr_joint","virtual_rp_joint", "virtual_ry_joint"
+    };
+    values = {0,0,10,0,0,0};
+
+    for (unsigned int i = 0; i < joints.size(); i++)
+    {
+        grasp::msgs::Target *target = msg.add_pid_targets();
+        target->set_type(VELOCITY);
+        target->set_joint(joints.at(i));
+        target->set_value(values.at(i));
     }
+    if (timeout > 0) { msg.set_timeout(timeout); }
     pub->Publish(msg);
 }
 
@@ -208,15 +263,18 @@ void tryGrasp(
     std::map<std::string, gazebo::transport::PublisherPtr> & pubs,
     std::string & target)
 {
-    std::vector<double> velocity_lift {0,0,5,0,0,0};
-    std::vector<double> velocity_stop {0,0,0};
-    std::vector<double> velocities_close {1.56,1.56,1.56};
+    // Get pose in world frame, given the object pose
+    ignition::math::Pose3d hand_pose = grasp.getPose(g_pose);
+    if (hand_pose.Pos().Z() < 0) {
+        debugPrintTrace("Pose beneath ground plane. Aborting grasp");
+        return;
+    }
 
-    debugPrintTrace("Candidate " << grasp.getPose(g_pose) << " Target " << g_pose);
+    debugPrintTrace("Candidate " << hand_pose << " Target " << g_pose);
 
     // Teleport hand to grasp candidate pose
     // Add the resting position transformation first
-    setPose(pubs["hand"], grasp.getPose(g_pose), 0.1);
+    setPose(pubs["hand"], hand_pose, 0.0001);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
     debugPrintTrace("Hand moved to grasp candidate pose");
     // Check if hand is already in collision
@@ -229,12 +287,11 @@ void tryGrasp(
     }
     debugPrintTrace("No collisions detected");
     // Close fingers
-    setVelocity(pubs["hand"], velocity_stop, 0.2);
-    setJointVelocities(pubs["hand"], velocities_close, 0.5);
+    closeFingers(pubs["hand"], 0.5);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
     debugPrintTrace("Fingers closed");
     // Lift object
-    setVelocity(pubs["hand"], velocity_lift, 0.7);
+    liftHand(pubs["hand"], 0.7);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
     debugPrintTrace("Object lifted");
     // Stop lifting
@@ -245,7 +302,7 @@ void tryGrasp(
     getTargetPose(pubs["target"], false);
     while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
 
-   debugPrintTrace("Success: " << g_success
+    debugPrintTrace("Success: " << g_success
         << " - Pose: " << grasp.pose);
 
     grasp.success = g_success;

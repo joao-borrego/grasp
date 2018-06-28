@@ -31,15 +31,17 @@
 // Debug streams
 #include "debug.hh"
 
-// Height threshold
+/// Height threshold
 #define Z_LIFTED 0.2
+
+#define SHADOWHAND
 
 // Topics
 
 /// Topic monitored by hand plugin for incoming requests
 #define HAND_REQ_TOPIC      "~/hand"
 /// Topic for hand plugin responses
-#define HAND_RES_TOPIC    	"~/hand/response"
+#define HAND_RES_TOPIC      "~/hand/response"
 /// Topic monitored by target plugin for incoming requests
 #define TARGET_REQ_TOPIC    "~/grasp/target"
 /// Topic for target plugin responses
@@ -76,6 +78,13 @@
 
 /// Request to capture frame
 #define REQ_CAPTURE    grasp::msgs::CameraRequest::CAPTURE
+
+// Hand plugin
+
+/// Position control
+#define POSITION grasp::msgs::Target::POSITION
+/// Velocity control
+#define VELOCITY grasp::msgs::Target::VELOCITY
 
 // Message type definitions
 
@@ -146,19 +155,12 @@ void getContacts(gazebo::transport::PublisherPtr pub,
     std::string & target,
     std::string & hand);
 
-/// \brief Sets hand velocity
-/// \param pub 		Publisher to hand's topic
-/// \param pose 	New hand velocity vector
-/// \param timeout	Timeout in seconds
-void setVelocity(gazebo::transport::PublisherPtr pub,
-    std::vector<double> & velocity,
+/// TODO
+void closeFingers(gazebo::transport::PublisherPtr pub,
     double timeout=-1);
 
-/// \brief Sets hand's finger joint velocities
-/// \param pub Publisher to hand's topic
-/// \param pose New finger joint velocities vector
-void setJointVelocities(gazebo::transport::PublisherPtr pub,
-    std::vector<double> & velocities,
+/// TODO
+void liftHand(gazebo::transport::PublisherPtr pub,
     double timeout=-1);
 
 /// TODO

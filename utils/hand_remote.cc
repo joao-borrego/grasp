@@ -37,30 +37,23 @@ int main(int _argc, char **_argv)
         // Change pose request
         if (command == "pose")
         {
-            ignition::math::Pose3d pose(0,0.0,0.1,0,1.57,0);
+            ignition::math::Pose3d pose(0,0.0,0.15,0,0,0);
             setPose(pub, pose);
         }
         // Change velocity request
-        else if (command == "up")
+        else if (command == "lift")
         {
-            std::vector<double> velocity {0,0,10,0,0,0};
-            setVelocity(pub, velocity);
+            liftHand(pub);
         }
         // Close hand
         else if (command == "close")
         {
-            std::vector<double> velocities_close {1.56,1.56,1.56};
-            std::vector<double> velocity {0,0,0,0,0,0};
-            setJointVelocities(pub, velocities_close);
-            setVelocity(pub, velocity);
+            moveFingers(pub, true);
         }
         // Open hand
         else if (command == "open")
         {
-            std::vector<double> velocities_open {0,0,0};
-            std::vector<double> velocity {0,0,0,0,0,0};
-            setJointVelocities(pub, velocities_open);
-            setVelocity(pub, velocity);
+            moveFingers(pub, false);
         }
         // Perform grasp attempt request
         else if (command == "grasp")
@@ -91,22 +84,84 @@ void setPose(gazebo::transport::PublisherPtr pub,
 }
 
 /////////////////////////////////////////////////
-void setVelocity(gazebo::transport::PublisherPtr pub,
-    std::vector<double> & velocity)
+void moveFingers(gazebo::transport::PublisherPtr pub,
+    bool close)
 {
     grasp::msgs::Hand msg;
-    google::protobuf::RepeatedField<double> data(velocity.begin(), velocity.end());
-    msg.mutable_velocity()->Swap(&data);
+    std::vector<std::string> joints;
+    std::vector<double> values;
+    double value = close? 1.57 : 0.0; 
+
+    #ifdef SHADOWHAND // Shadowhand
+    joints = {
+        "rh_FFJ4","rh_FFJ3","rh_FFJ2",
+        "rh_MFJ4","rh_MFJ3","rh_MFJ2",
+        "rh_RFJ4","rh_RFJ3","rh_RFJ2",
+        "rh_FFJ4","rh_LFJ3","rh_LFJ2",
+        "rh_THJ5","rh_THJ4","rh_THJ3","rh_THJ2",
+    };
+    values = {
+        0.0, value, value,
+        0.0, value, value,
+        0.0, value, value,
+        0.0, value, value,
+        0.0, 0.0, value, value,
+    };
+    #endif
+    #ifndef SHADOWHAND // Vizzy
+    joints = {
+        "r_thumb_phal_1_joint",
+        "r_ind_phal_1_joint",
+        "r_med_phal_1_joint"
+    };
+    values = {value, value, value};
+    #endif
+    
+    for (unsigned int i = 0; i < joints.size(); i++)
+    {
+        grasp::msgs::Target *target = msg.add_pid_targets();
+        target->set_type(POSITION);
+        target->set_joint(joints.at(i));
+        target->set_value(values.at(i));
+    }
+
+    joints = {
+        "virtual_px_joint","virtual_py_joint", "virtual_pz_joint",
+        "virtual_rr_joint","virtual_rp_joint", "virtual_ry_joint"
+    };
+    values = {0,0,0,0,0,0};
+
+    for (unsigned int i = 0; i < joints.size(); i++)
+    {
+        grasp::msgs::Target *target = msg.add_pid_targets();
+        target->set_type(VELOCITY);
+        target->set_joint(joints.at(i));
+        target->set_value(values.at(i));
+    }
+
     pub->Publish(msg);
 }
 
 /////////////////////////////////////////////////
-void setJointVelocities(gazebo::transport::PublisherPtr pub,
-    std::vector<double> & velocities)
+void liftHand(gazebo::transport::PublisherPtr pub)
 {
     grasp::msgs::Hand msg;
-    google::protobuf::RepeatedField<double> data(velocities.begin(), velocities.end());
-    msg.mutable_joint_velocities()->Swap(&data);
+    std::vector<std::string> joints;
+    std::vector<double> values;
+
+    joints = {
+        "virtual_px_joint","virtual_py_joint", "virtual_pz_joint",
+        "virtual_rr_joint","virtual_rp_joint", "virtual_ry_joint"
+    };
+    values = {0,0,10,0,0,0};
+
+    for (unsigned int i = 0; i < joints.size(); i++)
+    {
+        grasp::msgs::Target *target = msg.add_pid_targets();
+        target->set_type(VELOCITY);
+        target->set_joint(joints.at(i));
+        target->set_value(values.at(i));
+    }
     pub->Publish(msg);
 }
 
@@ -122,20 +177,14 @@ void reset(gazebo::transport::PublisherPtr pub)
 void tryGrasp(gazebo::transport::PublisherPtr pub)
 {
     ignition::math::Pose3d pose(0,0,0.1,0,1.57,0);
-    std::vector<double> velocity_lift {0,0,10,0,0,0};
-    std::vector<double> velocity_stop {0,0,0,0,0,0};
-    std::vector<double> velocities_close {1.56,1.56,1.56};
-    std::vector<double> velocities_open {0,0,0};
 
     setPose(pub, pose);
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    setVelocity(pub, velocity_stop);
-    setJointVelocities(pub, velocities_close);
+    moveFingers(pub, true);
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    setVelocity(pub, velocity_lift);
+    liftHand(pub);
     std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-    setJointVelocities(pub, velocities_open);
-    setVelocity(pub, velocity_stop);
+    moveFingers(pub, false);
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     reset(pub);
 }

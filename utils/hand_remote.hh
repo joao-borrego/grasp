@@ -21,10 +21,19 @@
 #include <thread>
 
 // Custom messages
+#include "target.pb.h"
 #include "hand.pb.h"
+
+/// Use shadowhand
+#define SHADOWHAND
 
 /// Command prompt
 #define PROMPT "> "
+
+/// Position control
+#define POSITION grasp::msgs::Target::POSITION
+/// Velocity control
+#define VELOCITY grasp::msgs::Target::VELOCITY
 
 /// Topic monitored by hand plugin for incoming requests
 #define HAND_PLUGIN_TOPIC "~/hand"
@@ -37,17 +46,12 @@
 void setPose(gazebo::transport::PublisherPtr pub,
     ignition::math::Pose3d pose);
 
-/// \brief Sets hand velocity
-/// \param pub Publisher to hand's topic
-/// \param pose New hand velocity vector
-void setVelocity(gazebo::transport::PublisherPtr pub,
-    std::vector<double> & velocity);
+/// TODO
+void moveFingers(gazebo::transport::PublisherPtr pub,
+    bool close);
 
-/// \brief Sets hand's finger joint velocities
-/// \param pub Publisher to hand's topic
-/// \param pose New finger joint velocities vector
-void setJointVelocities(gazebo::transport::PublisherPtr pub,
-    std::vector<double> & velocities);
+/// TODO
+void liftHand(gazebo::transport::PublisherPtr pub);
 
 /// \brief Resets simulation world
 /// \param pub Publisher to hand's topic
