@@ -37,8 +37,21 @@ namespace HandPlugin {
     #define PARAM_MIMIC_JOINT       "mimicJoint"
     /// Virtual revolute joint name SDF entity
     #define PARAM_VIRTUAL_JOINTS    "virtualJoints"
+    /// Controller SDF entity
+    #define PARAM_CONTROLLERS       "controllers"
+    /// Real joint controller SDF entity
+    #define PARAM_CTRL_REAL         "real"
+    /// Virtual joint controller SDF entity
+    #define PARAM_CTRL_VIRTUAL      "virtual"
+    /// Controller type SDF attribute
+    #define PARAM_CTRL_TYPE         "type"
     /// Set gravity state SDF entity
     #define PARAM_GRAVITY           "gravity"
+
+    /// Position controller type
+    #define POSITION grasp::msgs::Target::POSITION
+    /// Velocity controller type
+    #define VELOCITY grasp::msgs::Target::VELOCITY
 
     // Plugin messages
 
@@ -74,6 +87,8 @@ namespace gazebo {
         private: physics::WorldPtr world;
         /// Connection to world update event
         private: event::ConnectionPtr update_connection;
+        /// Connection to world reset event
+        private: event::ConnectionPtr reset_connection;
 
         /// Array of finger joints
         private: std::vector<JointGroup> joint_groups;
@@ -110,6 +125,9 @@ namespace gazebo {
         /// \brief Updates model on world update
         public: void onUpdate();
 
+        /// \brief Updates model on world reset
+        public: void onReset();
+
         /// \brief Callback function for handling incoming requests
         /// \param _msg  The message
         public: void onRequest(HandMsgPtr & _msg);
@@ -130,8 +148,9 @@ namespace gazebo {
         private: bool loadVirtualJoints(sdf::ElementPtr _sdf);
 
         /// \brief Loads PID controllers for each joint
+        /// \param _sdf The root sdf element pointer
         /// \returns Success
-        private: bool loadControllers();
+        private: bool loadControllers(sdf::ElementPtr _sdf);
 
         /// \brief Imobilises the hand
         private: void imobilise();
@@ -157,6 +176,14 @@ namespace gazebo {
         /// \brief Updates internal timer
         /// \param _msg The request message
         private: void updateTimer(HandMsgPtr & _msg);
+
+        // TODO
+        private: void setPIDController(
+            physics::JointControllerPtr controller,
+            int type,
+            const std::string & joint,
+            double p, double i, double d,
+            double initial_value);
 
         /// \brief Change PID target
         /// \param type Type of PID control

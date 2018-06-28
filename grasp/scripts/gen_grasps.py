@@ -187,9 +187,11 @@ def main(argv):
     object_name = 'Pitcher'
     file_name = 'datasets/kit/Pitcher/meshes/Pitcher.stl'
     samples = 200
-    robot = 'vizzy'
-    palm_normal = np.array([0,-1,0])
-    palm_offset = 0.01 # [m]
+    #robot = 'vizzy'
+    #palm_normal = np.array([0,-1,0])
+    robot = 'shadowhand'
+    palm_normal = np.array([0,1,0])
+    palm_offset = 0.03 # [m]
     out_file = 'grasp/config/' + object_name + '.grasp.yml'
 
     mesh = loadMesh(file_name)

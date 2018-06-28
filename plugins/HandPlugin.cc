@@ -79,7 +79,7 @@ void HandPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     // Virtual joints for unconstrained movement
     if (loadVirtualJoints(_sdf) != true) return;
     // Load PID controllers
-    if (loadControllers() != true) return;
+    if (loadControllers(_sdf) != true) return;
     // Enable/disable gravity
     if (_sdf->HasElement(PARAM_GRAVITY))
     {
@@ -93,6 +93,9 @@ void HandPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     // Connect to world update event
     this->update_connection = event::Events::ConnectWorldUpdateBegin(
         std::bind(&HandPlugin::onUpdate, this));
+    // Connect to world reset event
+    this->reset_connection = event::Events::ConnectWorldReset(
+        std::bind(&HandPlugin::onReset, this));
 
     // Setup transport node
     this->data_ptr->node = transport::NodePtr(new transport::Node());
@@ -206,7 +209,27 @@ bool HandPlugin::loadVirtualJoints(sdf::ElementPtr _sdf)
 }
 
 /////////////////////////////////////////////////
-bool HandPlugin::loadControllers()
+void HandPlugin::setPIDController(
+    physics::JointControllerPtr controller,
+    int type,
+    const std::string & joint,
+    double p, double i, double d,
+    double initial_value)
+{
+    if (type == POSITION)
+    {
+        controller->SetPositionPID(joint, common::PID(p,i,d));
+        controller->SetPositionTarget(joint, initial_value); 
+    }
+    else if (type == VELOCITY)
+    {
+        controller->SetVelocityPID(joint, common::PID(p,i,d));
+        controller->SetVelocityTarget(joint, initial_value);
+    }
+}
+
+/////////////////////////////////////////////////
+bool HandPlugin::loadControllers(sdf::ElementPtr _sdf)
 {
     physics::JointControllerPtr controller = model->GetJointController();
 
@@ -220,21 +243,50 @@ bool HandPlugin::loadControllers()
         controller->SetPositionPID(entry.first, common::PID(0,0,0));
     }
 
-    for (const auto &joint : virtual_joints)
+    // Controller pid gains and controller types
+    double v_p = 10.0, v_i = 0.0, v_d = 0.0;
+    double r_p = 3.0, r_i = 0.0, r_d = 0.0;
+    int v_type = POSITION, r_type = POSITION;
+    std::string type;
+
+    if (_sdf->HasElement(PARAM_CONTROLLERS))
     {
-        controller->SetVelocityPID(
-            joint->GetScopedName(), common::PID(5,0,0));
+        gzerr << "GUCCI BANDANA\n";
+
+        sdf::ElementPtr ctrl_sdf = _sdf->GetElement(PARAM_CONTROLLERS);
+        if (ctrl_sdf->HasElement(PARAM_CTRL_REAL) && 
+            ctrl_sdf->HasElement(PARAM_CTRL_VIRTUAL))
+        {
+            sdf::ElementPtr virtual_sdf = ctrl_sdf->GetElement(PARAM_CTRL_VIRTUAL);    
+            sdf::ElementPtr real_sdf = ctrl_sdf->GetElement(PARAM_CTRL_REAL);
+            virtual_sdf->GetAttribute(PARAM_CTRL_TYPE)->Get<std::string>(type);
+            gzerr << "Virtual " << type << std::endl;
+            if (type == "velocity") v_type = VELOCITY; // else position
+            real_sdf->GetAttribute(PARAM_CTRL_TYPE)->Get<std::string>(type);
+            gzerr << "Real " << type << std::endl;
+            if (type == "velocity") r_type = VELOCITY; // else position
+            virtual_sdf->GetAttribute("p")->Get<double>(v_p);
+            virtual_sdf->GetAttribute("i")->Get<double>(v_i);
+            virtual_sdf->GetAttribute("d")->Get<double>(v_d);
+            real_sdf->GetAttribute("p")->Get<double>(r_p);
+            real_sdf->GetAttribute("i")->Get<double>(r_i);
+            real_sdf->GetAttribute("d")->Get<double>(r_d);
+        }
     }
-    for (const auto &group : joint_groups)
+
+    for (const auto & joint : virtual_joints)
     {
-        controller->SetPositionPID(
-            group.actuated->GetScopedName(), common::PID(3,0,0));
-        controller->SetPositionTarget(group.actuated->GetScopedName(), 0);
+       setPIDController(controller, v_type,
+            joint->GetScopedName(), v_p, v_i, v_d, 0.0);
+    }
+    for (const auto & group : joint_groups)
+    {
+        setPIDController(controller, r_type,
+            group.actuated->GetScopedName(), r_p, r_i, r_d, 0.0);
         for (const auto &joint : group.mimic)
         {
-            controller->SetPositionPID(
-                joint->GetScopedName(), common::PID(3,0,0));
-            controller->SetPositionTarget(joint->GetScopedName(), 0);
+            setPIDController(controller, r_type,
+                joint->GetScopedName(), r_p, r_i, r_d, 0.0);
         }
     }
 
@@ -282,6 +334,12 @@ void HandPlugin::onUpdate()
         checkReset(msg_req);
         msg_req.reset();
     }
+}
+
+/////////////////////////////////////////////////
+void HandPlugin::onReset()
+{
+    setPose(init_pose);
 }
 
 /////////////////////////////////////////////////
@@ -336,11 +394,11 @@ void HandPlugin::updateTimer(HandMsgPtr &_msg)
 void HandPlugin::setPIDTarget(int type, const std::string & joint, double value)
 {
     physics::JointControllerPtr ctrl = model->GetJointController();
-    if (type == grasp::msgs::Target::VELOCITY)
+    if (type == VELOCITY)
     {
         ctrl->SetVelocityTarget(joint, value);
     }
-    else if (type == grasp::msgs::Target::POSITION)
+    else if (type == POSITION)
     {
         ctrl->SetPositionTarget(joint, value);
     }

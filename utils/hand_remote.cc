@@ -37,7 +37,7 @@ int main(int _argc, char **_argv)
         // Change pose request
         if (command == "pose")
         {
-            ignition::math::Pose3d pose(0,0.0,0.15,0,0,0);
+            ignition::math::Pose3d pose(0,0.0,0.06,0,-1.56,0);
             setPose(pub, pose);
         }
         // Change velocity request
@@ -97,14 +97,14 @@ void moveFingers(gazebo::transport::PublisherPtr pub,
         "rh_FFJ4","rh_FFJ3","rh_FFJ2",
         "rh_MFJ4","rh_MFJ3","rh_MFJ2",
         "rh_RFJ4","rh_RFJ3","rh_RFJ2",
-        "rh_FFJ4","rh_LFJ3","rh_LFJ2",
+        "rh_LFJ5","rh_LFJ4","rh_LFJ3","rh_LFJ2",
         "rh_THJ5","rh_THJ4","rh_THJ3","rh_THJ2",
     };
     values = {
         0.0, value, value,
         0.0, value, value,
         0.0, value, value,
-        0.0, value, value,
+        0.0, 0.0, value, value,
         0.0, 0.0, value, value,
     };
     #endif

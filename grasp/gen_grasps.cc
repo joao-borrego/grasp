@@ -13,7 +13,8 @@ using namespace ignition::math;
 
 void obtainGrasps(std::string file_name, std::vector<Grasp> & grasps)
 {
-    std::string robot("vizzy");
+    //std::string robot("vizzy");
+    std::string robot("shadowhand");
     Matrix4d tf_mat (Matrix4d::Identity);
 
     try
