@@ -339,7 +339,7 @@ class MainApp(Frame):
 def main(argv):
   """TODO: Main Application"""
 
-  in_file = '../shadowhand_lite.urdf'
+  in_file = '../shadowhand_motor.urdf'
 
   # Open input file
   tree = ET.parse(in_file)  
@@ -349,6 +349,7 @@ def main(argv):
   removePlugins(root, ['gazebo_ros_control'])
   removeElemAttrMatch(root, 'joint', 'name', ['rh_world_joint'])
   removeElemAttrMatch(root, 'link', 'name', ['world'])
+  removeElemAttrMatch(root, 'plugin', 'type', ['contact'])
 
   # Obtain model name
   name = root.attrib['name']
