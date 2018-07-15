@@ -14,58 +14,11 @@ int main(int _argc, char **_argv)
     // Load gazebo as a client
     gazebo::client::setup(_argc, _argv);
 
-    // Create the communication node
-    gazebo::transport::NodePtr node(new gazebo::transport::Node());
-    node->Init();
-
-    // Publish to the object spawner topic
-    gazebo::transport::PublisherPtr pub =
-        node->Advertise<grasp::msgs::Hand>(HAND_PLUGIN_TOPIC);
-
-    // Wait for a subscriber to connect to this publisher
-    pub->WaitForConnection();
+    // Interface
+    Interface io;
 
     // Main loop
-    std::string line = "";
-
-    while (std::cout << PROMPT)
-    {
-        // Process command
-        getline(std::cin, line);
-        std::stringstream input_stream(line);
-        std::string command = input_stream.str();
-        // Change pose request
-        if (command == "pose")
-        {
-            ignition::math::Pose3d pose(0,0.0,0.06,0,-1.56,0);
-            setPose(pub, pose);
-        }
-        // Change velocity request
-        else if (command == "lift")
-        {
-            liftHand(pub);
-        }
-        // Close hand
-        else if (command == "close")
-        {
-            moveFingers(pub, true);
-        }
-        // Open hand
-        else if (command == "open")
-        {
-            moveFingers(pub, false);
-        }
-        // Perform grasp attempt request
-        else if (command == "grasp")
-        {
-           tryGrasp(pub);
-        }
-        // Reset everything
-        else if (command == "reset")
-        {
-            reset(pub);
-        }
-    }
+    io.loop();
 
     // Shut down
     gazebo::client::shutdown();
@@ -98,7 +51,7 @@ void moveFingers(gazebo::transport::PublisherPtr pub,
         "rh_MFJ4","rh_MFJ3","rh_MFJ2",
         "rh_RFJ4","rh_RFJ3","rh_RFJ2",
         "rh_LFJ5","rh_LFJ4","rh_LFJ3","rh_LFJ2",
-        "rh_THJ5","rh_THJ4","rh_THJ3","rh_THJ2",
+        "rh_THJ5","rh_THJ4","rh_THJ3","rh_THJ2"
     };
     values = {
         0.0, value, value,

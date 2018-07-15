@@ -62,7 +62,13 @@ int main(int _argc, char **_argv)
     // Spawn target object
     std::string model_name ("Pitcher");
     std::string model_filename = "model://" + model_name;
+    ignition::math::Pose3d hand_pose(0,0,0.8,0,0,0);
     ignition::math::Pose3d model_pose(0,0,0.1,0,0,0);
+
+    setPose(pubs["hand"], hand_pose, 0.5);
+    while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
+    liftHand(pubs["hand"]);
+
     spawnModelFromFilename(pubs["factory"], model_pose, model_filename);
     pubs["target"]->WaitForConnection();
     debugPrintTrace("Target connected");
@@ -97,6 +103,7 @@ int main(int _argc, char **_argv)
     removeModel(pubs["request"], camera_name);
     */
     removeModel(pubs["request"], model_name);
+    setPose(pubs["hand"], hand_pose);
 
     // Shut down
     gazebo::client::shutdown();
@@ -204,19 +211,6 @@ void closeFingers(gazebo::transport::PublisherPtr pub, double timeout)
         target->set_value(values.at(i));
     }
 
-    joints = {
-        "virtual_px_joint","virtual_py_joint", "virtual_pz_joint",
-        "virtual_rr_joint","virtual_rp_joint", "virtual_ry_joint"
-    };
-    values = {0,0,0,0,0,0};
-
-    for (unsigned int i = 0; i < joints.size(); i++)
-    {
-        grasp::msgs::Target *target = msg.add_pid_targets();
-        target->set_type(VELOCITY);
-        target->set_joint(joints.at(i));
-        target->set_value(values.at(i));
-    }
     if (timeout > 0) { msg.set_timeout(timeout); }
 
     pub->Publish(msg);
@@ -233,12 +227,12 @@ void liftHand(gazebo::transport::PublisherPtr pub, double timeout)
         "virtual_px_joint","virtual_py_joint", "virtual_pz_joint",
         "virtual_rr_joint","virtual_rp_joint", "virtual_ry_joint"
     };
-    values = {0,0,10,0,0,0};
+    values = {0,0,0.8,0,0,0};
 
     for (unsigned int i = 0; i < joints.size(); i++)
     {
         grasp::msgs::Target *target = msg.add_pid_targets();
-        target->set_type(VELOCITY);
+        target->set_type(POSITION);
         target->set_joint(joints.at(i));
         target->set_value(values.at(i));
     }

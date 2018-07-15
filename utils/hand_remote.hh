@@ -24,6 +24,9 @@
 #include "target.pb.h"
 #include "hand.pb.h"
 
+// Interface
+#include "Interface.hh"
+
 /// Use shadowhand
 #define SHADOWHAND
 

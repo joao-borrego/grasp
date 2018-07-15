@@ -251,8 +251,6 @@ bool HandPlugin::loadControllers(sdf::ElementPtr _sdf)
 
     if (_sdf->HasElement(PARAM_CONTROLLERS))
     {
-        gzerr << "GUCCI BANDANA\n";
-
         sdf::ElementPtr ctrl_sdf = _sdf->GetElement(PARAM_CONTROLLERS);
         if (ctrl_sdf->HasElement(PARAM_CTRL_REAL) && 
             ctrl_sdf->HasElement(PARAM_CTRL_VIRTUAL))
@@ -260,10 +258,8 @@ bool HandPlugin::loadControllers(sdf::ElementPtr _sdf)
             sdf::ElementPtr virtual_sdf = ctrl_sdf->GetElement(PARAM_CTRL_VIRTUAL);    
             sdf::ElementPtr real_sdf = ctrl_sdf->GetElement(PARAM_CTRL_REAL);
             virtual_sdf->GetAttribute(PARAM_CTRL_TYPE)->Get<std::string>(type);
-            gzerr << "Virtual " << type << std::endl;
             if (type == "velocity") v_type = VELOCITY; // else position
             real_sdf->GetAttribute(PARAM_CTRL_TYPE)->Get<std::string>(type);
-            gzerr << "Real " << type << std::endl;
             if (type == "velocity") r_type = VELOCITY; // else position
             virtual_sdf->GetAttribute("p")->Get<double>(v_p);
             virtual_sdf->GetAttribute("i")->Get<double>(v_i);
@@ -400,8 +396,10 @@ void HandPlugin::setPIDTarget(int type, const std::string & joint, double value)
     }
     else if (type == POSITION)
     {
+        gzdbg << joint << " : " << value << std::endl; 
         ctrl->SetPositionTarget(joint, value);
     }
+    ctrl->Update();
 }
 
 /////////////////////////////////////////////////

@@ -60,7 +60,7 @@
         <mimicJoint name="rh_THJ1" multiplier="0.5" />
       </actuatedJoint>
       <!-- Virtual joints for floating behaviour -->
-      <virtualJoints min="-1.0" max="1.0">
+      <virtualJoints>
         virtual_px_joint virtual_py_joint virtual_pz_joint
         virtual_rr_joint virtual_rp_joint virtual_ry_joint
       </virtualJoints>
@@ -69,7 +69,7 @@
         <!-- PID parameters for real hand joints -->
         <real type="position" p="3.0" i="0.0" d="0.0"/>
         <!-- PID parameters for virtual joints -->
-        <virtual type="velocity" p="10.0" i="0.0" d="0.0"/>
+        <virtual type="position" p="100.0" i="10.0" d="2.0"/>
       </controllers>
       <!-- Constraints -->
       <gravity>1</gravity>
@@ -87,8 +87,8 @@
     <axis xyz="1 0 0"/>
     <parent link="world"/>
     <child link="virtual_px_link"/>
-    <limit effort="5.0" lower="-0.5" upper="0.5" velocity="5.0"/>
-    <dynamics damping="600.0" friction="10.0"/>
+    <limit effort="25.0" lower="-1.0" upper="1.0" velocity="25.0"/>
+    <dynamics damping="30.0" friction="10.0"/>
   </joint>
   <link name="virtual_px_link">
     <visual>
@@ -114,8 +114,8 @@
     <axis xyz="0 1 0"/>
     <parent link="virtual_px_link"/>
     <child link="virtual_py_link"/>
-    <limit effort="5.0" lower="-0.5" upper="0.5" velocity="5.0"/>
-    <dynamics damping="600.0" friction="10.0"/>
+    <limit effort="25.0" lower="-1.0" upper="1.0" velocity="25.0"/>
+    <dynamics damping="30.0" friction="10.0"/>
   </joint>
   <link name="virtual_py_link">
     <visual>
@@ -141,8 +141,8 @@
     <axis xyz="0 0 1"/>
     <parent link="virtual_py_link"/>
     <child link="virtual_pz_link"/>
-    <limit effort="20.0" lower="0.0" upper="1.0" velocity="20.0"/>
-    <dynamics damping="50.0" friction="0.0"/>
+    <limit effort="25.0" lower="0.0" upper="1.0" velocity="25.0"/>
+    <dynamics damping="30.0" friction="10.0"/>
   </joint>
   <link name="virtual_pz_link">
     <visual>
@@ -170,8 +170,8 @@
     <axis xyz="0 0 1"/>
     <parent link="virtual_pz_link"/>
     <child link="virtual_ry_link"/>
-    <limit lower="-1.57" upper="1.57" effort="10.01" velocity="0.0"/>
-    <dynamics damping="100000" friction="10.0"/>
+    <limit lower="-1.57" upper="1.57" effort="25.0" velocity="25.0"/>
+    <dynamics damping="10.0" friction="5.0"/>
   </joint>
   <link name="virtual_ry_link">
     <visual>
@@ -197,8 +197,8 @@
     <axis xyz="0 1 0"/>
     <parent link="virtual_ry_link"/>
     <child link="virtual_rp_link"/>
-    <limit lower="-1.57" upper="1.57" effort="10.01" velocity="0.0"/>
-    <dynamics damping="100000" friction="10.0"/>
+    <limit lower="-1.57" upper="1.57" effort="25.0" velocity="25.0"/>
+    <dynamics damping="10.0" friction="5.0"/>
   </joint>
   <link name="virtual_rp_link">
     <visual>
@@ -224,8 +224,8 @@
     <axis xyz="1 0 0"/>
     <parent link="virtual_rp_link"/>
     <child link="base_footprint"/>
-    <limit lower="-1.57" upper="1.57" effort="10.01" velocity="0.0"/>
-    <dynamics damping="100000" friction="10.0"/>
+    <limit lower="-1.57" upper="1.57" effort="25.0" velocity="25.0"/>
+    <dynamics damping="10.0" friction="5.0"/>
   </joint>
 
   <!-- Root link, on the ground just below the robot origin -->
