@@ -12,7 +12,6 @@ endforeach()
 set (msgs
   # Custom messages
   target.proto
-  gripper.proto
   hand.proto
   # Grasp target messages
   target_request.proto

@@ -1,6 +1,184 @@
 <?xml version="1.0" ?>
 <robot name="baxter_gripper">
 
+  <!-- Gazebo hand plugin -->
+  <gazebo>
+    <plugin name="hand_plugin" filename="libHandPlugin.so">
+      <!-- Reference names -->
+      <model>baxter_gripper</model>
+      <!-- Fingers -->
+      <actuatedJoint name="gripper_l_finger_joint">
+        <mimicJoint name="gripper_r_finger_joint" multiplier="1.0" />
+      </actuatedJoint>
+      <!-- Virtual joints for floating behaviour -->
+      <virtualJoints>
+        virtual_px_joint virtual_py_joint virtual_pz_joint
+        virtual_rr_joint virtual_rp_joint virtual_ry_joint
+      </virtualJoints>
+      <!-- PID controller parameters -->
+      <controllers>
+        <!-- PID parameters for real hand joints -->
+        <real type="position" p="3.0" i="0.0" d="0.0"/>
+        <!-- PID parameters for virtual joints -->
+        <virtual type="position" p="100.0" i="10.0" d="2.0"/>
+      </controllers>
+      <!-- Constraints -->
+      <gravity>1</gravity>
+    </plugin>
+  </gazebo>
+
+  <!-- Virtual joints for floating behaviour -->
+  
+  <!-- Virtual link world -->
+  <link name="world"/>
+
+  <!-- Translation -->
+  <joint name="virtual_px_joint" type="prismatic">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <parent link="world"/>
+    <child link="virtual_px_link"/>
+    <limit effort="25.0" lower="-1.0" upper="1.0" velocity="25.0"/>
+    <dynamics damping="30.0" friction="10.0"/>
+  </joint>
+  <link name="virtual_px_link">
+    <visual>
+      <origin rpy="0 0 0.0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.005"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <mass value="0.001"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.0 -20.0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.005"/>
+      </geometry>
+    </collision>
+  </link>
+    <joint name="virtual_py_joint" type="prismatic">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <parent link="virtual_px_link"/>
+    <child link="virtual_py_link"/>
+    <limit effort="25.0" lower="-1.0" upper="1.0" velocity="25.0"/>
+    <dynamics damping="30.0" friction="10.0"/>
+  </joint>
+  <link name="virtual_py_link">
+    <visual>
+      <origin rpy="0 0 0.0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.005"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <mass value="0.001"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.0 -20.0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.005"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="virtual_pz_joint" type="prismatic">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <parent link="virtual_py_link"/>
+    <child link="virtual_pz_link"/>
+    <limit effort="25.0" lower="0.0" upper="1.0" velocity="25.0"/>
+    <dynamics damping="30.0" friction="10.0"/>
+  </joint>
+  <link name="virtual_pz_link">
+    <visual>
+      <origin rpy="0 0 0.0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.005"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <mass value="0.001"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.0 -20.0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.005"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Rotation -->
+  <joint name="virtual_ry_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <parent link="virtual_pz_link"/>
+    <child link="virtual_ry_link"/>
+    <limit lower="-1.57" upper="1.57" effort="25.0" velocity="25.0"/>
+    <dynamics damping="10.0" friction="5.0"/>
+  </joint>
+  <link name="virtual_ry_link">
+    <visual>
+      <origin rpy="0 0 0.0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.005"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <mass value="0.001"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.0 -20.0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.005"/>
+      </geometry>
+    </collision>
+  </link>
+    <joint name="virtual_rp_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <parent link="virtual_ry_link"/>
+    <child link="virtual_rp_link"/>
+    <limit lower="-1.57" upper="1.57" effort="25.0" velocity="25.0"/>
+    <dynamics damping="10.0" friction="5.0"/>
+  </joint>
+  <link name="virtual_rp_link">
+    <visual>
+      <origin rpy="0 0 0.0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.01" radius="0.005"/>
+      </geometry>
+    </visual>
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
+      <mass value="0.001"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+    <collision>
+      <origin rpy="0 0 0" xyz="0.0 0.0 -20.0"/>
+      <geometry>
+        <cylinder length="0.001" radius="0.005"/>
+      </geometry>
+    </collision>
+  </link>
+    <joint name="virtual_rr_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <parent link="virtual_rp_link"/>
+    <child link="gripper_base"/>
+    <limit lower="-1.57" upper="1.57" effort="25.0" velocity="25.0"/>
+    <dynamics damping="10.0" friction="5.0"/>
+  </joint>
+
   <!-- Base of end effector -->
   <link name="gripper_base">
     <visual>
@@ -200,179 +378,5 @@
   <gazebo reference="gripper_l_finger_joint">
     <implicitSpringDamper>1</implicitSpringDamper>
   </gazebo>
-
-  <!-- Gazebo gripper plugin -->
-  <gazebo>
-    <plugin name="gripper_plugin" filename="libGripperPlugin.so">
-      <!-- Reference names -->
-      <model>baxter_gripper</model>
-      <!-- Real links and joints -->
-      <baseLink>gripper_base</baseLink>
-      <leftLink>gripper_l_finger</leftLink>
-      <rightLink>gripper_r_finger</rightLink>
-      <leftJoint>gripper_l_finger_joint</leftJoint>
-      <rightJoint>gripper_r_finger_joint</rightJoint>
-      <!-- Virtual joints for floating behaviour -->
-      <virtualJoints>
-        virtual_px_joint
-        virtual_py_joint
-        virtual_pz_joint
-        virtual_rr_joint
-        virtual_rp_joint
-        virtual_ry_joint
-      </virtualJoints>
-      <!-- Constraints -->
-      <gravity>0</gravity>
-    </plugin>
-  </gazebo>
-
-  <!-- Virtual joints for floating behaviour -->
-  <link name="world"/>
-  <!-- Translation -->
-  <joint name="virtual_px_joint" type="prismatic">
-    <origin rpy="0 0 0" xyz="0 0 0"/>
-    <axis xyz="1 0 0"/>
-    <parent link="world"/>
-    <child link="virtual_px_link"/>
-    <limit effort="40.0" lower="0.0" upper="0.5" velocity="5.0"/>
-    <dynamics damping="0.01" friction="0.0"/>
-  </joint>
-  <link name="virtual_px_link">
-    <visual>
-      <origin rpy="0 0 0.0" xyz="0 0 0"/>
-      <geometry>
-        <cylinder length="0.01" radius="0.01"/>
-      </geometry>
-    </visual>
-    <inertial>
-      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
-      <mass value="0.001"/>
-      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
-    </inertial>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
-      <geometry>
-        <cylinder length="0.001" radius="0.01"/>
-      </geometry>
-    </collision>
-  </link>
-    <joint name="virtual_py_joint" type="prismatic">
-    <origin rpy="0 0 0" xyz="0 0 0"/>
-    <axis xyz="0 1 0"/>
-    <parent link="virtual_px_link"/>
-    <child link="virtual_py_link"/>
-    <limit effort="40.0" lower="0.0" upper="0.5" velocity="5.0"/>
-    <dynamics damping="0.01" friction="0.0"/>
-  </joint>
-  <link name="virtual_py_link">
-    <visual>
-      <origin rpy="0 0 0.0" xyz="0 0 0"/>
-      <geometry>
-        <cylinder length="0.01" radius="0.01"/>
-      </geometry>
-    </visual>
-    <inertial>
-      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
-      <mass value="0.001"/>
-      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
-    </inertial>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
-      <geometry>
-        <cylinder length="0.001" radius="0.01"/>
-      </geometry>
-    </collision>
-  </link>
-    <joint name="virtual_pz_joint" type="prismatic">
-    <origin rpy="0 0 0" xyz="0 0 0"/>
-    <axis xyz="0 0 1"/>
-    <parent link="virtual_py_link"/>
-    <child link="virtual_pz_link"/>
-    <limit effort="40.0" lower="0.0" upper="0.5" velocity="5.0"/>
-    <dynamics damping="0.01" friction="0.0"/>
-  </joint>
-  <link name="virtual_pz_link">
-    <visual>
-      <origin rpy="0 0 0.0" xyz="0 0 0"/>
-      <geometry>
-        <cylinder length="0.01" radius="0.01"/>
-      </geometry>
-    </visual>
-    <inertial>
-      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
-      <mass value="0.001"/>
-      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
-    </inertial>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
-      <geometry>
-        <cylinder length="0.001" radius="0.01"/>
-      </geometry>
-    </collision>
-  </link>
-
-  <!-- Rotation -->
-  <joint name="virtual_ry_joint" type="continuous">
-    <origin rpy="0 0 0" xyz="0 0 0"/>
-    <axis xyz="0 0 1"/>
-    <parent link="virtual_pz_link"/>
-    <child link="virtual_ry_link"/>
-    <limit effort="40.0" velocity="5.0"/>
-    <dynamics damping="10000" friction="0.0"/>
-  </joint>
-  <link name="virtual_ry_link">
-    <visual>
-      <origin rpy="0 0 0.0" xyz="0 0 0"/>
-      <geometry>
-        <cylinder length="0.01" radius="0.01"/>
-      </geometry>
-    </visual>
-    <inertial>
-      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
-      <mass value="0.001"/>
-      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
-    </inertial>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
-      <geometry>
-        <cylinder length="0.001" radius="0.01"/>
-      </geometry>
-    </collision>
-  </link>
-    <joint name="virtual_rp_joint" type="continuous">
-    <origin rpy="0 0 0" xyz="0 0 0"/>
-    <axis xyz="0 1 0"/>
-    <parent link="virtual_ry_link"/>
-    <child link="virtual_rp_link"/>
-    <limit effort="40.0" velocity="5.0"/>
-    <dynamics damping="10000" friction="0.0"/>
-  </joint>
-  <link name="virtual_rp_link">
-    <visual>
-      <origin rpy="0 0 0.0" xyz="0 0 0"/>
-      <geometry>
-        <cylinder length="0.01" radius="0.01"/>
-      </geometry>
-    </visual>
-    <inertial>
-      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
-      <mass value="0.001"/>
-      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
-    </inertial>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
-      <geometry>
-        <cylinder length="0.001" radius="0.01"/>
-      </geometry>
-    </collision>
-  </link>
-    <joint name="virtual_rr_joint" type="continuous">
-    <origin rpy="0 0 0" xyz="0 0 0"/>
-    <axis xyz="1 0 0"/>
-    <parent link="virtual_rp_link"/>
-    <child link="gripper_base"/>
-    <limit effort="40.0" velocity="5.0"/>
-    <dynamics damping="10000" friction="0.0"/>
-  </joint>
 
 </robot>

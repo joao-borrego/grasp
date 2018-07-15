@@ -21,14 +21,6 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 include_directories(${PROJECT_BINARY_DIR}/msgs)
 link_directories(${PROJECT_BINARY_DIR}/msgs)
 
-# Gripper Gazebo plugin
-add_library(GripperPlugin SHARED GripperPlugin.cc )
-target_link_libraries(GripperPlugin
-    grasp_msgs
-    ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
-add_dependencies(GripperPlugin
-    grasp_msgs)
-
 # Hand Gazebo plugin
 add_library(HandPlugin SHARED HandPlugin.cc )
 target_link_libraries(HandPlugin

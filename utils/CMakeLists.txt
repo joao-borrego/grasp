@@ -17,17 +17,11 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 include_directories(${PROJECT_BINARY_DIR}/msgs)
 link_directories(${PROJECT_BINARY_DIR}/msgs)
 
-# Gripper plugin example client
-add_executable (gripper_remote gripper_remote.cc)
-target_link_libraries(gripper_remote
-    grasp_msgs
-    ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES} ${SDF_LIBRARIES})
-add_dependencies(
-    gripper_remote
-    grasp_msgs)
-
 # Hand plugin example client
-add_executable (hand_remote hand_remote.cc)
+add_executable (hand_remote
+    hand_remote.cc
+    Interface.cc
+    utils.cc)
 target_link_libraries(hand_remote
     grasp_msgs
     ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES} ${SDF_LIBRARIES})
