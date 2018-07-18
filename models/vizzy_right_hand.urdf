@@ -6,6 +6,38 @@
   xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
   xmlns:xacro="http://ros.org/wiki/xacro">
 
+  <!-- Gazebo hand plugin -->
+  <gazebo>
+    <plugin name="hand_plugin" filename="libHandPlugin.so">
+      <!-- Reference names -->
+      <model>vizzy_right_hand</model>
+      <!-- Fingers -->
+      <actuatedJoint name="r_thumb_phal_1_joint">
+        <mimicJoint name="r_thumb_phal_2_joint" multiplier="0.5" />
+        <mimicJoint name="r_thumb_phal_3_joint" multiplier="0.5" />
+      </actuatedJoint>
+      <actuatedJoint name="r_ind_phal_1_joint">
+        <mimicJoint name="r_ind_phal_2_joint" multiplier="0.5" />
+        <mimicJoint name="r_ind_phal_3_joint" multiplier="0.5" />
+      </actuatedJoint>
+      <!-- Vizzy's med and min fingers are coupled and act as one -->
+      <actuatedJoint name="r_med_phal_1_joint">
+        <mimicJoint name="r_med_phal_2_joint" multiplier="0.5" />
+        <mimicJoint name="r_med_phal_3_joint" multiplier="0.5" />
+        <mimicJoint name="r_min_phal_1_joint" multiplier="1.0" />
+        <mimicJoint name="r_min_phal_3_joint" multiplier="0.5" />
+        <mimicJoint name="r_min_phal_2_joint" multiplier="0.5" />
+      </actuatedJoint>
+      <!-- Virtual joints for floating behaviour -->
+      <virtualJoints>
+        virtual_px_joint virtual_py_joint virtual_pz_joint
+        virtual_rr_joint virtual_rp_joint virtual_ry_joint
+      </virtualJoints>
+      <!-- Constraints -->
+      <gravity>0</gravity>
+    </plugin>
+  </gazebo>
+
   <!-- Root link, on the ground just below the robot origin -->
   <link name="base_footprint">
   </link>
@@ -161,38 +193,6 @@
     <limit lower="-1.57" upper="1.57" effort="10.01" velocity="0.0"/>
     <dynamics damping="100000" friction="10.0"/>
   </joint>
-
-  <!-- Gazebo hand plugin -->
-  <gazebo>
-    <plugin name="hand_plugin" filename="libHandPlugin.so">
-      <!-- Reference names -->
-      <model>vizzy_right_hand</model>
-      <!-- Fingers -->
-      <actuatedJoint name="r_thumb_phal_1_joint">
-        <mimicJoint name="r_thumb_phal_2_joint" multiplier="0.5" />
-        <mimicJoint name="r_thumb_phal_3_joint" multiplier="0.5" />
-      </actuatedJoint>
-      <actuatedJoint name="r_ind_phal_1_joint">
-        <mimicJoint name="r_ind_phal_2_joint" multiplier="0.5" />
-        <mimicJoint name="r_ind_phal_3_joint" multiplier="0.5" />
-      </actuatedJoint>
-      <!-- Vizzy's med and min fingers are coupled and act as one -->
-      <actuatedJoint name="r_med_phal_1_joint">
-        <mimicJoint name="r_med_phal_2_joint" multiplier="0.5" />
-        <mimicJoint name="r_med_phal_3_joint" multiplier="0.5" />
-        <mimicJoint name="r_min_phal_1_joint" multiplier="1.0" />
-        <mimicJoint name="r_min_phal_3_joint" multiplier="0.5" />
-        <mimicJoint name="r_min_phal_2_joint" multiplier="0.5" />
-      </actuatedJoint>
-      <!-- Virtual joints for floating behaviour -->
-      <virtualJoints>
-        virtual_px_joint virtual_py_joint virtual_pz_joint
-        virtual_rr_joint virtual_rp_joint virtual_ry_joint
-      </virtualJoints>
-      <!-- Constraints -->
-      <gravity>0</gravity>
-    </plugin>
-  </gazebo>
 
   <!-- Vizzy's right hand -->
   <joint name="r_hand_base_joint_fix" type="fixed">

@@ -8,7 +8,7 @@
       <model>baxter_gripper</model>
       <!-- Fingers -->
       <actuatedJoint name="gripper_l_finger_joint">
-        <mimicJoint name="gripper_r_finger_joint" multiplier="1.0" />
+        <mimicJoint name="gripper_r_finger_joint" multiplier="-1.0" />
       </actuatedJoint>
       <!-- Virtual joints for floating behaviour -->
       <virtualJoints>
@@ -18,12 +18,12 @@
       <!-- PID controller parameters -->
       <controllers>
         <!-- PID parameters for real hand joints -->
-        <real type="position" p="3.0" i="0.0" d="0.0"/>
+        <real type="position" p="100.0" i="10.0" d="0.0"/>
         <!-- PID parameters for virtual joints -->
-        <virtual type="position" p="100.0" i="10.0" d="2.0"/>
+        <virtual type="position" p="100.0" i="10.0" d="0.0"/>
       </controllers>
       <!-- Constraints -->
-      <gravity>1</gravity>
+      <gravity>0</gravity>
     </plugin>
   </gazebo>
 
@@ -50,8 +50,8 @@
     </visual>
     <inertial>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
-      <mass value="0.001"/>
-      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+      <mass value="01"/>
+      <inertia ixx="0.1" ixy="0" ixz="0" iyy="0.1" iyz="0" izz="0.1"/>
     </inertial>
     <collision>
       <origin rpy="0 0 0" xyz="0.0 0.0 -20.0"/>
@@ -77,8 +77,8 @@
     </visual>
     <inertial>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
-      <mass value="0.001"/>
-      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+      <mass value="01"/>
+      <inertia ixx="0.1" ixy="0" ixz="0" iyy="0.1" iyz="0" izz="0.1"/>
     </inertial>
     <collision>
       <origin rpy="0 0 0" xyz="0.0 0.0 -20.0"/>
@@ -104,8 +104,8 @@
     </visual>
     <inertial>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
-      <mass value="0.001"/>
-      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+      <mass value="01"/>
+      <inertia ixx="0.1" ixy="0" ixz="0" iyy="0.1" iyz="0" izz="0.1"/>
     </inertial>
     <collision>
       <origin rpy="0 0 0" xyz="0.0 0.0 -20.0"/>
@@ -116,12 +116,12 @@
   </link>
 
   <!-- Rotation -->
-  <joint name="virtual_ry_joint" type="revolute">
+  <joint name="virtual_ry_joint" type="continuous">
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="0 0 1"/>
     <parent link="virtual_pz_link"/>
     <child link="virtual_ry_link"/>
-    <limit lower="-1.57" upper="1.57" effort="25.0" velocity="25.0"/>
+    <limit effort="25.0" velocity="25.0"/>
     <dynamics damping="10.0" friction="5.0"/>
   </joint>
   <link name="virtual_ry_link">
@@ -133,8 +133,8 @@
     </visual>
     <inertial>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
-      <mass value="0.001"/>
-      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+      <mass value="01"/>
+      <inertia ixx="0.1" ixy="0" ixz="0" iyy="0.1" iyz="0" izz="0.1"/>
     </inertial>
     <collision>
       <origin rpy="0 0 0" xyz="0.0 0.0 -20.0"/>
@@ -143,12 +143,12 @@
       </geometry>
     </collision>
   </link>
-    <joint name="virtual_rp_joint" type="revolute">
+    <joint name="virtual_rp_joint" type="continuous">
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="0 1 0"/>
     <parent link="virtual_ry_link"/>
     <child link="virtual_rp_link"/>
-    <limit lower="-1.57" upper="1.57" effort="25.0" velocity="25.0"/>
+    <limit effort="25.0" velocity="25.0"/>
     <dynamics damping="10.0" friction="5.0"/>
   </joint>
   <link name="virtual_rp_link">
@@ -160,8 +160,8 @@
     </visual>
     <inertial>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
-      <mass value="0.001"/>
-      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+      <mass value="01"/>
+      <inertia ixx="0.1" ixy="0" ixz="0" iyy="0.1" iyz="0" izz="0.1"/>
     </inertial>
     <collision>
       <origin rpy="0 0 0" xyz="0.0 0.0 -20.0"/>
@@ -170,12 +170,12 @@
       </geometry>
     </collision>
   </link>
-    <joint name="virtual_rr_joint" type="revolute">
+    <joint name="virtual_rr_joint" type="continuous">
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="1 0 0"/>
     <parent link="virtual_rp_link"/>
     <child link="gripper_base"/>
-    <limit lower="-1.57" upper="1.57" effort="25.0" velocity="25.0"/>
+    <limit effort="25.0" velocity="25.0"/>
     <dynamics damping="10.0" friction="5.0"/>
   </joint>
 
