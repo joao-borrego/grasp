@@ -17,15 +17,18 @@ import re
 # Triangular meshes
 import numpy as np
 import trimesh
-
-# Usage
-USAGE = 'options: -i <input mesh directory>\n' +   \
-        '         -o <output model directory>\n' + \
-        '         -t <template directory>\n' +     \
-        '         -s <meshlab script> \n'
+# YAML output
+import yaml
 
 # Output mesh format
 MESH_EXT = 'stl'
+
+# Usage
+USAGE = 'options: -i <input mesh directory>\n' +   \
+        '         -t <template directory>\n' +     \
+        '         -s <meshlab script> \n' +        \
+        '         -o <output model directory>\n' + \
+        '         -c <output config yml path>\n'
 
 def parseArgs(argv):
     '''
@@ -37,12 +40,14 @@ def parseArgs(argv):
     out_dir = 'output'
     template = 'template'
     script = 'script.mlx'
+    out_yml = 'dataset.yml'
     
     usage = 'usage:   ' + argv[0] + ' [options]\n' + USAGE
 
     try:
         opts, args = getopt.getopt(argv[1:],
-            "hi:o:t:s:",["in_dir=","out_dir=","template=","script="])
+            "hi:o:t:s:c:",
+            ["in_dir=","out_dir=","template=","script=","out_yml="])
     except getopt.GetoptError:
         print (usage)
         sys.exit(2)
@@ -59,13 +64,16 @@ def parseArgs(argv):
             template = arg
         elif opt in ("-s", "--script"):
             script = arg
+        elif opt in ("-c", "--config"):
+            out_yml = arg
 
     print ('Input mesh directory   ', in_dir)
     print ('Output model directory ', out_dir)
+    print ('Output config file     ', out_yml)
     print ('Template path          ', template)
     print ('Meshlab script         ', script)
     
-    return [in_dir, out_dir, template, script]
+    return [in_dir, out_dir, out_yml, template, script]
 
 def search_and_replace(filename, search, replace):
     with fileinput.FileInput(filename, inplace=True) as file:
@@ -75,14 +83,18 @@ def search_and_replace(filename, search, replace):
 def main(argv):
 
     # Obtain command-line arguments
-    [in_dir, out_dir, template, script] = parseArgs(argv)
+    [in_dir, out_dir, out_yml, template, script] = parseArgs(argv)
 
-    meshes = [f for f in os.listdir(in_dir) \
-        if os.path.isfile(os.path.join(in_dir, f))]
+    # Initialise output yaml data
+    data_yml = dict()
 
     print('\nGenerating Gazebo models:\n')
 
+    # Get list of meshes
+    meshes = [f for f in os.listdir(in_dir) \
+        if os.path.isfile(os.path.join(in_dir, f))]
     meshes_num = len(meshes)
+
     for idx, mesh in enumerate(meshes):
 
     	# Preprocessing - dataset specific
@@ -90,8 +102,10 @@ def main(argv):
         # Erase suffix and extension
         name = mesh.replace('_800_tex', '')
         name = name.replace('.obj', '')
-        print("\x1b[2K{:10.4f}".format(idx * 100.0 / meshes_num) + ' % - ' + name, end="\r")
+        print("\x1b[2K{:10.4f}".format(idx * 100.0 / meshes_num) + \
+            ' % - ' + name, end="\r")
         
+        # Obtain required input and output path names
         out_name = out_dir + '/' + name + '/meshes/'
         os.makedirs(os.path.dirname(out_name), exist_ok=1)
         template_model = template + '/model.sdf'
@@ -119,19 +133,33 @@ def main(argv):
         copyfile(template_model, out_model)
         copyfile(template_cfg, out_cfg)
 
-        # Open mesh and compute inertia tensor estimation
-        mesh = trimesh.load(out_mesh)
-        properties = trimesh.triangles.mass_properties(mesh.triangles)
-        inertia = properties['inertia']
-        # TODO - Write inertia tensor to output
-
         search_and_replace(out_model, 'TEMPLATE', name)
         search_and_replace(out_model, 'MESH_EXT', 'stl')
         search_and_replace(out_model, 'SCALE', '1 1 1')
         search_and_replace(out_cfg, 'TEMPLATE', name)
         search_and_replace(out_cfg, 'DESCRIPTION', name)
 
-    print("\r\n\nDone!")
+        # Dataset configuration file
+        data_yml[name] = dict()
+        data_yml[name]['name'] = name
+        data_yml[name]['path'] = 'model://' + name
+        data_yml[name]['mesh'] = out_mesh 
+
+        # Open mesh and compute physical properties
+        mesh = trimesh.load(out_mesh)
+        properties = trimesh.triangles.mass_properties(mesh.triangles)
+        inertia = properties['inertia']
+        mass = properties['mass']
+        # TODO - Use estimated physical properties
+        #data_yml[name]['mass'] = float(mass)
+        #data_yml[name]['inertia'] = str(inertia.tolist())
+
+    # Write output yaml
+    with open(out_yml, 'w') as outfile:
+        yaml.dump(data_yml, outfile, default_flow_style=False)
+
+    print("\x1b[2K{:10.4f}".format(100.0) + ' %\n\n' + \
+     "Done generating Gazebo models!\n")
 
 if __name__ == "__main__":
     main(sys.argv)
