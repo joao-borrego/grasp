@@ -17,36 +17,38 @@ Interface::Interface()
 
     std::vector<double> values;
 
+    // Initial configuration
+
     joints = {
         "virtual_px_joint","virtual_py_joint", "virtual_pz_joint",
         "virtual_rr_joint","virtual_rp_joint", "virtual_ry_joint",
+        /*
         "rh_FFJ4","rh_FFJ3","rh_FFJ2",
         "rh_MFJ4","rh_MFJ3","rh_MFJ2",
         "rh_RFJ4","rh_RFJ3","rh_RFJ2",
         "rh_LFJ5","rh_LFJ4","rh_LFJ3","rh_LFJ2",
         "rh_THJ5","rh_THJ4","rh_THJ3","rh_THJ2"
+        */
+        "gripper_l_finger_joint", "gripper_r_finger_joint"
     };
     values = {
         0.0, 0.0, 0.5,
         0.0, 0.0, 0.0,
+        /*
         0.0, 0.0, 0.0,
         0.0, 0.0, 0.0,
         0.0, 0.0, 0.0,
         0.0, 0.0, 0.0, 0.0,
         0.0, 0.0, 0.0, 0.0
+        */
+        0.0, 0.0
     };
+    
+    setJoints(joints, values);
 
-    grasp::msgs::Hand msg;
-    for (unsigned int i = 0; i < joints.size(); i++)
-    {    
-        const char *joint = joints.at(i).c_str();
-        state[joint] = 0.0;
-        grasp::msgs::Target *target = msg.add_pid_targets();
-        target->set_type(POSITION);
-        target->set_joint(joint);
-        target->set_value(0.0);
-    }
-    pub->Publish(msg);
+    fingers = {
+        "gripper_l_finger_joint"
+    };
 }
 
 //////////////////////////////////////////////////
@@ -102,6 +104,11 @@ int Interface::processKeypress(char key)
             moveJoint("virtual_ry_joint",  0.025); break;
         case 'o':
             moveJoint("virtual_ry_joint", -0.025); break;
+        // Move fingers
+        case 'r':
+            moveFingers(rest_finger_pos); break;
+        case 'f':
+            moveFingers(bent_finger_pos); break;
         default:
             break;
     }
@@ -109,25 +116,28 @@ int Interface::processKeypress(char key)
 }
 
 //////////////////////////////////////////////////
-void Interface::moveJoint(const char *joint, float value)
-{ 
-    auto search = state.find(joint);
-    if (search != state.end())
-    {
-        search->second += value;
-        grasp::msgs::Hand msg;
-        grasp::msgs::Target *target = msg.add_pid_targets();
-        target->set_type(POSITION);
-        target->set_joint(joint);
-        target->set_value(search->second);
-        pub->Publish(msg);
-    }
+void Interface::moveFingers(double value)
+{
+    std::vector<double> values(fingers.size(), value);
+    setJoints(fingers, values);
 }
 
 //////////////////////////////////////////////////
-void Interface::moveJoints(
+void Interface::moveJoint(const char *joint, double value)
+{ 
+    state[joint] += value;
+    grasp::msgs::Hand msg;
+    grasp::msgs::Target *target = msg.add_pid_targets();
+    target->set_type(POSITION);
+    target->set_joint(joint);
+    target->set_value(state[joint]);
+    pub->Publish(msg);
+}
+
+//////////////////////////////////////////////////
+void Interface::setJoints(
     std::vector<std::string> & joints,
-    std::vector<float> & values)
+    std::vector<double> & values)
 { 
     if (joints.size() == values.size())
     {
@@ -135,7 +145,7 @@ void Interface::moveJoints(
         for (unsigned int i = 0; i < joints.size(); i++)
         {
             const char *joint = joints.at(i).c_str();
-            state[joint] = 0.0;
+            state[joint] = values.at(i);
             grasp::msgs::Target *target = msg.add_pid_targets();
             target->set_type(POSITION);
             target->set_joint(joint);

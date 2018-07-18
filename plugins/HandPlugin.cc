@@ -390,16 +390,21 @@ void HandPlugin::updateTimer(HandMsgPtr &_msg)
 void HandPlugin::setPIDTarget(int type, const std::string & joint, double value)
 {
     physics::JointControllerPtr ctrl = model->GetJointController();
+    
     if (type == VELOCITY)
     {
         ctrl->SetVelocityTarget(joint, value);
     }
     else if (type == POSITION)
     {
-        gzdbg << joint << " : " << value << std::endl; 
         ctrl->SetPositionTarget(joint, value);
+        
+        // DEBUG
+        ctrl->Update();
+        std::map<std::string, double> positions;
+        positions = ctrl->GetPositions();
+        gzdbg << joint << " : " << positions[joint] << "\n";
     }
-    ctrl->Update();
 }
 
 /////////////////////////////////////////////////

@@ -47,6 +47,13 @@ class Interface
     /// TODO
     private: std::vector<std::string> joints;
     /// TODO
+    private: std::vector<std::string> fingers;
+    /// TODO
+    private: double rest_finger_pos {0.0};
+    /// TODO
+    private: double bent_finger_pos {1.0}; 
+
+    /// TODO
     private: std::map<std::string, double> state;
 
 
@@ -60,12 +67,16 @@ class Interface
     private: int processKeypress(char key);
 
     /// TODO
-    private: void moveJoint(const char*, float);
+    private: void moveJoint(
+        const char *joint, double value);
 
     /// TODO
-    void moveJoints(
-    std::vector<std::string> & joints,
-    std::vector<float> & values);
+    private: void moveFingers(double value);
+
+    /// TODO
+    private: void setJoints(
+        std::vector<std::string> & joints,
+        std::vector<double> & values);
 };
 
 #endif
