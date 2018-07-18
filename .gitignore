@@ -7,6 +7,8 @@ datasets/kit
 datasets/ShapeNetSem
 datasets/ycb
 # Grasp candidates files
-grasp/config
+config/
+# Exclude important configs
+!grasp/config
 # Documentation
 doc/

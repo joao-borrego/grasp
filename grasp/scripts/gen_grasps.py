@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 """
 All heavy lifting performed by mveres01 at
@@ -17,6 +17,63 @@ from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 # YAML output
 import yaml
+
+# Amount of grasps to sample per (hand,object) pair
+SAMPLES = 200
+# Plot 3D object with grasp candidates
+DEBUG = False 
+
+# Usage
+USAGE = 'options: -d <object dataset yaml>\n' +            \
+        '         -p <hand properties yaml>\n' +           \
+        '         -o <grasp output directory>\n' +         \
+        '         -t <target> [optional, default=all]\n' + \
+        '         -r <robot> [optional, default=all]\n'
+
+def parseArgs(argv):
+    '''
+    Parses command-line options.
+    '''
+
+    # Parameters
+    obj_dataset = 'dataset.yml'
+    hand_cfg = 'hands.yml'
+    out_dir = 'grasps'
+    target = 'all'
+    robot = 'all'
+
+    usage = 'usage:   ' + argv[0] + ' [options]\n' + USAGE
+
+    try:
+        opts, args = getopt.getopt(argv[1:],
+            "hd:p:o:t:r:",
+            ["in_dir=","out_dir=","template=","script=","out_yml="])
+    except getopt.GetoptError:
+        print (usage)
+        sys.exit(2)
+
+    for opt, arg in opts:
+        if opt == '-h':
+            print (usage)
+            sys.exit()
+        elif opt in ("-d", "--obj_dataset"):
+            obj_dataset = arg
+        elif opt in ("-p", "--hand_cfg"):
+            hand_cfg = arg
+        elif opt in ("-o", "--out_dir"):
+            out_dir = arg
+        elif opt in ("-t", "--target"):
+            target = arg
+        elif opt in ("-r", "--robot"):
+            robot = arg
+
+    print ('Object dataset yaml    ', obj_dataset)
+    print ('Hand properties yaml   ', hand_cfg)
+    print ('Output directory       ', out_dir)
+    print ('Target object          ', target)
+    print ('Robot                  ', robot)
+    
+    return [obj_dataset, hand_cfg, out_dir, target, robot]
 
 def loadMesh(mesh_path):
     """Loads mesh from file
@@ -181,23 +238,53 @@ def writeOutput(file, object, robot, matrices):
     with open(file, 'w') as outfile:
         yaml.dump(data, outfile, default_flow_style=False)
 
-def main(argv):
-    """Main method
+def parseYAML(obj_dataset):
+    """ Parses YAML file to dictionary.
     """
-    object_name = 'Pitcher'
-    file_name = 'datasets/kit/Pitcher/meshes/Pitcher.stl'
-    samples = 200
-    #robot = 'vizzy'
-    #palm_normal = np.array([0,-1,0])
-    robot = 'shadowhand'
-    palm_normal = np.array([0,1,0])
-    palm_offset = 0.03 # [m]
-    out_file = 'grasp/config/' + object_name + '.grasp.yml'
 
-    mesh = loadMesh(file_name)
-    grasps = generateCandidates(mesh, samples, palm_offset, palm_normal)
-    plotMeshWithNormals(mesh, grasps, palm_normal)
-    writeOutput(out_file, object_name, robot, grasps)
+    data = dict()
+    with open(obj_dataset, 'r') as stream:
+        try:
+            data = yaml.load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+            sys.exit(2)
 
+    return data
+
+def main(argv):
+    """ Main method
+    """
+    
+    [obj_dataset, hand_cfg, out_dir, target, robot] = parseArgs(argv)
+
+    # Parse input config files
+    objects_data = parseYAML(obj_dataset)
+    hands_data = parseYAML(hand_cfg)
+
+    targets = [key for key in objects_data] if target == 'all' else [target]
+    hands = [key for key in hands_data] if robot == 'all' else [robot]
+
+    # TODO - try, except
+
+    for hand in hands:
+        
+        tmp_normal = hands_data[hand]['palm_normal'].split(" ")
+        palm_normal = np.array(tmp_normal,  dtype=float)
+        palm_offset = float(hands_data[hand]['palm_offset'])
+
+        for target in targets:
+
+            out_file = out_dir + '/' + target + '.' + robot + '.grasp.yml'
+            mesh_filename = objects_data[target]['mesh'] 
+        
+            mesh = loadMesh(mesh_filename)
+            grasps = generateCandidates(mesh, SAMPLES,
+                palm_offset, palm_normal)
+            writeOutput(out_file, target, robot, grasps)
+
+            if (DEBUG):
+                plotMeshWithNormals(mesh, grasps, palm_normal)
+    
 if __name__ == "__main__" :
     main(sys.argv)

@@ -1,0 +1,512 @@
+Amicelli:
+  mesh: datasets/kit/Amicelli/meshes/Amicelli.stl
+  name: Amicelli
+  path: model://Amicelli
+BakingSoda:
+  mesh: datasets/kit/BakingSoda/meshes/BakingSoda.stl
+  name: BakingSoda
+  path: model://BakingSoda
+BakingVanilla:
+  mesh: datasets/kit/BakingVanilla/meshes/BakingVanilla.stl
+  name: BakingVanilla
+  path: model://BakingVanilla
+BathDetergent:
+  mesh: datasets/kit/BathDetergent/meshes/BathDetergent.stl
+  name: BathDetergent
+  path: model://BathDetergent
+BlueSaltCube:
+  mesh: datasets/kit/BlueSaltCube/meshes/BlueSaltCube.stl
+  name: BlueSaltCube
+  path: model://BlueSaltCube
+BroccoliSoup:
+  mesh: datasets/kit/BroccoliSoup/meshes/BroccoliSoup.stl
+  name: BroccoliSoup
+  path: model://BroccoliSoup
+CatLying:
+  mesh: datasets/kit/CatLying/meshes/CatLying.stl
+  name: CatLying
+  path: model://CatLying
+CatSitting:
+  mesh: datasets/kit/CatSitting/meshes/CatSitting.stl
+  name: CatSitting
+  path: model://CatSitting
+CeylonTea:
+  mesh: datasets/kit/CeylonTea/meshes/CeylonTea.stl
+  name: CeylonTea
+  path: model://CeylonTea
+ChickenSoup:
+  mesh: datasets/kit/ChickenSoup/meshes/ChickenSoup.stl
+  name: ChickenSoup
+  path: model://ChickenSoup
+ChocMarshmallows:
+  mesh: datasets/kit/ChocMarshmallows/meshes/ChocMarshmallows.stl
+  name: ChocMarshmallows
+  path: model://ChocMarshmallows
+ChocSticks:
+  mesh: datasets/kit/ChocSticks/meshes/ChocSticks.stl
+  name: ChocSticks
+  path: model://ChocSticks
+ChocSticks2:
+  mesh: datasets/kit/ChocSticks2/meshes/ChocSticks2.stl
+  name: ChocSticks2
+  path: model://ChocSticks2
+ChocoIcing:
+  mesh: datasets/kit/ChocoIcing/meshes/ChocoIcing.stl
+  name: ChocoIcing
+  path: model://ChocoIcing
+ChocolateBars:
+  mesh: datasets/kit/ChocolateBars/meshes/ChocolateBars.stl
+  name: ChocolateBars
+  path: model://ChocolateBars
+ChoppedTomatoes:
+  mesh: datasets/kit/ChoppedTomatoes/meshes/ChoppedTomatoes.stl
+  name: ChoppedTomatoes
+  path: model://ChoppedTomatoes
+Clown:
+  mesh: datasets/kit/Clown/meshes/Clown.stl
+  name: Clown
+  path: model://Clown
+CoffeeBox:
+  mesh: datasets/kit/CoffeeBox/meshes/CoffeeBox.stl
+  name: CoffeeBox
+  path: model://CoffeeBox
+CoffeeCookies:
+  mesh: datasets/kit/CoffeeCookies/meshes/CoffeeCookies.stl
+  name: CoffeeCookies
+  path: model://CoffeeCookies
+CoffeeFilters:
+  mesh: datasets/kit/CoffeeFilters/meshes/CoffeeFilters.stl
+  name: CoffeeFilters
+  path: model://CoffeeFilters
+CoffeeFilters2:
+  mesh: datasets/kit/CoffeeFilters2/meshes/CoffeeFilters2.stl
+  name: CoffeeFilters2
+  path: model://CoffeeFilters2
+CokePlasticLarge:
+  mesh: datasets/kit/CokePlasticLarge/meshes/CokePlasticLarge.stl
+  name: CokePlasticLarge
+  path: model://CokePlasticLarge
+CokePlasticSmall:
+  mesh: datasets/kit/CokePlasticSmall/meshes/CokePlasticSmall.stl
+  name: CokePlasticSmall
+  path: model://CokePlasticSmall
+CokePlasticSmallGrasp:
+  mesh: datasets/kit/CokePlasticSmallGrasp/meshes/CokePlasticSmallGrasp.stl
+  name: CokePlasticSmallGrasp
+  path: model://CokePlasticSmallGrasp
+CondensedMilk:
+  mesh: datasets/kit/CondensedMilk/meshes/CondensedMilk.stl
+  name: CondensedMilk
+  path: model://CondensedMilk
+CoughDropsBerries:
+  mesh: datasets/kit/CoughDropsBerries/meshes/CoughDropsBerries.stl
+  name: CoughDropsBerries
+  path: model://CoughDropsBerries
+CoughDropsHoney:
+  mesh: datasets/kit/CoughDropsHoney/meshes/CoughDropsHoney.stl
+  name: CoughDropsHoney
+  path: model://CoughDropsHoney
+CoughDropsLemon:
+  mesh: datasets/kit/CoughDropsLemon/meshes/CoughDropsLemon.stl
+  name: CoughDropsLemon
+  path: model://CoughDropsLemon
+Curry:
+  mesh: datasets/kit/Curry/meshes/Curry.stl
+  name: Curry
+  path: model://Curry
+DanishHam:
+  mesh: datasets/kit/DanishHam/meshes/DanishHam.stl
+  name: DanishHam
+  path: model://DanishHam
+Deodorant:
+  mesh: datasets/kit/Deodorant/meshes/Deodorant.stl
+  name: Deodorant
+  path: model://Deodorant
+Dog:
+  mesh: datasets/kit/Dog/meshes/Dog.stl
+  name: Dog
+  path: model://Dog
+DropsCherry:
+  mesh: datasets/kit/DropsCherry/meshes/DropsCherry.stl
+  name: DropsCherry
+  path: model://DropsCherry
+DropsOrange:
+  mesh: datasets/kit/DropsOrange/meshes/DropsOrange.stl
+  name: DropsOrange
+  path: model://DropsOrange
+Dwarf:
+  mesh: datasets/kit/Dwarf/meshes/Dwarf.stl
+  name: Dwarf
+  path: model://Dwarf
+FennelTea:
+  mesh: datasets/kit/FennelTea/meshes/FennelTea.stl
+  name: FennelTea
+  path: model://FennelTea
+Fish:
+  mesh: datasets/kit/Fish/meshes/Fish.stl
+  name: Fish
+  path: model://Fish
+FizzyTablets:
+  mesh: datasets/kit/FizzyTablets/meshes/FizzyTablets.stl
+  name: FizzyTablets
+  path: model://FizzyTablets
+FizzyTabletsCalcium:
+  mesh: datasets/kit/FizzyTabletsCalcium/meshes/FizzyTabletsCalcium.stl
+  name: FizzyTabletsCalcium
+  path: model://FizzyTabletsCalcium
+FlowerCup:
+  mesh: datasets/kit/FlowerCup/meshes/FlowerCup.stl
+  name: FlowerCup
+  path: model://FlowerCup
+FruitBars:
+  mesh: datasets/kit/FruitBars/meshes/FruitBars.stl
+  name: FruitBars
+  path: model://FruitBars
+FruitDrink:
+  mesh: datasets/kit/FruitDrink/meshes/FruitDrink.stl
+  name: FruitDrink
+  path: model://FruitDrink
+FruitTea:
+  mesh: datasets/kit/FruitTea/meshes/FruitTea.stl
+  name: FruitTea
+  path: model://FruitTea
+Glassbowl:
+  mesh: datasets/kit/Glassbowl/meshes/Glassbowl.stl
+  name: Glassbowl
+  path: model://Glassbowl
+GreenCup:
+  mesh: datasets/kit/GreenCup/meshes/GreenCup.stl
+  name: GreenCup
+  path: model://GreenCup
+GreenSaltCylinder:
+  mesh: datasets/kit/GreenSaltCylinder/meshes/GreenSaltCylinder.stl
+  name: GreenSaltCylinder
+  path: model://GreenSaltCylinder
+HamburgerSauce:
+  mesh: datasets/kit/HamburgerSauce/meshes/HamburgerSauce.stl
+  name: HamburgerSauce
+  path: model://HamburgerSauce
+Heart1:
+  mesh: datasets/kit/Heart1/meshes/Heart1.stl
+  name: Heart1
+  path: model://Heart1
+HerbSalt:
+  mesh: datasets/kit/HerbSalt/meshes/HerbSalt.stl
+  name: HerbSalt
+  path: model://HerbSalt
+HeringTin:
+  mesh: datasets/kit/HeringTin/meshes/HeringTin.stl
+  name: HeringTin
+  path: model://HeringTin
+HotPot:
+  mesh: datasets/kit/HotPot/meshes/HotPot.stl
+  name: HotPot
+  path: model://HotPot
+HotPot2:
+  mesh: datasets/kit/HotPot2/meshes/HotPot2.stl
+  name: HotPot2
+  path: model://HotPot2
+HygieneSpray:
+  mesh: datasets/kit/HygieneSpray/meshes/HygieneSpray.stl
+  name: HygieneSpray
+  path: model://HygieneSpray
+InstantDumplings:
+  mesh: datasets/kit/InstantDumplings/meshes/InstantDumplings.stl
+  name: InstantDumplings
+  path: model://InstantDumplings
+InstantIceCoffee:
+  mesh: datasets/kit/InstantIceCoffee/meshes/InstantIceCoffee.stl
+  name: InstantIceCoffee
+  path: model://InstantIceCoffee
+InstantMousse:
+  mesh: datasets/kit/InstantMousse/meshes/InstantMousse.stl
+  name: InstantMousse
+  path: model://InstantMousse
+InstantSauce:
+  mesh: datasets/kit/InstantSauce/meshes/InstantSauce.stl
+  name: InstantSauce
+  path: model://InstantSauce
+InstantSauce2:
+  mesh: datasets/kit/InstantSauce2/meshes/InstantSauce2.stl
+  name: InstantSauce2
+  path: model://InstantSauce2
+InstantSoup:
+  mesh: datasets/kit/InstantSoup/meshes/InstantSoup.stl
+  name: InstantSoup
+  path: model://InstantSoup
+InstantTomatoSoup:
+  mesh: datasets/kit/InstantTomatoSoup/meshes/InstantTomatoSoup.stl
+  name: InstantTomatoSoup
+  path: model://InstantTomatoSoup
+JamSugar:
+  mesh: datasets/kit/JamSugar/meshes/JamSugar.stl
+  name: JamSugar
+  path: model://JamSugar
+Knaeckebrot:
+  mesh: datasets/kit/Knaeckebrot/meshes/Knaeckebrot.stl
+  name: Knaeckebrot
+  path: model://Knaeckebrot
+KnaeckebrotRye:
+  mesh: datasets/kit/KnaeckebrotRye/meshes/KnaeckebrotRye.stl
+  name: KnaeckebrotRye
+  path: model://KnaeckebrotRye
+KoalaCandy:
+  mesh: datasets/kit/KoalaCandy/meshes/KoalaCandy.stl
+  name: KoalaCandy
+  path: model://KoalaCandy
+LetterP:
+  mesh: datasets/kit/LetterP/meshes/LetterP.stl
+  name: LetterP
+  path: model://LetterP
+LivioClassicOil:
+  mesh: datasets/kit/LivioClassicOil/meshes/LivioClassicOil.stl
+  name: LivioClassicOil
+  path: model://LivioClassicOil
+LivioSunflowerOil:
+  mesh: datasets/kit/LivioSunflowerOil/meshes/LivioSunflowerOil.stl
+  name: LivioSunflowerOil
+  path: model://LivioSunflowerOil
+Margarine:
+  mesh: datasets/kit/Margarine/meshes/Margarine.stl
+  name: Margarine
+  path: model://Margarine
+Marjoram:
+  mesh: datasets/kit/Marjoram/meshes/Marjoram.stl
+  name: Marjoram
+  path: model://Marjoram
+MashedPotatoes:
+  mesh: datasets/kit/MashedPotatoes/meshes/MashedPotatoes.stl
+  name: MashedPotatoes
+  path: model://MashedPotatoes
+MelforBottle:
+  mesh: datasets/kit/MelforBottle/meshes/MelforBottle.stl
+  name: MelforBottle
+  path: model://MelforBottle
+MilkDrinkVanilla:
+  mesh: datasets/kit/MilkDrinkVanilla/meshes/MilkDrinkVanilla.stl
+  name: MilkDrinkVanilla
+  path: model://MilkDrinkVanilla
+MilkRice:
+  mesh: datasets/kit/MilkRice/meshes/MilkRice.stl
+  name: MilkRice
+  path: model://MilkRice
+Moon:
+  mesh: datasets/kit/Moon/meshes/Moon.stl
+  name: Moon
+  path: model://Moon
+MuesliBars:
+  mesh: datasets/kit/MuesliBars/meshes/MuesliBars.stl
+  name: MuesliBars
+  path: model://MuesliBars
+NutCandy:
+  mesh: datasets/kit/NutCandy/meshes/NutCandy.stl
+  name: NutCandy
+  path: model://NutCandy
+NutellaGo:
+  mesh: datasets/kit/NutellaGo/meshes/NutellaGo.stl
+  name: NutellaGo
+  path: model://NutellaGo
+OrangeMarmelade:
+  mesh: datasets/kit/OrangeMarmelade/meshes/OrangeMarmelade.stl
+  name: OrangeMarmelade
+  path: model://OrangeMarmelade
+OrgFruitTea:
+  mesh: datasets/kit/OrgFruitTea/meshes/OrgFruitTea.stl
+  name: OrgFruitTea
+  path: model://OrgFruitTea
+OrgHerbTea:
+  mesh: datasets/kit/OrgHerbTea/meshes/OrgHerbTea.stl
+  name: OrgHerbTea
+  path: model://OrgHerbTea
+Paprika:
+  mesh: datasets/kit/Paprika/meshes/Paprika.stl
+  name: Paprika
+  path: model://Paprika
+Patches:
+  mesh: datasets/kit/Patches/meshes/Patches.stl
+  name: Patches
+  path: model://Patches
+PatchesSensitive:
+  mesh: datasets/kit/PatchesSensitive/meshes/PatchesSensitive.stl
+  name: PatchesSensitive
+  path: model://PatchesSensitive
+Peanuts:
+  mesh: datasets/kit/Peanuts/meshes/Peanuts.stl
+  name: Peanuts
+  path: model://Peanuts
+Peanuts2:
+  mesh: datasets/kit/Peanuts2/meshes/Peanuts2.stl
+  name: Peanuts2
+  path: model://Peanuts2
+Peas:
+  mesh: datasets/kit/Peas/meshes/Peas.stl
+  name: Peas
+  path: model://Peas
+PineappleSlices:
+  mesh: datasets/kit/PineappleSlices/meshes/PineappleSlices.stl
+  name: PineappleSlices
+  path: model://PineappleSlices
+Pitcher:
+  mesh: datasets/kit/Pitcher/meshes/Pitcher.stl
+  name: Pitcher
+  path: model://Pitcher
+Pony:
+  mesh: datasets/kit/Pony/meshes/Pony.stl
+  name: Pony
+  path: model://Pony
+PotatoeDumplings:
+  mesh: datasets/kit/PotatoeDumplings/meshes/PotatoeDumplings.stl
+  name: PotatoeDumplings
+  path: model://PotatoeDumplings
+PotatoeStarch:
+  mesh: datasets/kit/PotatoeStarch/meshes/PotatoeStarch.stl
+  name: PotatoeStarch
+  path: model://PotatoeStarch
+PotatoeSticks:
+  mesh: datasets/kit/PotatoeSticks/meshes/PotatoeSticks.stl
+  name: PotatoeSticks
+  path: model://PotatoeSticks
+PowderedSugar:
+  mesh: datasets/kit/PowderedSugar/meshes/PowderedSugar.stl
+  name: PowderedSugar
+  path: model://PowderedSugar
+PowderedSugarMill:
+  mesh: datasets/kit/PowderedSugarMill/meshes/PowderedSugarMill.stl
+  name: PowderedSugarMill
+  path: model://PowderedSugarMill
+RavioliLarge:
+  mesh: datasets/kit/RavioliLarge/meshes/RavioliLarge.stl
+  name: RavioliLarge
+  path: model://RavioliLarge
+Rice:
+  mesh: datasets/kit/Rice/meshes/Rice.stl
+  name: Rice
+  path: model://Rice
+Rusk:
+  mesh: datasets/kit/Rusk/meshes/Rusk.stl
+  name: Rusk
+  path: model://Rusk
+RuskWholemeal:
+  mesh: datasets/kit/RuskWholemeal/meshes/RuskWholemeal.stl
+  name: RuskWholemeal
+  path: model://RuskWholemeal
+SardinesCan:
+  mesh: datasets/kit/SardinesCan/meshes/SardinesCan.stl
+  name: SardinesCan
+  path: model://SardinesCan
+SauceThickener:
+  mesh: datasets/kit/SauceThickener/meshes/SauceThickener.stl
+  name: SauceThickener
+  path: model://SauceThickener
+Sauerkraut:
+  mesh: datasets/kit/Sauerkraut/meshes/Sauerkraut.stl
+  name: Sauerkraut
+  path: model://Sauerkraut
+SauerkrautSmall:
+  mesh: datasets/kit/SauerkrautSmall/meshes/SauerkrautSmall.stl
+  name: SauerkrautSmall
+  path: model://SauerkrautSmall
+Seal:
+  mesh: datasets/kit/Seal/meshes/Seal.stl
+  name: Seal
+  path: model://Seal
+Shampoo:
+  mesh: datasets/kit/Shampoo/meshes/Shampoo.stl
+  name: Shampoo
+  path: model://Shampoo
+ShowerGel:
+  mesh: datasets/kit/ShowerGel/meshes/ShowerGel.stl
+  name: ShowerGel
+  path: model://ShowerGel
+SmacksCereals:
+  mesh: datasets/kit/SmacksCereals/meshes/SmacksCereals.stl
+  name: SmacksCereals
+  path: model://SmacksCereals
+SmallGlass:
+  mesh: datasets/kit/SmallGlass/meshes/SmallGlass.stl
+  name: SmallGlass
+  path: model://SmallGlass
+SoftCakeOrange:
+  mesh: datasets/kit/SoftCakeOrange/meshes/SoftCakeOrange.stl
+  name: SoftCakeOrange
+  path: model://SoftCakeOrange
+SoftCheese:
+  mesh: datasets/kit/SoftCheese/meshes/SoftCheese.stl
+  name: SoftCheese
+  path: model://SoftCheese
+Sprayflask:
+  mesh: datasets/kit/Sprayflask/meshes/Sprayflask.stl
+  name: Sprayflask
+  path: model://Sprayflask
+Sprudelflasche:
+  mesh: datasets/kit/Sprudelflasche/meshes/Sprudelflasche.stl
+  name: Sprudelflasche
+  path: model://Sprudelflasche
+StrawberryPorridge:
+  mesh: datasets/kit/StrawberryPorridge/meshes/StrawberryPorridge.stl
+  name: StrawberryPorridge
+  path: model://StrawberryPorridge
+Sweetener:
+  mesh: datasets/kit/Sweetener/meshes/Sweetener.stl
+  name: Sweetener
+  path: model://Sweetener
+TomatoHerbSauce:
+  mesh: datasets/kit/TomatoHerbSauce/meshes/TomatoHerbSauce.stl
+  name: TomatoHerbSauce
+  path: model://TomatoHerbSauce
+TomatoSauce:
+  mesh: datasets/kit/TomatoSauce/meshes/TomatoSauce.stl
+  name: TomatoSauce
+  path: model://TomatoSauce
+Toothpaste:
+  mesh: datasets/kit/Toothpaste/meshes/Toothpaste.stl
+  name: Toothpaste
+  path: model://Toothpaste
+Tortoise:
+  mesh: datasets/kit/Tortoise/meshes/Tortoise.stl
+  name: Tortoise
+  path: model://Tortoise
+ToyCarYelloq:
+  mesh: datasets/kit/ToyCarYelloq/meshes/ToyCarYelloq.stl
+  name: ToyCarYelloq
+  path: model://ToyCarYelloq
+VitalisCereals:
+  mesh: datasets/kit/VitalisCereals/meshes/VitalisCereals.stl
+  name: VitalisCereals
+  path: model://VitalisCereals
+Wafflerolls:
+  mesh: datasets/kit/Wafflerolls/meshes/Wafflerolls.stl
+  name: Wafflerolls
+  path: model://Wafflerolls
+Waterglass:
+  mesh: datasets/kit/Waterglass/meshes/Waterglass.stl
+  name: Waterglass
+  path: model://Waterglass
+WhippedCream:
+  mesh: datasets/kit/WhippedCream/meshes/WhippedCream.stl
+  name: WhippedCream
+  path: model://WhippedCream
+WhippedCream2:
+  mesh: datasets/kit/WhippedCream2/meshes/WhippedCream2.stl
+  name: WhippedCream2
+  path: model://WhippedCream2
+Wineglass:
+  mesh: datasets/kit/Wineglass/meshes/Wineglass.stl
+  name: Wineglass
+  path: model://Wineglass
+YellowSaltCube:
+  mesh: datasets/kit/YellowSaltCube/meshes/YellowSaltCube.stl
+  name: YellowSaltCube
+  path: model://YellowSaltCube
+YellowSaltCube2:
+  mesh: datasets/kit/YellowSaltCube2/meshes/YellowSaltCube2.stl
+  name: YellowSaltCube2
+  path: model://YellowSaltCube2
+YellowSaltCylinder:
+  mesh: datasets/kit/YellowSaltCylinder/meshes/YellowSaltCylinder.stl
+  name: YellowSaltCylinder
+  path: model://YellowSaltCylinder
+YellowSaltCylinderSmall:
+  mesh: datasets/kit/YellowSaltCylinderSmall/meshes/YellowSaltCylinderSmall.stl
+  name: YellowSaltCylinderSmall
+  path: model://YellowSaltCylinderSmall
