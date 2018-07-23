@@ -7,59 +7,36 @@
     \author João Borrego : jsbruglie
 */
 
+#ifndef _HAND_REMOTE_HH
+#define _HAND_REMOTE_HH
+
 // Gazebo
 #include <gazebo/gazebo_client.hh>
 #include <gazebo/gazebo_config.h>
 #include <gazebo/transport/transport.hh>
 #include <gazebo/msgs/msgs.hh>
 
-// I/O streams
-#include <iostream>
-
-// Sleep
-#include <chrono>
-#include <thread>
-
-// Custom messages
-#include "target.pb.h"
-#include "hand.pb.h"
-
+// Debug streams
+#include "debug.hh"
 // Interface
 #include "Interface.hh"
 
-/// Use shadowhand
-#define SHADOWHAND
-
-/// Command prompt
-#define PROMPT "> "
-
-/// Position control
-#define POSITION grasp::msgs::Target::POSITION
-/// Velocity control
-#define VELOCITY grasp::msgs::Target::VELOCITY
-
-/// Topic monitored by hand plugin for incoming requests
-#define HAND_PLUGIN_TOPIC "~/hand"
-
 // Functions
 
-/// \brief Sets hand pose
-/// \param pub Publisher to hand's topic
-/// \param pose New hand pose
-void setPose(gazebo::transport::PublisherPtr pub,
-    ignition::math::Pose3d pose);
+/// \brief Returns usage string.
+/// \param argv_0 Executable name
+/// \return Usage string.
+const std::string getUsage(const char* argv_0);
 
-/// TODO
-void moveFingers(gazebo::transport::PublisherPtr pub,
-    bool close);
+/// \brief Parses command-line arguments
+/// \param argc Argument count
+/// \param argv Argument values
+/// \param cfg_dir Robot configuration file
+/// \param robot Robot name 
+void parseArgs(
+    int argc,
+    char** argv,
+    std::string & cfg_dir,
+    std::string & robot);
 
-/// TODO
-void liftHand(gazebo::transport::PublisherPtr pub);
-
-/// \brief Resets simulation world
-/// \param pub Publisher to hand's topic
-void reset(gazebo::transport::PublisherPtr pub);
-
-/// \brief Attempts to grasp object
-/// \param pub Publisher to hand's topic
-void tryGrasp(gazebo::transport::PublisherPtr pub);
+#endif

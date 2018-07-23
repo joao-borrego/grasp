@@ -237,7 +237,7 @@ void obtainTargets(std::vector<std::string> & targets,
     try
     {
         YAML::Node config = YAML::LoadFile(file_name);
-        for (const auto& kv_pair : config)
+        for (const auto & kv_pair : config)
         {
             // TODO? - Use proper object for target object data
             name = kv_pair.second["name"].as<std::string>();

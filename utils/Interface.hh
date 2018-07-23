@@ -10,6 +10,8 @@
 
 #include <vector>
 #include <map>
+// Open YAML config files
+#include "yaml-cpp/yaml.h"
 
 // Gazebo
 #include <gazebo/gazebo_client.hh>
@@ -17,8 +19,10 @@
 #include <gazebo/transport/transport.hh>
 #include <gazebo/msgs/msgs.hh>
 
+// Custom utilities
 #include "utils.hh"
-
+// Debug streams
+#include "debug.hh"
 // Custom messages
 #include "target.pb.h"
 #include "hand.pb.h"
@@ -59,6 +63,20 @@ class Interface
 
     /// \brief Constructor
     public: Interface();
+
+    /// \brief Initalizes interface with config file
+    /// \return True on success, false otherwise.
+    public: bool init(
+        const std::string & config_file,
+        const std::string & robot);
+
+    /// \brief Sets hand pose
+    /// \detailed Sets hand pose using virtual joints
+    /// \param pose New hand pose
+    void setPose(ignition::math::Pose3d pose);
+
+    /// Sends reset signal to hand plugin.
+    public: void reset(void);
 
     /// TODO
     public: void loop(void);

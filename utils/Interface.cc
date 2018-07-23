@@ -52,6 +52,48 @@ Interface::Interface()
 }
 
 //////////////////////////////////////////////////
+bool Interface::init(
+    const std::string & config_file,
+    const std::string & robot)
+{
+    try
+    {
+        YAML::Node config = YAML::LoadFile(config_file);
+        rest_finger_pos = config[robot]["rest_finger"].as<double>();
+        bent_finger_pos = config[robot]["bent_finger"].as<double>();
+        YAML::Node finger_joints = config[robot]["finger_joints"];
+        int size = finger_joints.size();
+        for (int i = 0; i < size; i++) {
+            fingers.push_back(finger_joints[i].as<std::string>());
+        }
+    }
+    catch (YAML::Exception& yamlException)
+    {
+        errorPrintTrace("Unable to parse " << config_file);
+        return false;
+    }
+    return true;
+}
+
+/////////////////////////////////////////////////
+void Interface::setPose(ignition::math::Pose3d pose)
+{
+    grasp::msgs::Hand msg;
+    gazebo::msgs::Pose *pose_msg = new gazebo::msgs::Pose();
+    gazebo::msgs::Set(pose_msg, pose);
+    msg.set_allocated_pose(pose_msg);
+    pub->Publish(msg);
+}
+
+/////////////////////////////////////////////////
+void Interface::reset()
+{
+    grasp::msgs::Hand msg;
+    msg.set_reset(true);
+    pub->Publish(msg);
+}
+
+//////////////////////////////////////////////////
 void Interface::loop()
 {
     bool loop = true;
