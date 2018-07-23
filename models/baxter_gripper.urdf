@@ -18,7 +18,7 @@
       <!-- PID controller parameters -->
       <controllers>
         <!-- PID parameters for real hand joints -->
-        <real type="position" p="100.0" i="10.0" d="0.0"/>
+        <real type="position" p="200.0" i="20.0" d="0.0"/>
         <!-- PID parameters for virtual joints -->
         <virtual type="position" p="100.0" i="10.0" d="0.0"/>
       </controllers>

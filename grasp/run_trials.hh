@@ -20,6 +20,8 @@
 // Sleep
 #include <chrono>
 #include <thread>
+// Open YAML config files
+#include "yaml-cpp/yaml.h"
 
 // Custom messages
 #include "MessageTypes.hh"
@@ -131,6 +133,28 @@ typedef const boost::shared_ptr<const grasp::msgs::CameraResponse>
 
 // Functions
 
+/// \brief Obtains usage string
+/// \param argv_0 Name of the executable
+/// \return String with command-line usage
+const std::string getUsage(const char* argv_0);
+
+/// \brief Parses command-line arguments
+/// \param argc Argument count
+/// \param argv Arguments
+/// \param obj_cfg_dir Path to object dataset yaml
+/// \param grasp_cfg_dir Path to grasp candidates yaml
+/// \param out_img_dir Directory for output images
+/// \param out_trials_dir Directory for trial outcomes
+/// \param robot Robot to use
+void parseArgs(
+    int argc,
+    char** argv,
+    std::string & obj_cfg_dir,
+    std::string & grasp_cfg_dir,
+    std::string & out_img_dir,
+    std::string & out_trials_dir,
+    std::string & robot);
+
 /// \brief Sets up gazebo communication pubs/subs
 /// \param node Gazebo communication node pointer
 /// \param pubs Resulting map of publishers
@@ -139,6 +163,11 @@ void setupCommunications(
     gazebo::transport::NodePtr & node,
     std::map<std::string, gazebo::transport::PublisherPtr> & pubs,
     std::map<std::string, gazebo::transport::SubscriberPtr> & subs);
+
+
+/// TODO
+void obtainTargets(std::vector<std::string> & targets,
+    const std::string & file_name);
 
 /// \brief Sets hand pose
 /// \param pub Publisher to hand's topic
@@ -152,8 +181,8 @@ void setPose(gazebo::transport::PublisherPtr pub,
 /// \param target The target object name
 /// \param hand The hand model name
 void getContacts(gazebo::transport::PublisherPtr pub,
-    std::string & target,
-    std::string & hand);
+    const std::string & target,
+    const std::string & hand);
 
 /// TODO
 void closeFingers(gazebo::transport::PublisherPtr pub,
@@ -177,7 +206,7 @@ void reset(gazebo::transport::PublisherPtr pub);
 void tryGrasp(
     Grasp & grasp,
     std::map<std::string, gazebo::transport::PublisherPtr> & pubs,
-    std::string & model_name);
+    const std::string & model_name);
 
 /// TODO
 void captureFrame(gazebo::transport::PublisherPtr pub);

@@ -80,17 +80,17 @@ int Interface::processKeypress(char key)
     {
         // Translate base
         case 'w':
-            moveJoint("virtual_px_joint",  0.05); break;
+            moveJoint("virtual_px_joint",  0.025); break;
         case 's':
-            moveJoint("virtual_px_joint", -0.05); break;
+            moveJoint("virtual_px_joint", -0.025); break;
         case 'a':
-            moveJoint("virtual_py_joint",  0.05); break;
+            moveJoint("virtual_py_joint",  0.025); break;
         case 'd':
-            moveJoint("virtual_py_joint", -0.05); break;
+            moveJoint("virtual_py_joint", -0.025); break;
         case 'e':
-            moveJoint("virtual_pz_joint",  0.05); break;
+            moveJoint("virtual_pz_joint",  0.025); break;
         case 'q':
-            moveJoint("virtual_pz_joint", -0.05); break;
+            moveJoint("virtual_pz_joint", -0.025); break;
         // Rotate base
         case 'i':
             moveJoint("virtual_rr_joint",  0.025); break;

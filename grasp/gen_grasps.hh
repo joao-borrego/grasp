@@ -20,9 +20,13 @@
 
 // Grasp representation
 #include "Grasp.hh"
+// Debug streams
+#include "debug.hh"
 
 /// TODO
-void obtainGrasps(std::string file_name, std::vector<Grasp> & grasps);
+void obtainGrasps(const std::string file_name,
+	const std::string robot,
+	std::vector<Grasp> & grasps);
 
 /// \brief Get a random double in a given interval
 ///

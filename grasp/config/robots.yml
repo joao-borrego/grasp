@@ -44,7 +44,7 @@ shadow:
 baxter:
   name: baxter_gripper
   path: models/baxter_gripper.urdf
-  palm_normal: "0 0 1" 
+  palm_normal: "0 0 -1" 
   finger_joints:
     - gripper_l_finger_joint
   rest_finger: 0.0

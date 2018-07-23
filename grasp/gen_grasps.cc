@@ -11,10 +11,10 @@
 
 using namespace ignition::math;
 
-void obtainGrasps(std::string file_name, std::vector<Grasp> & grasps)
+void obtainGrasps(const std::string file_name,
+    const std::string robot,
+    std::vector<Grasp> & grasps)
 {
-    //std::string robot("vizzy");
-    std::string robot("shadowhand");
     Matrix4d tf_mat (Matrix4d::Identity);
 
     try
@@ -30,10 +30,11 @@ void obtainGrasps(std::string file_name, std::vector<Grasp> & grasps)
             }
             grasps.emplace_back(tf_mat);
         }
+        std::cout <<"A ";
     }
     catch (YAML::Exception& yamlException)
     {
-        std::cerr << "Unable to parse " << file_name << "\n";
+        errorPrintTrace("Unable to parse " << file_name);
     }
 }
 

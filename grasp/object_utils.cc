@@ -11,7 +11,7 @@
 
 void spawnModelFromFile(
     gazebo::transport::PublisherPtr pub,
-    std::string & file)
+    const std::string & file)
 {
     std::ifstream infile {file};
     std::string model_sdf {
@@ -25,7 +25,7 @@ void spawnModelFromFile(
 void spawnModelFromFilename(
     gazebo::transport::PublisherPtr pub,
     ignition::math::Pose3d & pose,
-    std::string & filename)
+    const std::string & filename)
 {
     gazebo::msgs::Factory msg;
     msg.set_sdf_filename(filename);
@@ -37,7 +37,7 @@ void spawnModelFromFilename(
 
 void removeModel(
     gazebo::transport::PublisherPtr pub,
-    std::string & name)
+    const std::string & name)
 {
     gazebo::msgs::Request *msg;
     msg = gazebo::msgs::CreateRequest("entity_delete", name);

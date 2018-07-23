@@ -38,6 +38,21 @@ std::string g_hand_name {"vizzy_hand"};
 
 int main(int _argc, char **_argv)
 {
+    // List of grasp targets
+    std::vector<std::string> targets;
+
+    // Command-line args
+    std::string obj_cfg_dir, grasp_cfg_dir, out_img_dir, out_trials_dir, robot;
+    parseArgs(_argc, _argv,
+        obj_cfg_dir, grasp_cfg_dir, out_img_dir, out_trials_dir, robot);
+
+    // Obtain target objects
+    obtainTargets(targets, obj_cfg_dir);
+    if (targets.empty()) {
+        errorPrintTrace("No valid objects retrieved from file");
+        exit(EXIT_FAILURE);
+    }
+
     // Load gazebo as a client
     gazebo::client::setup(_argc, _argv);
 
@@ -59,38 +74,52 @@ int main(int _argc, char **_argv)
 
     // TODO: Foreach object
 
-    // Spawn target object
-    std::string model_name ("Pitcher");
-    std::string model_filename = "model://" + model_name;
+    // Initial hand pose
     ignition::math::Pose3d hand_pose(0,0,0.8,0,0,0);
+    // Initial target object pose
     ignition::math::Pose3d model_pose(0,0,0.1,0,0,0);
 
-    setPose(pubs["hand"], hand_pose, 0.5);
-    while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
-    liftHand(pubs["hand"]);
+    std::string model_filename;
 
-    spawnModelFromFilename(pubs["factory"], model_pose, model_filename);
-    pubs["target"]->WaitForConnection();
-    debugPrintTrace("Target connected");
-
-    // Obtain candidate grasps
-    std::string cfg_file("grasp/config/"+model_name+".grasp.yml");
-    std::vector<Grasp> grasps;
-    obtainGrasps(cfg_file, grasps);
-    if (grasps.empty()) {
-        errorPrintTrace("No valid grasps retrieved from file");
-        exit(EXIT_FAILURE);
-    }
-
-    // Obtain object resting position
-    getTargetPose(pubs["target"], true);
-    while (waitingTrigger(g_resting_mutex, g_resting)) {waitMs(10);}
-
-    // Perform trials
-    for (auto candidate : grasps)
+    for (auto const &model_name : targets)
     {
-        tryGrasp(candidate, pubs, model_name);
+        model_filename = "model://" + model_name;
+        
+        // Obtain candidate grasps
+        std::string cfg_file(grasp_cfg_dir + 
+            model_name + "." + robot + ".grasp.yml");
+        std::vector<Grasp> grasps;
+        obtainGrasps(cfg_file, robot, grasps);
+        if (grasps.empty()) {
+            errorPrintTrace("No valid grasps retrieved from file");
+            exit(EXIT_FAILURE);
+        }
+
+        // Reset hand pose so it won't collide with target object
+        setPose(pubs["hand"], hand_pose, 2.0);
+        while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
+        liftHand(pubs["hand"]); // TODO
+
+        // Spawn object
+        spawnModelFromFilename(pubs["factory"], model_pose, model_filename);
+        pubs["target"]->WaitForConnection();
+        debugPrintTrace("Target connected");
+
+        // Obtain object resting position
+        getTargetPose(pubs["target"], true);
+        while (waitingTrigger(g_resting_mutex, g_resting)) {waitMs(10);}
+    
+        // Perform trials
+        for (auto candidate : grasps)
+        {
+            tryGrasp(candidate, pubs, model_name);
+        }
+
+        // Cleanup
+        removeModel(pubs["request"], model_name);
     }
+
+    // TODO - Render RGBD camera frames
 
     // Capture and render frame
     /*
@@ -102,12 +131,71 @@ int main(int _argc, char **_argv)
     /*
     removeModel(pubs["request"], camera_name);
     */
-    removeModel(pubs["request"], model_name);
     setPose(pubs["hand"], hand_pose);
 
     // Shut down
     gazebo::client::shutdown();
     return 0;
+}
+
+//////////////////////////////////////////////////
+const std::string getUsage(const char* argv_0)
+{
+    return \
+        "usage:   " + std::string(argv_0) + " [options]\n" +
+        "options: -d <object dataset yaml>\n"  +
+        "         -g <grasp candidates yaml>\n" +
+        "         -i <image output directory>\n" +
+        "         -o <dataset output directory>\n" +
+        "         -r <robot>\n";
+}
+
+//////////////////////////////////////////////////
+void parseArgs(
+    int argc,
+    char** argv,
+    std::string & obj_cfg_dir,
+    std::string & grasp_cfg_dir,
+    std::string & out_img_dir,
+    std::string & out_trials_dir,
+    std::string & robot)
+{
+    int opt;
+    bool d, g, i, o, r;
+
+    while ((opt = getopt(argc,argv,"d: g: i: o: r:")) != EOF)
+    {
+        switch (opt)
+        {
+            case 'd':
+                d = true; obj_cfg_dir = optarg;    break;
+            case 'g':
+                g = true; grasp_cfg_dir = optarg;  break;
+            case 'i':
+                i = true; out_img_dir = optarg;    break;
+            case 'o':
+                o = true; out_trials_dir = optarg; break;
+            case 'r':
+                r = true; robot = optarg; break;
+            case '?':
+                std::cerr << getUsage(argv[0]);
+            default:
+                std::cout << std::endl;
+                exit(EXIT_FAILURE);
+        }
+    }
+
+    if (!d || !g || !i || !o || !r) {
+        std::cerr << getUsage(argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    debugPrint("Parameters:\n" <<
+        "   Object dataset yaml      '" << obj_cfg_dir << "'\n" <<
+        "   Grasp candidates yaml    '" << grasp_cfg_dir << "'\n" <<
+        "   Image output directory   '" << out_img_dir << "'\n" <<
+        "   Dataset output directory '" << out_trials_dir << "'\n" <<
+        "   Robot                    '" << robot << "'\n");
 }
 
 /////////////////////////////////////////////////
@@ -141,6 +229,31 @@ void setupCommunications(
 }
 
 /////////////////////////////////////////////////
+void obtainTargets(std::vector<std::string> & targets,
+    const std::string & file_name)
+{
+    std::string mesh, name, path;
+
+    try
+    {
+        YAML::Node config = YAML::LoadFile(file_name);
+        for (const auto& kv_pair : config)
+        {
+            // TODO? - Use proper object for target object data
+            name = kv_pair.second["name"].as<std::string>();
+            //mesh = kv_pair.second["mesh"].as<std::string>();
+            //path = kv_pair.second["path"].as<std::string>();
+            targets.push_back(name);
+        }
+    }
+    catch (YAML::Exception& yamlException)
+    {
+        std::cerr << "Unable to parse " << file_name << "\n";
+    }
+    debugPrintTrace("Found " << targets.size() << " objects in " << file_name);
+}
+
+/////////////////////////////////////////////////
 void setPose(gazebo::transport::PublisherPtr pub,
     ignition::math::Pose3d pose,
     double timeout)
@@ -157,8 +270,8 @@ void setPose(gazebo::transport::PublisherPtr pub,
 
 /////////////////////////////////////////////////
 void getContacts(gazebo::transport::PublisherPtr pub,
-    std::string & target,
-    std::string & hand)
+    const std::string & target,
+    const std::string & hand)
 {
     ContactRequest msg;
     CollisionRequest *msg_col_gnd = msg.add_collision();
@@ -261,7 +374,7 @@ void reset(gazebo::transport::PublisherPtr pub)
 void tryGrasp(
     Grasp & grasp,
     std::map<std::string, gazebo::transport::PublisherPtr> & pubs,
-    std::string & target)
+    const std::string & target)
 {
     // Get pose in world frame, given the object pose
     ignition::math::Pose3d hand_pose = grasp.getPose(g_pose);

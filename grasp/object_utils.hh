@@ -22,17 +22,17 @@
 /// TODO
 void spawnModelFromFile(
     gazebo::transport::PublisherPtr pub,
-    std::string & file);
+    const std::string & file);
 
 /// TODO
 void spawnModelFromFilename(
     gazebo::transport::PublisherPtr pub,
     ignition::math::Pose3d & pose,
-    std::string & filename);
+    const std::string & filename);
 
 /// TODO
 void removeModel(
     gazebo::transport::PublisherPtr pub,
-    std::string & name);
+    const std::string & name);
 
 #endif
