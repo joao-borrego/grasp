@@ -36,8 +36,9 @@ add_executable (run_trials
 	Grasp.cc)
 target_link_libraries(run_trials
     grasp_msgs
+    grasp_interface
     ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES}
     ${YAML_CPP_LIBRARIES})
-add_dependencies(
-    run_trials
-    grasp_msgs)
+add_dependencies(run_trials
+    grasp_msgs
+    grasp_interface)

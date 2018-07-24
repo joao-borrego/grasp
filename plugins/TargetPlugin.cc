@@ -133,7 +133,6 @@ void TargetPlugin::onUpdate()
 void TargetPlugin::onReset()
 {
     std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
-    this->model->Reset();
     this->model->SetWorldPose(this->init_pose);
 }
 

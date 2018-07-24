@@ -47,6 +47,6 @@ baxter:
   palm_normal: "0 0 -1" 
   finger_joints:
     - gripper_l_finger_joint
-  rest_finger: 0.0
-  bent_finger: 1.0
-  palm_offset: 0.05
+  rest_finger: 1.0
+  bent_finger: 0.0
+  palm_offset: 0.07

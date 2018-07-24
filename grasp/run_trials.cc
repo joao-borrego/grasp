@@ -19,6 +19,8 @@ std::mutex g_timeout_mutex;
 bool g_resting  {false};
 /// Mutex for global object resting flag
 std::mutex g_resting_mutex;
+/// Global hand resting pose
+ignition::math::Pose3d g_safe_pose {0,0,1.0,0,0,0};
 /// Global object resting pose
 ignition::math::Pose3d g_pose {0,0,0,0,0,0};
 /// Global setp finished flag
@@ -28,20 +30,13 @@ std::mutex g_finished_mutex;
 /// Global trial outcome
 bool g_success  {false};
 
-/// Robot name - TODO - make parameter
-#ifdef SHADOWHAND
-std::string g_hand_name {"shadowhand"};
-#endif
-#ifndef SHADOWHAND
-std::string g_hand_name {"vizzy_hand"};
-#endif
-
 int main(int _argc, char **_argv)
 {
     // List of grasp targets
     std::vector<std::string> targets;
 
     // Command-line args
+    std::map<std::string, std::string> args;
     std::string obj_cfg_dir, grasp_cfg_dir, out_img_dir, out_trials_dir, robot;
     parseArgs(_argc, _argv,
         obj_cfg_dir, grasp_cfg_dir, out_img_dir, out_trials_dir, robot);
@@ -61,7 +56,11 @@ int main(int _argc, char **_argv)
     std::map<std::string, gazebo::transport::PublisherPtr> pubs;
     std::map<std::string, gazebo::transport::SubscriberPtr> subs;
     setupCommunications(node, pubs, subs);
-    
+    // Interface for hand plugin
+    Interface interface;
+    // TODO
+    interface.init("grasp/config/robots.yml",robot);
+
     // Spawn camera
     /*
     std::string camera_name("rgbd_camera");
@@ -74,8 +73,6 @@ int main(int _argc, char **_argv)
 
     // TODO: Foreach object
 
-    // Initial hand pose
-    ignition::math::Pose3d hand_pose(0,0,0.8,0,0,0);
     // Initial target object pose
     ignition::math::Pose3d model_pose(0,0,0.1,0,0,0);
 
@@ -96,9 +93,9 @@ int main(int _argc, char **_argv)
         }
 
         // Reset hand pose so it won't collide with target object
-        setPose(pubs["hand"], hand_pose, 2.0);
+        interface.setPose(g_safe_pose, 0.1);
         while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
-        liftHand(pubs["hand"]); // TODO
+        interface.raiseHand(); // Avoid hand dropping
 
         // Spawn object
         spawnModelFromFilename(pubs["factory"], model_pose, model_filename);
@@ -106,13 +103,16 @@ int main(int _argc, char **_argv)
         debugPrintTrace("Target connected");
 
         // Obtain object resting position
-        getTargetPose(pubs["target"], true);
-        while (waitingTrigger(g_resting_mutex, g_resting)) {waitMs(10);}
-    
+        while (waitingTrigger(g_resting_mutex, g_resting)) {
+            getTargetPose(pubs["target"], true);
+            waitMs(100);
+        }
+        debugPrintTrace("Obtained target object pose");
+
         // Perform trials
         for (auto candidate : grasps)
         {
-            tryGrasp(candidate, pubs, model_name);
+            tryGrasp(candidate, interface, pubs, model_name);
         }
 
         // Cleanup
@@ -131,7 +131,7 @@ int main(int _argc, char **_argv)
     /*
     removeModel(pubs["request"], camera_name);
     */
-    setPose(pubs["hand"], hand_pose);
+    interface.setPose(g_safe_pose);
 
     // Shut down
     gazebo::client::shutdown();
@@ -254,21 +254,6 @@ void obtainTargets(std::vector<std::string> & targets,
 }
 
 /////////////////////////////////////////////////
-void setPose(gazebo::transport::PublisherPtr pub,
-    ignition::math::Pose3d pose,
-    double timeout)
-{
-    HandMsg msg;
-    gazebo::msgs::Pose *pose_msg = new gazebo::msgs::Pose();
-    gazebo::msgs::Set(pose_msg, pose);
-    msg.set_allocated_pose(pose_msg);
-    if (timeout > 0) {
-        msg.set_timeout(timeout);
-    }
-    pub->Publish(msg);
-}
-
-/////////////////////////////////////////////////
 void getContacts(gazebo::transport::PublisherPtr pub,
     const std::string & target,
     const std::string & hand)
@@ -280,76 +265,6 @@ void getContacts(gazebo::transport::PublisherPtr pub,
     CollisionRequest *msg_col_tgt = msg.add_collision();
     msg_col_tgt->set_collision1(target);
     msg_col_tgt->set_collision2(hand);
-    pub->Publish(msg);
-}
-
-/////////////////////////////////////////////////
-void closeFingers(gazebo::transport::PublisherPtr pub, double timeout)
-{
-    grasp::msgs::Hand msg;
-    std::vector<std::string> joints;
-    std::vector<double> values;
-    double value = 1.57; 
-
-    #ifdef SHADOWHAND // Shadowhand
-    joints = {
-        "rh_FFJ4","rh_FFJ3","rh_FFJ2",
-        "rh_MFJ4","rh_MFJ3","rh_MFJ2",
-        "rh_RFJ4","rh_RFJ3","rh_RFJ2",
-        "rh_LFJ5","rh_LFJ4","rh_LFJ3","rh_LFJ2",
-        "rh_THJ5","rh_THJ4","rh_THJ3","rh_THJ2",
-    };
-    values = {
-        0.0, value, value,
-        0.0, value, value,
-        0.0, value, value,
-        0.0, 0.0, value, value,
-        0.0, 0.0, value, value,
-    };
-    #endif
-    #ifndef SHADOWHAND // Vizzy
-    joints = {
-        "r_thumb_phal_1_joint",
-        "r_ind_phal_1_joint",
-        "r_med_phal_1_joint"
-    };
-    values = {value, value, value};
-    #endif
-    
-    for (unsigned int i = 0; i < joints.size(); i++)
-    {
-        grasp::msgs::Target *target = msg.add_pid_targets();
-        target->set_type(POSITION);
-        target->set_joint(joints.at(i));
-        target->set_value(values.at(i));
-    }
-
-    if (timeout > 0) { msg.set_timeout(timeout); }
-
-    pub->Publish(msg);
-}
-
-/////////////////////////////////////////////////
-void liftHand(gazebo::transport::PublisherPtr pub, double timeout)
-{
-    grasp::msgs::Hand msg;
-    std::vector<std::string> joints;
-    std::vector<double> values;
-
-    joints = {
-        "virtual_px_joint","virtual_py_joint", "virtual_pz_joint",
-        "virtual_rr_joint","virtual_rp_joint", "virtual_ry_joint"
-    };
-    values = {0,0,0.8,0,0,0};
-
-    for (unsigned int i = 0; i < joints.size(); i++)
-    {
-        grasp::msgs::Target *target = msg.add_pid_targets();
-        target->set_type(POSITION);
-        target->set_joint(joints.at(i));
-        target->set_value(values.at(i));
-    }
-    if (timeout > 0) { msg.set_timeout(timeout); }
     pub->Publish(msg);
 }
 
@@ -373,6 +288,7 @@ void reset(gazebo::transport::PublisherPtr pub)
 /////////////////////////////////////////////////
 void tryGrasp(
     Grasp & grasp,
+    Interface & interface,
     std::map<std::string, gazebo::transport::PublisherPtr> & pubs,
     const std::string & target)
 {
@@ -387,11 +303,18 @@ void tryGrasp(
 
     // Teleport hand to grasp candidate pose
     // Add the resting position transformation first
-    setPose(pubs["hand"], hand_pose, 0.0001);
+    interface.setPose(g_safe_pose, 0.0001);
+    while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
+    debugPrintTrace("Hand moved to safe pose");
+    interface.openFingers(0.5);
+    while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
+    debugPrintTrace("Hand opened fingers");
+    interface.setPose(hand_pose, 0.0001);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
     debugPrintTrace("Hand moved to grasp candidate pose");
+
     // Check if hand is already in collision
-    getContacts(pubs["contact"], target, g_hand_name);
+    getContacts(pubs["contact"], target, interface.getRobotName());
     while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
     if (!g_success) {
         grasp.success = false;
@@ -399,17 +322,21 @@ void tryGrasp(
         return;
     }
     debugPrintTrace("No collisions detected");
+
     // Close fingers
-    closeFingers(pubs["hand"], 0.5);
+    interface.closeFingers(0.5);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
     debugPrintTrace("Fingers closed");
+
     // Lift object
-    liftHand(pubs["hand"], 0.7);
+    interface.raiseHand(0.7);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
     debugPrintTrace("Object lifted");
+
     // Stop lifting
     //setVelocity(pubs["hand"], velocity_stop, 0.5);
     //while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
+
     // Check if object was grasped
     // TODO - Replace by collision check
     getTargetPose(pubs["target"], false);
@@ -419,7 +346,7 @@ void tryGrasp(
         << " - Pose: " << grasp.pose);
 
     grasp.success = g_success;
-    reset(pubs["hand"]);
+    interface.reset();
 
     waitMs(50);
 }

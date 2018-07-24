@@ -22,33 +22,13 @@ Interface::Interface()
     joints = {
         "virtual_px_joint","virtual_py_joint", "virtual_pz_joint",
         "virtual_rr_joint","virtual_rp_joint", "virtual_ry_joint",
-        /*
-        "rh_FFJ4","rh_FFJ3","rh_FFJ2",
-        "rh_MFJ4","rh_MFJ3","rh_MFJ2",
-        "rh_RFJ4","rh_RFJ3","rh_RFJ2",
-        "rh_LFJ5","rh_LFJ4","rh_LFJ3","rh_LFJ2",
-        "rh_THJ5","rh_THJ4","rh_THJ3","rh_THJ2"
-        */
-        "gripper_l_finger_joint", "gripper_r_finger_joint"
     };
     values = {
-        0.0, 0.0, 0.5,
+        0.0, 0.0, 1.0,
         0.0, 0.0, 0.0,
-        /*
-        0.0, 0.0, 0.0,
-        0.0, 0.0, 0.0,
-        0.0, 0.0, 0.0,
-        0.0, 0.0, 0.0, 0.0,
-        0.0, 0.0, 0.0, 0.0
-        */
-        0.0, 0.0
     };
     
     setJoints(joints, values);
-
-    fingers = {
-        "gripper_l_finger_joint"
-    };
 }
 
 //////////////////////////////////////////////////
@@ -76,12 +56,22 @@ bool Interface::init(
 }
 
 /////////////////////////////////////////////////
-void Interface::setPose(ignition::math::Pose3d pose)
+std::string Interface::getRobotName()
+{
+    return robot_name;
+}
+
+/////////////////////////////////////////////////
+void Interface::setPose(ignition::math::Pose3d pose,
+    double timeout)
 {
     grasp::msgs::Hand msg;
     gazebo::msgs::Pose *pose_msg = new gazebo::msgs::Pose();
     gazebo::msgs::Set(pose_msg, pose);
     msg.set_allocated_pose(pose_msg);
+    if (timeout > 0) {
+        msg.set_timeout(timeout);
+    }
     pub->Publish(msg);
 }
 
@@ -90,6 +80,61 @@ void Interface::reset()
 {
     grasp::msgs::Hand msg;
     msg.set_reset(true);
+    pub->Publish(msg);
+}
+
+/////////////////////////////////////////////////
+void Interface::openFingers(double timeout)
+{
+    grasp::msgs::Hand msg;
+    for (unsigned int i = 0; i < fingers.size(); i++)
+    {
+        grasp::msgs::Target *target = msg.add_pid_targets();
+        target->set_type(POSITION);
+        target->set_joint(fingers.at(i));
+        target->set_value(rest_finger_pos);    
+    }
+    if (timeout > 0) { msg.set_timeout(timeout); }
+    pub->Publish(msg);
+}
+
+/////////////////////////////////////////////////
+void Interface::closeFingers(double timeout)
+{
+    grasp::msgs::Hand msg;
+    for (unsigned int i = 0; i < fingers.size(); i++)
+    {
+        grasp::msgs::Target *target = msg.add_pid_targets();
+        target->set_type(POSITION);
+        target->set_joint(fingers.at(i));
+        target->set_value(bent_finger_pos);    
+    }
+    if (timeout > 0) { msg.set_timeout(timeout); }
+    pub->Publish(msg);
+}
+
+/////////////////////////////////////////////////
+void Interface::raiseHand(double timeout)
+{
+    grasp::msgs::Hand msg;
+    std::vector<std::string> virtual_joints;
+    std::vector<double> values;
+
+    // TODO - Read virtual joints from config file
+    virtual_joints = {
+        "virtual_px_joint","virtual_py_joint", "virtual_pz_joint",
+        "virtual_rr_joint","virtual_rp_joint", "virtual_ry_joint"
+    };
+    values = {0,0,0.8,0,0,0};
+
+    for (unsigned int i = 0; i < virtual_joints.size(); i++)
+    {
+        grasp::msgs::Target *target = msg.add_pid_targets();
+        target->set_type(POSITION);
+        target->set_joint(virtual_joints.at(i));
+        target->set_value(values.at(i));
+    }
+    if (timeout > 0) { msg.set_timeout(timeout); }
     pub->Publish(msg);
 }
 

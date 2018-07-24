@@ -30,7 +30,6 @@ void obtainGrasps(const std::string file_name,
             }
             grasps.emplace_back(tf_mat);
         }
-        std::cout <<"A ";
     }
     catch (YAML::Exception& yamlException)
     {

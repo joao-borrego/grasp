@@ -23,6 +23,7 @@
 
     <include>
       <uri>model://sun</uri>
+      <name>sun0</name>
     </include>
 
   </world>

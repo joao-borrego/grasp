@@ -21,7 +21,10 @@ int main(int _argc, char **_argv)
     // Interface
     Interface io;
     // Init interface with config file
-    io.init(config_file, robot);
+    if (!io.init(config_file, robot)) {
+        errorPrintTrace("Exiting...");
+        exit(EXIT_FAILURE);
+    }
     // Main loop
     io.loop();
 

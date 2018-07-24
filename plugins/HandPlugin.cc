@@ -219,7 +219,7 @@ void HandPlugin::setPIDController(
     if (type == POSITION)
     {
         controller->SetPositionPID(joint, common::PID(p,i,d));
-        controller->SetPositionTarget(joint, initial_value); 
+        controller->SetPositionTarget(joint, initial_value);
     }
     else if (type == VELOCITY)
     {
@@ -252,10 +252,10 @@ bool HandPlugin::loadControllers(sdf::ElementPtr _sdf)
     if (_sdf->HasElement(PARAM_CONTROLLERS))
     {
         sdf::ElementPtr ctrl_sdf = _sdf->GetElement(PARAM_CONTROLLERS);
-        if (ctrl_sdf->HasElement(PARAM_CTRL_REAL) && 
+        if (ctrl_sdf->HasElement(PARAM_CTRL_REAL) &&
             ctrl_sdf->HasElement(PARAM_CTRL_VIRTUAL))
         {
-            sdf::ElementPtr virtual_sdf = ctrl_sdf->GetElement(PARAM_CTRL_VIRTUAL);    
+            sdf::ElementPtr virtual_sdf = ctrl_sdf->GetElement(PARAM_CTRL_VIRTUAL);
             sdf::ElementPtr real_sdf = ctrl_sdf->GetElement(PARAM_CTRL_REAL);
             virtual_sdf->GetAttribute(PARAM_CTRL_TYPE)->Get<std::string>(type);
             if (type == "velocity") v_type = VELOCITY; // else position
@@ -359,8 +359,8 @@ void HandPlugin::setPose(const ignition::math::Pose3d & pose)
     virtual_joints.at(4)->SetPosition(0, rot.Pitch());
     virtual_joints.at(5)->SetPosition(0, rot.Yaw());
 
-    resetJoints();
-    imobilise();    
+    //resetJoints();
+    imobilise();
 }
 
 /////////////////////////////////////////////////
@@ -390,7 +390,7 @@ void HandPlugin::updateTimer(HandMsgPtr &_msg)
 void HandPlugin::setPIDTarget(int type, const std::string & joint, double value)
 {
     physics::JointControllerPtr ctrl = model->GetJointController();
-    
+
     if (type == VELOCITY)
     {
         ctrl->SetVelocityTarget(joint, value);
@@ -398,7 +398,7 @@ void HandPlugin::setPIDTarget(int type, const std::string & joint, double value)
     else if (type == POSITION)
     {
         ctrl->SetPositionTarget(joint, value);
-        
+
         // DEBUG
         ctrl->Update();
         std::map<std::string, double> positions;
@@ -432,7 +432,7 @@ void HandPlugin::updatePIDTargets(HandMsgPtr &_msg)
             {
                 if (group.actuated == joint){
                     for (int i = 0; i < group.mimic.size(); i++) {
-                        physics::JointPtr mimic = group.mimic.at(i); 
+                        physics::JointPtr mimic = group.mimic.at(i);
                         setPIDTarget(type, mimic->GetScopedName(),
                             value * group.multipliers.at(i));
                     }

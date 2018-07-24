@@ -45,6 +45,8 @@
 class Interface
 {
     /// TODO
+    private: std::string robot_name;
+    /// TODO
     private: gazebo::transport::NodePtr node;
     /// TODO
     private: gazebo::transport::PublisherPtr pub;
@@ -70,13 +72,30 @@ class Interface
         const std::string & config_file,
         const std::string & robot);
 
+    /// \brief Gets robot name
+    /// \return Robot name string
+    public: std::string getRobotName();
+
     /// \brief Sets hand pose
     /// \detailed Sets hand pose using virtual joints
     /// \param pose New hand pose
-    void setPose(ignition::math::Pose3d pose);
+    /// \param timeout Timer value
+    void setPose(ignition::math::Pose3d pose, double timeout=-1);
 
-    /// Sends reset signal to hand plugin.
+    /// \brief Sends reset signal to hand plugin.
     public: void reset(void);
+
+    /// \brief Releases fingers and opens hand.
+    /// \param timeout Timer value
+    void openFingers(double timeout=-1);
+
+    /// \brief Clenches fingers and closes hand.
+    /// \param timeout Timer value
+    void closeFingers(double timeout=-1);
+
+    /// \brief Raises hand.
+    /// \param timeout Timer value
+    void raiseHand(double timeout=-1);
 
     /// TODO
     public: void loop(void);

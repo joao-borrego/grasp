@@ -27,6 +27,8 @@
 #include "MessageTypes.hh"
 // Grasp representation
 #include "Grasp.hh"
+// Interface for hand plugin
+#include "Interface.hh"
 // Tools
 #include "gen_grasps.hh"
 #include "object_utils.hh"
@@ -201,10 +203,11 @@ void reset(gazebo::transport::PublisherPtr pub);
 
 /// \brief Attempts to grasp object
 /// \param grasp The grasp configuration
-/// \param pub   Publisher to hand's topic
-/// \param pub   Publisher to grasp target topic
+/// \param pubs  Map of publishers
+/// \param model_name Target object model name
 void tryGrasp(
     Grasp & grasp,
+    Interface & interface,
     std::map<std::string, gazebo::transport::PublisherPtr> & pubs,
     const std::string & model_name);
 
