@@ -67,7 +67,7 @@ def parseArgs(argv):
         elif opt in ("-c", "--config"):
             out_yml = arg
 
-    print ('Input mesh directory   ', in_dir)
+    print ('\nInput mesh directory   ', in_dir)
     print ('Output model directory ', out_dir)
     print ('Output config file     ', out_yml)
     print ('Template path          ', template)
@@ -88,12 +88,14 @@ def main(argv):
     # Initialise output yaml data
     data_yml = dict()
 
-    print('\nGenerating Gazebo models:\n')
-
     # Get list of meshes
     meshes = [f for f in os.listdir(in_dir) \
         if os.path.isfile(os.path.join(in_dir, f))]
     meshes_num = len(meshes)
+
+    progress = 0.0
+    progress_inc = 100.0 / len(meshes)
+    print('\nGenerating Gazebo models:\n')
 
     for idx, mesh in enumerate(meshes):
 
@@ -102,7 +104,7 @@ def main(argv):
         # Erase suffix and extension
         name = mesh.replace('_800_tex', '')
         name = name.replace('.obj', '')
-        print("\x1b[2K{:10.4f}".format(idx * 100.0 / meshes_num) + \
+        print("\x1b[2K{:10.4f}".format(progress) + \
             ' % - ' + name, end="\r")
         
         # Obtain required input and output path names
@@ -153,6 +155,8 @@ def main(argv):
         # TODO - Use estimated physical properties
         #data_yml[name]['mass'] = float(mass)
         #data_yml[name]['inertia'] = str(inertia.tolist())
+
+        progress = progress + progress_inc
 
     # Write output yaml
     with open(out_yml, 'w') as outfile:

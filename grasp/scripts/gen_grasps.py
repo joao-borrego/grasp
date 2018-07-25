@@ -67,7 +67,7 @@ def parseArgs(argv):
         elif opt in ("-r", "--robot"):
             robot = arg
 
-    print ('Object dataset yaml    ', obj_dataset)
+    print ('\nObject dataset yaml    ', obj_dataset)
     print ('Hand properties yaml   ', hand_cfg)
     print ('Output directory       ', out_dir)
     print ('Target object          ', target)
@@ -265,15 +265,21 @@ def main(argv):
     targets = [key for key in objects_data] if target == 'all' else [target]
     hands = [key for key in hands_data] if robot == 'all' else [robot]
 
-    # TODO - try, except
+    progress = 0.0
+    progress_inc = 100.0 / len(hands) / len(targets)
+    print('\nGenerating grasp configurations:\n')
 
-    for hand in hands:
+    # TODO - try, except
+    for i, hand in enumerate(hands):
         
         tmp_normal = hands_data[hand]['palm_normal'].split(" ")
         palm_normal = np.array(tmp_normal,  dtype=float)
         palm_offset = float(hands_data[hand]['palm_offset'])
 
-        for target in targets:
+        for j, target in enumerate(targets):
+
+            print("\x1b[2K{:10.4f}".format(progress) + \
+                ' % - ' + hand + ' - ' + target, end="\r")
 
             out_file = out_dir + '/' + target + '.' + robot + '.grasp.yml'
             mesh_filename = objects_data[target]['mesh'] 
@@ -285,6 +291,11 @@ def main(argv):
 
             if (DEBUG):
                 plotMeshWithNormals(mesh, grasps, palm_normal)
+
+            progress = progress + progress_inc
+
+    print("\x1b[2K{:10.4f}".format(100.0) + ' %\n\n' + \
+     "Done generating grasp proposals!\n")
     
 if __name__ == "__main__" :
     main(sys.argv)

@@ -11,7 +11,7 @@ vizzy:
     - r_med_phal_1_joint
   rest_finger: 0.0
   bent_finger: 1.570796 # PI/2
-  palm_offset: 0.06
+  palm_offset: 0.02
 
 # Shadow robotics dexterous (right) hand
 shadow:
@@ -38,7 +38,7 @@ shadow:
     - rh_THJ2
   rest_finger: 0.0
   bent_finger: 1.570796 # PI/2
-  palm_offset: 0.06
+  palm_offset: 0.03
 
 # Baxter parallel plates gripper
 baxter:
@@ -49,4 +49,4 @@ baxter:
     - gripper_l_finger_joint
   rest_finger: 1.0
   bent_finger: 0.0
-  palm_offset: 0.07
+  palm_offset: 0.035
