@@ -1,9 +1,9 @@
 <!DOCTYPE FilterScript>
 <FilterScript>
  <filter name="Transform: Scale, Normalize">
-  <Param description="X Axis" value="2.0" name="axisX" type="RichFloat" tooltip="Scaling"/>
-  <Param description="Y Axis" value="2.0" name="axisY" type="RichFloat" tooltip="Scaling"/>
-  <Param description="Z Axis" value="2.0" name="axisZ" type="RichFloat" tooltip="Scaling"/>
+  <Param description="X Axis" value="1.0" name="axisX" type="RichFloat" tooltip="Scaling"/>
+  <Param description="Y Axis" value="1.0" name="axisY" type="RichFloat" tooltip="Scaling"/>
+  <Param description="Z Axis" value="1.0" name="axisZ" type="RichFloat" tooltip="Scaling"/>
   <Param description="Uniform Scaling" value="true" name="uniformFlag" type="RichBool" tooltip="If selected an uniform scaling (the same for all the three axis) is applied (the X axis value is used)"/>
   <Param enum_val0="origin" enum_val2="custom point" description="Center of scaling:" value="0" enum_cardinality="3" enum_val1="barycenter" name="scaleCenter" type="RichEnum" tooltip="Choose a method"/>
   <Param y="0" description="Custom center" z="0" x="0" name="customCenter" type="RichPoint3f" tooltip="This scaling center is used only if the 'custom point' option is chosen."/>

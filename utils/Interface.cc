@@ -46,6 +46,7 @@ bool Interface::init(
         for (int i = 0; i < size; i++) {
             fingers.push_back(finger_joints[i].as<std::string>());
         }
+        robot_name = config[robot]["name"].as<std::string>();
     }
     catch (YAML::Exception& yamlException)
     {

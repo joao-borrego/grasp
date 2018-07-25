@@ -1,0 +1,4 @@
+Curry:
+  mesh: datasets/kit/Curry/meshes/Curry.stl
+  name: Curry
+  path: model://Curry

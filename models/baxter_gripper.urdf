@@ -122,7 +122,7 @@
     <parent link="virtual_pz_link"/>
     <child link="virtual_ry_link"/>
     <limit effort="25.0" velocity="25.0"/>
-    <dynamics damping="10.0" friction="5.0"/>
+    <dynamics damping="1000.0"/>
   </joint>
   <link name="virtual_ry_link">
     <visual>
@@ -149,7 +149,7 @@
     <parent link="virtual_ry_link"/>
     <child link="virtual_rp_link"/>
     <limit effort="25.0" velocity="25.0"/>
-    <dynamics damping="10.0" friction="5.0"/>
+    <dynamics damping="1000.0"/>
   </joint>
   <link name="virtual_rp_link">
     <visual>
@@ -176,7 +176,7 @@
     <parent link="virtual_rp_link"/>
     <child link="gripper_base"/>
     <limit effort="25.0" velocity="25.0"/>
-    <dynamics damping="10.0" friction="5.0"/>
+    <dynamics damping="1000.0"/>
   </joint>
 
   <!-- Base of end effector -->

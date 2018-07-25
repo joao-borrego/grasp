@@ -134,6 +134,7 @@ void TargetPlugin::onReset()
 {
     std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
     this->model->SetWorldPose(this->init_pose);
+    gzdbg << "Model reset to pose " << init_pose << std::endl; 
 }
 
 /////////////////////////////////////////////////
