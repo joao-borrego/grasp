@@ -29,6 +29,8 @@ namespace HandPlugin {
 
     /// Name SDF attribute
     #define PARAM_NAME              "name"
+    /// Target SDF attribute
+    #define PARAM_TARGET            "target"
     /// Mimic joint multiplier SDF attribute
     #define PARAM_MULTIPLIER        "multiplier"
     /// Finger joint name SDF entity

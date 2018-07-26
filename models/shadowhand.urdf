@@ -32,31 +32,31 @@
       <!-- Reference names -->
       <model>shadowhand</model>
       <!-- Fingers -->
-      <actuatedJoint name="rh_FFJ4"/>
-      <actuatedJoint name="rh_FFJ3"/>
-      <actuatedJoint name="rh_FFJ2">
+      <actuatedJoint name="rh_FFJ4" target="0.0"/>
+      <actuatedJoint name="rh_FFJ3" target="0.0"/>
+      <actuatedJoint name="rh_FFJ2" target="0.0">
         <mimicJoint name="rh_FFJ1" multiplier="0.5" />
       </actuatedJoint>
-      <actuatedJoint name="rh_MFJ4"/>
-      <actuatedJoint name="rh_MFJ3"/>
-      <actuatedJoint name="rh_MFJ2">
+      <actuatedJoint name="rh_MFJ4" target="0.0"/>
+      <actuatedJoint name="rh_MFJ3" target="0.0"/>
+      <actuatedJoint name="rh_MFJ2" target="0.0">
         <mimicJoint name="rh_MFJ1" multiplier="0.5" />
       </actuatedJoint>
-      <actuatedJoint name="rh_RFJ4"/>
-      <actuatedJoint name="rh_RFJ3"/>
-      <actuatedJoint name="rh_RFJ2">
+      <actuatedJoint name="rh_RFJ4" target="0.0"/>
+      <actuatedJoint name="rh_RFJ3" target="0.0"/>
+      <actuatedJoint name="rh_RFJ2" target="0.0">
         <mimicJoint name="rh_RFJ1" multiplier="0.5" />
       </actuatedJoint>
-      <actuatedJoint name="rh_LFJ5"/>
-      <actuatedJoint name="rh_LFJ4"/>
-      <actuatedJoint name="rh_LFJ3"/>
-      <actuatedJoint name="rh_LFJ2">
+      <actuatedJoint name="rh_LFJ5" target="0.0"/>
+      <actuatedJoint name="rh_LFJ4" target="0.0"/>
+      <actuatedJoint name="rh_LFJ3" target="0.0"/>
+      <actuatedJoint name="rh_LFJ2" target="0.0">
         <mimicJoint name="rh_LFJ1" multiplier="0.5" />
       </actuatedJoint>
-      <actuatedJoint name="rh_THJ5"/>
-      <actuatedJoint name="rh_THJ4"/>
-      <actuatedJoint name="rh_THJ3"/>
-      <actuatedJoint name="rh_THJ2">
+      <actuatedJoint name="rh_THJ5" target="0.0"/>
+      <actuatedJoint name="rh_THJ4" target="0.0"/>
+      <actuatedJoint name="rh_THJ3" target="0.0"/>
+      <actuatedJoint name="rh_THJ2" target="0.0">
         <mimicJoint name="rh_THJ1" multiplier="0.5" />
       </actuatedJoint>
       <!-- Virtual joints for floating behaviour -->
@@ -67,7 +67,7 @@
       <!-- PID controller parameters -->
       <controllers>
         <!-- PID parameters for real hand joints -->
-        <real type="position" p="3.0" i="0.0" d="0.0"/>
+        <real type="position" p="50.0" i="10.0" d="0.0"/>
         <!-- PID parameters for virtual joints -->
         <virtual type="position" p="100.0" i="10.0" d="2.0"/>
       </controllers>
@@ -377,7 +377,7 @@
 
   <!-- prefix can be anything but usually is "r_" or  "l_" for right and left hands distinction -->
   <gazebo reference="rh_ffproximal">
-    <selfCollide>true</selfCollide>
+    <selfCollide>false</selfCollide>
   </gazebo>
   <link name="rh_ffmiddle">
     <inertial>
@@ -422,7 +422,7 @@
 
   <!-- prefix can be anything but usually is "r_" or  "l_" for right and left hands distinction -->
   <gazebo reference="rh_ffmiddle">
-    <selfCollide>true</selfCollide>
+    <selfCollide>false</selfCollide>
   </gazebo>
   <link name="rh_ffdistal">
     <inertial>
@@ -476,7 +476,7 @@
     <mu2 value="500.0"/>
     <kp value="10000000.0"/>
     <kd value="1.0"/>
-    <selfCollide>true</selfCollide>
+    <selfCollide>false</selfCollide>
   </gazebo>
   <link name="rh_mfknuckle">
     <inertial>
@@ -543,7 +543,7 @@
 
   <!-- prefix can be anything but usually is "r_" or  "l_" for right and left hands distinction -->
   <gazebo reference="rh_mfproximal">
-    <selfCollide>true</selfCollide>
+    <selfCollide>false</selfCollide>
   </gazebo>
   <link name="rh_mfmiddle">
     <inertial>
@@ -588,7 +588,7 @@
 
   <!-- prefix can be anything but usually is "r_" or  "l_" for right and left hands distinction -->
   <gazebo reference="rh_mfmiddle">
-    <selfCollide>true</selfCollide>
+    <selfCollide>false</selfCollide>
   </gazebo>
   <link name="rh_mfdistal">
     <inertial>
@@ -642,7 +642,7 @@
     <mu2 value="500.0"/>
     <kp value="10000000.0"/>
     <kd value="1.0"/>
-    <selfCollide>true</selfCollide>
+    <selfCollide>false</selfCollide>
   </gazebo>
   <link name="rh_rfknuckle">
     <inertial>
@@ -709,7 +709,7 @@
 
   <!-- prefix can be anything but usually is "r_" or  "l_" for right and left hands distinction -->
   <gazebo reference="rh_rfproximal">
-    <selfCollide>true</selfCollide>
+    <selfCollide>false</selfCollide>
   </gazebo>
   <link name="rh_rfmiddle">
     <inertial>
@@ -754,7 +754,7 @@
 
   <!-- prefix can be anything but usually is "r_" or  "l_" for right and left hands distinction -->
   <gazebo reference="rh_rfmiddle">
-    <selfCollide>true</selfCollide>
+    <selfCollide>false</selfCollide>
   </gazebo>
   <link name="rh_rfdistal">
     <inertial>
@@ -808,7 +808,7 @@
     <mu2 value="500.0"/>
     <kp value="10000000.0"/>
     <kd value="1.0"/>
-    <selfCollide>true</selfCollide>
+    <selfCollide>false</selfCollide>
   </gazebo>
   <link name="rh_lfmetacarpal">
     <inertial>
@@ -841,7 +841,7 @@
 
   <!-- prefix can be anything but usually is "r_" or  "l_" for right and left hands distinction -->
   <gazebo reference="rh_lfmetacarpal">
-    <selfCollide>true</selfCollide>
+    <selfCollide>false</selfCollide>
   </gazebo>
   <link name="rh_lfknuckle">
     <inertial>
@@ -908,7 +908,7 @@
 
   <!-- prefix can be anything but usually is "r_" or  "l_" for right and left hands distinction -->
   <gazebo reference="rh_lfproximal">
-    <selfCollide>true</selfCollide>
+    <selfCollide>false</selfCollide>
   </gazebo>
   <link name="rh_lfmiddle">
     <inertial>
@@ -953,7 +953,7 @@
 
   <!-- prefix can be anything but usually is "r_" or  "l_" for right and left hands distinction -->
   <gazebo reference="rh_lfmiddle">
-    <selfCollide>true</selfCollide>
+    <selfCollide>false</selfCollide>
   </gazebo>
   <link name="rh_lfdistal">
     <inertial>
@@ -1007,7 +1007,7 @@
     <mu2 value="500.0"/>
     <kp value="10000000.0"/>
     <kd value="1.0"/>
-    <selfCollide>true</selfCollide>
+    <selfCollide>false</selfCollide>
   </gazebo>
   <link name="rh_thbase">
     <inertial>
@@ -1112,7 +1112,7 @@
 
   <!-- prefix can be anything but usually is "r_" or  "l_" for right and left hands distinction -->
   <gazebo reference="rh_thhub">
-    <selfCollide>true</selfCollide>
+    <selfCollide>false</selfCollide>
   </gazebo>
   <link name="rh_thmiddle">
     <inertial>
@@ -1153,7 +1153,7 @@
 
   <!-- prefix can be anything but usually is "r_" or  "l_" for right and left hands distinction -->
   <gazebo reference="rh_thmiddle">
-    <selfCollide>true</selfCollide>
+    <selfCollide>false</selfCollide>
   </gazebo>
   <!-- common -->
   <link name="rh_thdistal">
@@ -1210,7 +1210,7 @@
     <mu2 value="500.0"/>
     <kp value="10000000.0"/>
     <kd value="1.0"/>
-    <selfCollide>true</selfCollide>
+    <selfCollide>false</selfCollide>
   </gazebo>
 
 </robot>

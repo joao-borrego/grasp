@@ -7,7 +7,7 @@
       <!-- Reference names -->
       <model>baxter_gripper</model>
       <!-- Fingers -->
-      <actuatedJoint name="gripper_l_finger_joint">
+      <actuatedJoint name="gripper_l_finger_joint" target="0.0">
         <mimicJoint name="gripper_r_finger_joint" multiplier="-1.0" />
       </actuatedJoint>
       <!-- Virtual joints for floating behaviour -->

@@ -16,14 +16,17 @@ class JointGroup
 {
     /// Actuated joint
     public: physics::JointPtr actuated;
+    /// Actuated joint default target value
+    public: double target {0.0};
     /// Vector of mimic joints
     public: std::vector<physics::JointPtr> mimic;
     /// Vector of corresponding mimic joint's multipliers
     public: std::vector<double> multipliers;
 
-    public: JointGroup(physics::JointPtr joint)
+    public: JointGroup(physics::JointPtr joint, double target=0.0)
     {
         this->actuated = joint;
+        this->target = target;
     }
 };
 
@@ -146,6 +149,7 @@ bool HandPlugin::loadMimicJoints(sdf::ElementPtr _sdf, JointGroup & joint)
 bool HandPlugin::loadJointGroups(sdf::ElementPtr _sdf)
 {
     std::string joint_name;
+    double target;
     int inserted = 0;
 
     if (_sdf->HasElement(PARAM_JOINT_GROUP))
@@ -158,8 +162,10 @@ bool HandPlugin::loadJointGroups(sdf::ElementPtr _sdf)
             if (joint_sdf->HasAttribute(PARAM_NAME))
             {
                 joint_sdf->GetAttribute(PARAM_NAME)->Get<std::string>(joint_name);
-                this->joint_groups.emplace_back(this->model->GetJoint(joint_name));
-                gzdbg << "Actuated joint " << joint_name << std::endl;
+                joint_sdf->GetAttribute(PARAM_TARGET)->Get<double>(target);
+                this->joint_groups.emplace_back(this->model->GetJoint(joint_name), target);
+                gzdbg << "Actuated joint " << joint_name <<
+                    "target = " << target << std::endl;
                 loadMimicJoints(joint_sdf, this->joint_groups.at(inserted++));
             }
             else if (joint_sdf->GetName() == PARAM_JOINT_GROUP)
@@ -279,10 +285,12 @@ bool HandPlugin::loadControllers(sdf::ElementPtr _sdf)
     {
         setPIDController(controller, r_type,
             group.actuated->GetScopedName(), r_p, r_i, r_d, 0.0);
-        for (const auto &joint : group.mimic)
+            setPIDTarget(r_type, group.actuated->GetScopedName(), group.target);
+        for (int i = 0; i < group.mimic.size(); i++)
         {
             setPIDController(controller, r_type,
-                joint->GetScopedName(), r_p, r_i, r_d, 0.0);
+                group.mimic.at(i)->GetScopedName(),
+                r_p, r_i, r_d, group.target * group.multipliers.at(i));
         }
     }
 

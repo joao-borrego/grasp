@@ -140,7 +140,6 @@ void TargetPlugin::onReset()
 /////////////////////////////////////////////////
 void TargetPlugin::onRequest(TargetRequestPtr &_msg)
 {
-
     if (_msg->has_type())
     {
         int type = _msg->type();
