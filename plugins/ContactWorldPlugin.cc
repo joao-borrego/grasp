@@ -156,7 +156,7 @@ void ContactWorldPlugin::checkCollision(ContactResponse & _msg)
         {
             std::string col1(pair.collision1());
             std::string col2(pair.collision2());
-            
+
             gzdbg << "Test " << col1 << " and " << col2 << std::endl;
 
             for (int i = 0; i < num_contacts; i++)
@@ -199,17 +199,17 @@ void ContactWorldPlugin::changeSurface(ContactResponse & _msg)
 
             physics::LinkPtr link = model->GetLink(request.link());
             if (!link) { return; }
-            
-            physics::CollisionPtr col = 
+
+            physics::CollisionPtr col =
                 link->GetCollision(request.collision());
-            if (!col) { return; }           
+            if (!col) { return; }
 
             physics::SurfaceParamsPtr surface = col->GetSurface();
             if (!surface) { return; }
-            
+
             // Update surface properties
             surface->ProcessMsg(request.surface());
-        
+
             gzdbg << "Changed surface properties" << std::endl;
         }
     }

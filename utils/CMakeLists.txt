@@ -29,6 +29,7 @@ link_directories(${PROJECT_BINARY_DIR}/utils)
 
 # Shared library for hand plugin interface
 add_library(grasp_interface SHARED
+    GraspShape.cc
     Interface.cc
     utils.cc
 )
@@ -67,11 +68,13 @@ add_dependencies(contacts_example
     grasp_msgs)
 
 # Configure interface header
+configure_file (${PROJECT_SOURCE_DIR}/utils/GraspShape.hh
+  ${CMAKE_CURRENT_BINARY_DIR}/GraspShape.hh )
 configure_file (${PROJECT_SOURCE_DIR}/utils/Interface.hh
   ${CMAKE_CURRENT_BINARY_DIR}/Interface.hh )
 configure_file (${PROJECT_SOURCE_DIR}/utils/utils.hh
   ${CMAKE_CURRENT_BINARY_DIR}/utils.hh )
 
-# Configure header-only debug utilities 
+# Configure header-only debug utilities
 configure_file (${PROJECT_SOURCE_DIR}/utils/debug.hh.in
   ${CMAKE_CURRENT_BINARY_DIR}/debug.hh )

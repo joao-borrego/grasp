@@ -80,7 +80,7 @@ void TargetPlugin::onUpdate()
 {
     bool reply_pose = false;
     TargetResponse msg;
-    
+
     {
         std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
         if (this->get_pose)
@@ -100,7 +100,7 @@ void TargetPlugin::onUpdate()
         {
             bool resting = true;
             double epsilon = VELOCITY_EPSILON;
-            ignition::math::Vector3d lin_vel = model->WorldLinearVel(); 
+            ignition::math::Vector3d lin_vel = model->WorldLinearVel();
             ignition::math::Vector3d ang_vel = model->WorldAngularVel();
 
             // Object is resting iif vel_i < epsilon, for all i
@@ -134,7 +134,7 @@ void TargetPlugin::onReset()
 {
     std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
     this->model->SetWorldPose(this->init_pose);
-    gzdbg << "Model reset to pose " << init_pose << std::endl; 
+    gzdbg << "Model reset to pose " << init_pose << std::endl;
 }
 
 /////////////////////////////////////////////////

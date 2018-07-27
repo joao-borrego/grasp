@@ -67,12 +67,12 @@
       <!-- PID controller parameters -->
       <controllers>
         <!-- PID parameters for real hand joints -->
-        <real type="position" p="50.0" i="10.0" d="0.0"/>
+        <real type="position" p="100.0" i="10.0" d="0.0"/>
         <!-- PID parameters for virtual joints -->
-        <virtual type="position" p="100.0" i="10.0" d="2.0"/>
+        <virtual type="position" p="300.0" i="30.0" d="0.0"/>
       </controllers>
       <!-- Constraints -->
-      <gravity>1</gravity>
+      <gravity>0</gravity>
     </plugin>
   </gazebo>
 
@@ -171,7 +171,7 @@
     <parent link="virtual_pz_link"/>
     <child link="virtual_ry_link"/>
     <limit lower="-1.57" upper="1.57" effort="25.0" velocity="25.0"/>
-    <dynamics damping="1000.0"/>
+    <dynamics damping="100.0"/>
   </joint>
   <link name="virtual_ry_link">
     <visual>
@@ -198,7 +198,7 @@
     <parent link="virtual_ry_link"/>
     <child link="virtual_rp_link"/>
     <limit lower="-1.57" upper="1.57" effort="25.0" velocity="25.0"/>
-    <dynamics damping="1000.0"/>
+    <dynamics damping="100.0"/>
   </joint>
   <link name="virtual_rp_link">
     <visual>
@@ -225,7 +225,7 @@
     <parent link="virtual_rp_link"/>
     <child link="base_footprint"/>
     <limit lower="-1.57" upper="1.57" effort="25.0" velocity="25.0"/>
-    <dynamics damping="1000.0"/>
+    <dynamics damping="100.0"/>
   </joint>
 
   <!-- Root link, on the ground just below the robot origin -->

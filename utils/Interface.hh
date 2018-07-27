@@ -23,6 +23,8 @@
 #include "utils.hh"
 // Debug streams
 #include "debug.hh"
+// Grasp shape representation
+#include "GraspShape.hh"
 // Custom messages
 #include "target.pb.h"
 #include "hand.pb.h"
@@ -53,15 +55,9 @@ class Interface
     /// TODO
     private: std::vector<std::string> joints;
     /// TODO
-    private: std::vector<std::string> fingers;
-    /// TODO
-    private: double rest_finger_pos {0.0};
-    /// TODO
-    private: double bent_finger_pos {1.0}; 
-
-    /// TODO
     private: std::map<std::string, double> state;
-
+    /// TODO
+    private: std::vector<GraspShape> grasps;
 
     /// \brief Constructor
     public: Interface();

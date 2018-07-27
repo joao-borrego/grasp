@@ -84,7 +84,7 @@ int main(int _argc, char **_argv)
     {
         // Obtain candidate grasps
         model_filename = "model://" + model_name;
-        std::string cfg_file(grasp_cfg_dir + 
+        std::string cfg_file(grasp_cfg_dir +
             model_name + "." + robot + ".grasp.yml");
         std::vector<Grasp> grasps;
         obtainGrasps(cfg_file, robot, grasps);
@@ -128,7 +128,7 @@ int main(int _argc, char **_argv)
     // Capture and render frame
     /*
     captureFrame(pubs["camera"]);
-    while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}    
+    while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
     */
 
     // Cleanup
