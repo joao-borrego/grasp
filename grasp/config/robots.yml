@@ -5,10 +5,6 @@ vizzy:
   name: vizzy_right_hand
   path: models/vizzy_right_hand.urdf
   palm_normal: "0 -1 0"
-  finger_joints:
-    - r_thumb_phal_1_joint
-    - r_ind_phal_1_joint
-    - r_med_phal_1_joint
   grasp_configurations:
     cylindrical:
       r_thumb_phal_1_joint: {pre: 0.0, post: 1.570796}
@@ -21,12 +17,6 @@ shadow:
   name: shadowhand
   path: models/shadowhand.urdf
   palm_normal: "0 1 0"
-  finger_joints: [
-    rh_FFJ4, rh_FFJ3, rh_FFJ2,
-    rh_MFJ4, rh_MFJ3, rh_MFJ2,
-    rh_RFJ4, rh_RFJ3, rh_RFJ2,
-    rh_LFJ5, rh_LFJ4, rh_LFJ3, rh_LFJ2,
-    rh_THJ5, rh_THJ4, rh_THJ3, rh_THJ2]
   grasp_configurations:
     cylindrical:
       rh_FFJ4: {pre: 0.0, post: 1.570796}
@@ -52,9 +42,7 @@ shadow:
 baxter:
   name: baxter_gripper
   path: models/baxter_gripper.urdf
-  palm_normal: "0 0 -1" 
-  finger_joints:
-    - gripper_l_finger_joint
+  palm_normal: "0 0 -1"
   grasp_configurations:
     pinch:
       gripper_l_finger_joint: {pre: 0.0, post: 1.0}
