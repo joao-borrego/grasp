@@ -1,6 +1,6 @@
 /*!
     \file plugins/DRPlugin.hh
-    \brief Domain Randomization Gazebo plugin
+    \brief Domain randomization Gazebo plugin headers
 
     Plugin for handling Domain Randomization requests
 
@@ -16,6 +16,11 @@
 #include <gazebo/transport/transport.hh>
 #include <gazebo/sensors/sensors.hh>
 
+// Custom messages
+#include "dr_request.pb.h"
+#include "model_cmd.pb.h"
+
+// Required fields workaround
 #include <limits>
 
 namespace DRPlugin {
@@ -37,21 +42,17 @@ namespace gazebo {
 
     // Message types
 
-    /// Model message pointer
-    typedef const boost::shared_ptr<const msgs::Model> ModelMsgPtr;
-    /// Link message pointer
-    typedef const boost::shared_ptr<const msgs::Link> LinkMsgPtr;
-    /// Inertial message pointer
-    typedef const boost::shared_ptr<const msgs::Inertial> InertialMsgPtr;
-    /// Surface message pointer
-    typedef const boost::shared_ptr<const msgs::Surface> SurfaceMsgPtr;
-    /// Joint message pointer
-    typedef const boost::shared_ptr<const msgs::Joint> JointMsgPtr;
-    /// Joint command message pointer
-    typedef const boost::shared_ptr<const msgs::JointCmd> JointCmdMsgPtr;
-    /// PID controller message pointer
-    typedef const boost::shared_ptr<const msgs::PID> PIDMsgPtr;
-
+    /// Declaration for request message type
+    typedef grasp::msgs::DRRequest DRRequest;
+    /// Shared pointer declaration for request message type
+    typedef const boost::shared_ptr<const grasp::msgs::DRRequest>
+        DRRequestPtr;
+    /// Declaration for model command message type
+    typedef grasp::msgs::ModelCmd ModelCmdMsg;
+    /// Shared pointer declaration for model command message type
+    typedef const boost::shared_ptr<const grasp::msgs::ModelCmd>
+        ModelCmdPtr;
+    
     // Forward declaration of private data class
     class DRPluginPrivate;
 
@@ -70,6 +71,9 @@ namespace gazebo {
         /// Physics engine pointer
         private: physics::PhysicsEnginePtr physics_engine;
 
+        /// Pending request
+        private: boost::shared_ptr<DRRequest const> msg;
+
         // Public methods
 
         /// \brief Constructs the object
@@ -87,43 +91,60 @@ namespace gazebo {
         /// \brief Called on World Update event
         public: void onUpdate();
 
+        /// \brief Callback function for handling incoming requests
+        /// \param _msg  The message
+        public: void onRequest(DRRequestPtr & _msg);
+
         // Physics 
 
-        /// \brief Updates gravity
-        /// \param gravity New gravity vector
-        private: void setGravity(const ignition::math::Vector3d & gravity);
+        /// \brief Processes physics message
+        /// \param msg Physics message
+        private: void processPhysics(const msgs::Physics & msg);
 
-        /// \brief Updates model scale
-        /// \param msg Model message pointer
-        private: void setScale(ModelMsgPtr & msg);
-
-        /// \brief Updates inertial
-        /// \param link Parent link pointer
-        /// \param msg Inertial message pointer
-        private: void processInertial(
-            physics::LinkPtr link,
-            InertialMsgPtr & msg);
-
-        /// \brief Updates surface
-        /// \param collision Parent collision pointer
-        /// \param msg Surface message pointer
-        private: void processSurface(
-            physics::CollisionPtr collision,
-            SurfaceMsgPtr & msg);
+        /// \brief Processes model message
+        /// \param msg Model message
+        private: void processModel(const msgs::Model & msg);
 
         /// \brief Updates joint
         /// \param model Parent model pointer
-        /// \param msg Joint message pointer
+        /// \param msg Joint message
         private: void processJoint(
             physics::ModelPtr model,
-            JointMsgPtr & msg);
+            const msgs::Joint & msg);
+
+        /// \brief Updates link
+        /// \param model Parent model pointer
+        /// \param msg Link message
+        private: void processLink(
+            physics::ModelPtr model,
+            const msgs::Link & msg);
+
+        /// \brief Updates inertial
+        /// \param link Parent link pointer
+        /// \param msg Inertial message
+        private: void processInertial(
+            physics::LinkPtr link,
+            const msgs::Inertial & msg);
+
+        /// \brief Updates surface
+        /// \param collision Parent collision pointer
+        /// \param msg Surface message
+        private: void processSurface(
+            physics::CollisionPtr collision,
+            const msgs::Surface & msg);
+
+        /// \brief Processes model command message
+        /// \param model Parent model pointer
+        /// \param msg Joint command message pointer
+        private: void processModelCmd(
+            const ModelCmdMsg & msg);
 
         /// \brief Processes joint command message
         /// \param model Parent model pointer
         /// \param msg Joint command message pointer
         private: void processJointCmd(
             physics::ModelPtr model,
-            JointCmdMsgPtr & msg);
+            const msgs::JointCmd & msg);
         
         /// \brief Updates PID controller
         /// \param type PID controller type (POSITION or VELOCITY)

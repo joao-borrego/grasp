@@ -8,6 +8,10 @@ foreach(ITR ${GAZEBO_INCLUDE_DIRS})
   endif()
 endforeach()
 
+# Get list of every proto source
+# Slight overhead in compilation
+file(GLOB PROTOBUF_SOURCES ${PROTOBUF_IMPORT_DIRS}/*.proto)
+
 # Obtain set of proto messages definitions
 set (msgs
   # Custom messages
@@ -25,17 +29,11 @@ set (msgs
   # Contact messages
   contact_request.proto
   contact_response.proto
+  # Domain randomization messages
+  model_cmd.proto
+  dr_request.proto
   # Message dependencies
-  ${PROTOBUF_IMPORT_DIRS}/header.proto
-  ${PROTOBUF_IMPORT_DIRS}/time.proto
-  ${PROTOBUF_IMPORT_DIRS}/vector3d.proto
-  ${PROTOBUF_IMPORT_DIRS}/quaternion.proto
-  ${PROTOBUF_IMPORT_DIRS}/pose.proto
-  ${PROTOBUF_IMPORT_DIRS}/contact.proto
-  ${PROTOBUF_IMPORT_DIRS}/joint_wrench.proto
-  ${PROTOBUF_IMPORT_DIRS}/wrench.proto
-  ${PROTOBUF_IMPORT_DIRS}/friction.proto
-  ${PROTOBUF_IMPORT_DIRS}/surface.proto
+  ${PROTOBUF_SOURCES}
 )
 
 # Generate Protobuf sources

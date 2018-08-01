@@ -48,83 +48,107 @@ void DRPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
     this->world = _world;
     this->physics_engine = world->Physics();
 
+    // Connect to world update event
+    this->update_connection = event::Events::ConnectWorldUpdateBegin(
+        std::bind(&DRPlugin::onUpdate, this));
+    // Setup transport node
+    this->data_ptr->node = transport::NodePtr(new transport::Node());
+    this->data_ptr->node->Init();
+    // Subcribe to the monitored requests topic
+    this->data_ptr->sub = this->data_ptr->node->Subscribe(REQUEST_TOPIC,
+        &DRPlugin::onRequest, this);
+
     gzmsg << "[DRPlugin] Loaded plugin." << std::endl;
 }
 
 /////////////////////////////////////////////////
 void DRPlugin::onUpdate()
 {
-    // TODO
+    std::lock_guard<std::mutex> lock(data_ptr->mutex);
+
+    // If no requests are pending
+    if (!msg) { return; }
+    // Process stored message
+    if (msg->has_physics())
+    {
+        processPhysics(msg->physics());
+    }
+    for (const auto & model : msg->model())
+    {
+        processModel(model);
+    }
+    for (const auto & model_cmd : msg->model_cmd())
+    {
+        processModelCmd(model_cmd);
+    }
+    // Clear processed request
+    msg.reset();
 }
 
 /////////////////////////////////////////////////
-void DRPlugin::setGravity(const ignition::math::Vector3d & gravity)
+void DRPlugin::onRequest(DRRequestPtr & _msg)
 {
-    physics_engine->SetGravity(gravity);
+    std::lock_guard<std::mutex> lock(data_ptr->mutex);
+
+    GZ_ASSERT(_msg, "Invalid request");
+    // TODO - Create message queue
+    // Store message
+    if (!msg) { msg = _msg; }
+}
+
+// Process requests
+
+/////////////////////////////////////////////////
+void DRPlugin::processPhysics(const msgs::Physics & msg)
+{
+    ignition::math::Vector3d gravity;
+
+    if (msg.has_gravity())
+    {
+        gravity = msgs::ConvertIgn(msg.gravity());
+        physics_engine->SetGravity(gravity);
+    }
 }
 
 /////////////////////////////////////////////////
-void DRPlugin::setScale(ModelMsgPtr & msg)
+void DRPlugin::processModel(const msgs::Model & msg)
 {
-    std::string model_name;
-    ignition::math::Vector3d scale;
     physics::ModelPtr model;
-
-    GZ_ASSERT(msg, "Invalid model message");
-    GZ_ASSERT(msg->has_scale(), "Message has no scale field");
-    model_name = msg->name();
-    scale = msgs::ConvertIgn(msg->scale());
+    std::string model_name = msg.name();
     model = world->ModelByName(model_name);
     GZ_ASSERT(model, "Model not found");
-    model->SetScale(scale);
-}
 
-/////////////////////////////////////////////////
-void DRPlugin::processInertial(
-    physics::LinkPtr link,
-    InertialMsgPtr & msg)
-{
-    physics::InertialPtr inertial;
-    double mass;
-    double ixx, ixy, ixz, iyy, iyz, izz;
-
-    GZ_ASSERT(link, "Invalid link");
-    inertial = link->GetInertial();
-    GZ_ASSERT(msg, "Invalid inertial message");
-
-    if (msg->has_mass())
+    for (const auto & joint : msg.joint())
     {
-        mass = msg->mass();
-        inertial->SetMass(mass);
+        processJoint(model, joint);
     }
-    if (msg->has_ixx() && msg->has_ixy() && 
-        msg->has_ixz() && msg->has_iyy() && 
-        msg->has_iyz() && msg->has_izz())
+    for (const auto & link : msg.link())
     {
-        ixx = msg->ixx(); ixy = msg->ixy();
-        ixz = msg->ixz(); iyy = msg->iyy();
-        iyz = msg->iyz(); izz = msg->izz();
-        inertial->SetInertiaMatrix(ixx, iyy, izz, ixy, ixz, iyz);
+        processLink(model, link);
     }
-}
-
-/////////////////////////////////////////////////
-void DRPlugin::processSurface(
-    physics::CollisionPtr collision,
-    SurfaceMsgPtr & msg)
-{
-    physics::SurfaceParamsPtr surface;
-
-    GZ_ASSERT(collision, "Invalid collision");
-    surface = collision->GetSurface();
-    GZ_ASSERT(msg, "Invalid surface message");
-    surface->ProcessMsg(*msg);
+    if (msg.has_scale())
+    {
+        model->SetScale(msgs::ConvertIgn(msg.scale()));
+    }
+    // MAYBE
+    /*
+    for (const auto & nested_model : msg.model())
+    {
+        processModel(nested_model);
+    }
+    */
+    // TODO
+    /*
+    for (const auto & visual : msg->visual()) {
+        //processModel(model);
+    }
+    */
 }
 
 /////////////////////////////////////////////////
 void DRPlugin::processJoint(
     physics::ModelPtr model,
-    JointMsgPtr & msg)
+    const msgs::Joint & msg)
 {
     std::string joint_name;
     physics::JointPtr joint;
@@ -132,17 +156,16 @@ void DRPlugin::processJoint(
     double value;
 
     GZ_ASSERT(model, "Invalid model");
-    GZ_ASSERT(msg, "Invalid joint message");
-    joint_name = msg->name();
+    joint_name = msg.name();
     joint = model->GetJoint(joint_name);
     GZ_ASSERT(joint, "Joint not found");
     
     // axis2 is not yet used by Gazebo
-    if (msg->has_axis1())
+    if (msg.has_axis1())
     {
         // Since every field is required,
         // filter out unwanted fields by checking for INFINITY
-        axis_msg = msg->axis1();
+        axis_msg = msg.axis1();
         // Joint lower limit
         value = axis_msg.limit_lower();
         if (value != INFINITY) { joint->SetLowerLimit(0, value); }
@@ -166,9 +189,94 @@ void DRPlugin::processJoint(
 }
 
 /////////////////////////////////////////////////
+void DRPlugin::processLink(
+    physics::ModelPtr model,
+    const msgs::Link & msg)
+{
+    std::string link_name;
+    physics::LinkPtr link;
+    msgs::Collision collision_msg;
+    physics::CollisionPtr collision;
+
+    link_name = msg.name();
+    link = model->GetChildLink(link_name);
+    GZ_ASSERT(link, "Link not found");
+
+    if (msg.has_inertial())
+    {
+        processInertial(link, msg.inertial());
+    }
+    for (const auto & collision_msg : msg.collision())
+    {
+        if (collision_msg.has_surface())
+        {
+            collision = link->GetCollision(collision_msg.name());
+            GZ_ASSERT(collision, "Collision not found");
+            processSurface(collision, collision_msg.surface());
+        }
+    }
+}
+
+/////////////////////////////////////////////////
+void DRPlugin::processInertial(
+    physics::LinkPtr link,
+    const msgs::Inertial & msg)
+{
+    physics::InertialPtr inertial;
+    double mass;
+    double ixx, ixy, ixz, iyy, iyz, izz;
+
+    GZ_ASSERT(link, "Invalid link");
+    inertial = link->GetInertial();
+
+    if (msg.has_mass())
+    {
+        mass = msg.mass();
+        inertial->SetMass(mass);
+    }
+    if (msg.has_ixx() && msg.has_ixy() && 
+        msg.has_ixz() && msg.has_iyy() && 
+        msg.has_iyz() && msg.has_izz())
+    {
+        ixx = msg.ixx(); ixy = msg.ixy();
+        ixz = msg.ixz(); iyy = msg.iyy();
+        iyz = msg.iyz(); izz = msg.izz();
+        inertial->SetInertiaMatrix(ixx, iyy, izz, ixy, ixz, iyz);
+    }
+}
+
+/////////////////////////////////////////////////
+void DRPlugin::processSurface(
+    physics::CollisionPtr collision,
+    const msgs::Surface & msg)
+{
+    physics::SurfaceParamsPtr surface;
+    surface = collision->GetSurface();
+    GZ_ASSERT(surface, "Invalid surface");
+    surface->ProcessMsg(msg);
+}
+
+/////////////////////////////////////////////////
+void DRPlugin::processModelCmd(
+    const ModelCmdMsg & msg)
+{
+    std::string model_name;
+    physics::ModelPtr model;
+
+    model_name = msg.model_name();
+    model = world->ModelByName(model_name);
+    GZ_ASSERT(model, "Model not found");
+
+    for (const auto & joint_cmd : msg.joint_cmd())
+    {
+        processJointCmd(model, joint_cmd);
+    }
+}
+
+/////////////////////////////////////////////////
 void DRPlugin::processJointCmd(
     physics::ModelPtr model,
-    JointCmdMsgPtr & msg)
+    const msgs::JointCmd & msg)
 {
     // Joint scoped name
     std::string joint_name;
@@ -177,17 +285,16 @@ void DRPlugin::processJointCmd(
     double value;
 
     GZ_ASSERT(model, "Invalid model");
-    GZ_ASSERT(msg, "Invalid Joint Command message");
     controller = model->GetJointController();
-    joint_name = msg->name();
+    joint_name = msg.name();
 
-    if (msg->has_position())
+    if (msg.has_position())
     {
-        processPID(POSITION, controller, joint_name, msg->position());
+        processPID(POSITION, controller, joint_name, msg.position());
     }
-    if (msg->has_velocity())
+    if (msg.has_velocity())
     {
-        processPID(VELOCITY, controller, joint_name, msg->velocity());
+        processPID(VELOCITY, controller, joint_name, msg.velocity());
     }
 }
 
