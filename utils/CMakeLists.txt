@@ -38,6 +38,16 @@ target_link_libraries(grasp_interface
 add_dependencies(grasp_interface
     grasp_msgs)
 
+# Shared library for domain randomization plugin interface
+add_library(dr_interface SHARED
+    DRInterface.cc
+    utils.cc
+)
+target_link_libraries(dr_interface
+    grasp_msgs)
+add_dependencies(grasp_interface
+    grasp_msgs)
+
 # Hand plugin example client
 add_executable (hand_remote
     hand_remote.cc
@@ -74,6 +84,8 @@ configure_file (${PROJECT_SOURCE_DIR}/utils/Interface.hh
   ${CMAKE_CURRENT_BINARY_DIR}/Interface.hh )
 configure_file (${PROJECT_SOURCE_DIR}/utils/utils.hh
   ${CMAKE_CURRENT_BINARY_DIR}/utils.hh )
+configure_file (${PROJECT_SOURCE_DIR}/utils/DRInterface.hh
+  ${CMAKE_CURRENT_BINARY_DIR}/DRInterface.hh )
 
 # Configure header-only debug utilities
 configure_file (${PROJECT_SOURCE_DIR}/utils/debug.hh.in
