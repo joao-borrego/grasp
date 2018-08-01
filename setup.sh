@@ -10,9 +10,7 @@ export GAZEBO_PLUGIN_PATH=${GAZEBO_PLUGIN_PATH}:`pwd`/build/plugins
 
 # Datasets
 export GAZEBO_MODEL_PATH=${GAZEBO_MODEL_PATH}:`pwd`/datasets/kit
-# export GAZEBO_MODEL_PATH=${GAZEBO_MODEL_PATH}:`pwd`/datasets/3dnet
-# export GAZEBO_MODEL_PATH=${GAZEBO_MODEL_PATH}:`pwd`/datasets/ycb
-# export GAZEBO_MODEL_PATH=${GAZEBO_MODEL_PATH}:`pwd`/datasets/ShapeNetSem
+export GAZEBO_MODEL_PATH=${GAZEBO_MODEL_PATH}:`pwd`/datasets/parametric
 
 # Other
 export GAZEBO_MODEL_PATH=${GAZEBO_MODEL_PATH}:`pwd`/models

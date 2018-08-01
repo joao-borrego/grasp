@@ -1,0 +1,8 @@
+Cube:
+  mesh: datasets/parametric/Cube/meshes/Cube.stl
+  name: Cube
+  path: model://Cube
+Sphere:
+  mesh: datasets/parametric/Sphere/meshes/Sphere.stl
+  name: Sphere
+  path: model://Sphere
