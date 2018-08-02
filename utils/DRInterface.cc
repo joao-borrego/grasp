@@ -183,7 +183,7 @@ void DRInterface::addModelCmd(DRRequest & msg,
     if (type == POSITION) { pid = joint_cmd->mutable_position(); }
     else                  { pid = joint_cmd->mutable_velocity(); }
 
-    pid->set_p_gain(p_gain);
-    pid->set_i_gain(i_gain);
-    pid->set_d_gain(d_gain);
+    if (p_gain != INFINITY) { pid->set_p_gain(p_gain); }
+    if (i_gain != INFINITY) { pid->set_i_gain(i_gain); }
+    if (d_gain != INFINITY) { pid->set_d_gain(d_gain); }
 }

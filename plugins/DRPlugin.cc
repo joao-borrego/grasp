@@ -44,7 +44,7 @@ DRPlugin::~DRPlugin()
 /////////////////////////////////////////////////
 void DRPlugin::Load(physics::WorldPtr _world, sdf::ElementPtr _sdf)
 {
-    GZ_ASSERT(_world, "World pointer is NULL");
+    NULL_CHECK(_world, "World pointer is NULL");
     this->world = _world;
     this->physics_engine = world->Physics();
 
@@ -90,7 +90,7 @@ void DRPlugin::onRequest(DRRequestPtr & _msg)
 {
     std::lock_guard<std::mutex> lock(data_ptr->mutex);
 
-    GZ_ASSERT(_msg, "Invalid request");
+    NULL_CHECK(_msg, "Invalid request");
     // TODO - Create message queue
     // Store message
     if (!msg) { msg = _msg; }
@@ -114,9 +114,11 @@ void DRPlugin::processPhysics(const msgs::Physics & msg)
 void DRPlugin::processModel(const msgs::Model & msg)
 {
     physics::ModelPtr model;
+    ignition::math::Vector3d scale;
+
     std::string model_name = msg.name();
     model = world->ModelByName(model_name);
-    GZ_ASSERT(model, "Model not found");
+    NULL_CHECK(model, "Model not found:" + model_name);
 
     for (const auto & joint : msg.joint())
     {
@@ -128,7 +130,9 @@ void DRPlugin::processModel(const msgs::Model & msg)
     }
     if (msg.has_scale())
     {
-        model->SetScale(msgs::ConvertIgn(msg.scale()));
+        scale = msgs::ConvertIgn(msg.scale());
+        model->SetScale(scale, true);
+        gzdbg << "Scaled " << model_name << " by " << scale << std::endl;
     }
     // MAYBE
     /*
@@ -155,10 +159,10 @@ void DRPlugin::processJoint(
     msgs::Axis axis_msg;
     double value;
 
-    GZ_ASSERT(model, "Invalid model");
+    NULL_CHECK(model, "Invalid model");
     joint_name = msg.name();
     joint = model->GetJoint(joint_name);
-    GZ_ASSERT(joint, "Joint not found");
+    NULL_CHECK(joint, "Joint not found: " + joint_name);
     
     // axis2 is not yet used by Gazebo
     if (msg.has_axis1())
@@ -186,6 +190,8 @@ void DRPlugin::processJoint(
         if (value != INFINITY) { joint->SetParam("friction", 0, value); }
     }
     // ODE-specific parameters are not evaluated
+
+    gzdbg << "Processed joint " << joint_name << std::endl;
 }
 
 /////////////////////////////////////////////////
@@ -200,7 +206,7 @@ void DRPlugin::processLink(
 
     link_name = msg.name();
     link = model->GetChildLink(link_name);
-    GZ_ASSERT(link, "Link not found");
+    NULL_CHECK(link, "Link not found");
 
     if (msg.has_inertial())
     {
@@ -211,7 +217,7 @@ void DRPlugin::processLink(
         if (collision_msg.has_surface())
         {
             collision = link->GetCollision(collision_msg.name());
-            GZ_ASSERT(collision, "Collision not found");
+            NULL_CHECK(collision, "Collision not found");
             processSurface(collision, collision_msg.surface());
         }
     }
@@ -226,7 +232,7 @@ void DRPlugin::processInertial(
     double mass;
     double ixx, ixy, ixz, iyy, iyz, izz;
 
-    GZ_ASSERT(link, "Invalid link");
+    NULL_CHECK(link, "Invalid link");
     inertial = link->GetInertial();
 
     if (msg.has_mass())
@@ -252,7 +258,7 @@ void DRPlugin::processSurface(
 {
     physics::SurfaceParamsPtr surface;
     surface = collision->GetSurface();
-    GZ_ASSERT(surface, "Invalid surface");
+    NULL_CHECK(surface, "Invalid surface");
     surface->ProcessMsg(msg);
 }
 
@@ -265,7 +271,7 @@ void DRPlugin::processModelCmd(
 
     model_name = msg.model_name();
     model = world->ModelByName(model_name);
-    GZ_ASSERT(model, "Model not found");
+    NULL_CHECK(model, "Model not found");
 
     for (const auto & joint_cmd : msg.joint_cmd())
     {
@@ -282,9 +288,8 @@ void DRPlugin::processJointCmd(
     std::string joint_name;
     physics::JointPtr joint;
     physics::JointControllerPtr controller;
-    double value;
 
-    GZ_ASSERT(model, "Invalid model");
+    NULL_CHECK(model, "Invalid model");
     controller = model->GetJointController();
     joint_name = msg.name();
 
@@ -305,7 +310,6 @@ void DRPlugin::processPID(
     const std::string & joint,
     const msgs::PID & msg)
 {
-    double value {0.0};
     bool requires_search {false};
     common::PID pid;
     std::map<std::string,common::PID> pids;   
@@ -353,6 +357,11 @@ void DRPlugin::processPID(
     if (msg.has_i_min()) {
         pid.SetIMin(msg.i_min());
     }
+
+    if (type == POSITION)      { controller->SetPositionPID(joint, pid); }
+    else if (type == VELOCITY) { controller->SetVelocityPID(joint, pid); }
+
+    gzdbg << "Processed joint PID " << joint << std::endl;
 }
 
 }

@@ -156,7 +156,7 @@ class DRInterface
     ///
     /// \param msg Output domain randomization request
     /// \param model The target model name
-    /// \param joint The target joint name
+    /// \param joint The target joint <b>scoped</b> name
     /// \param type Type of controllers (POSITION or VELOCITY)
     /// \param p_gain New P gain
     /// \param i_gain New I gain 

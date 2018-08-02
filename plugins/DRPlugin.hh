@@ -23,6 +23,13 @@
 // Required fields workaround
 #include <limits>
 
+// TODO - Migrate
+#define NULL_CHECK(_expr, _msg) if (!_expr) \
+{                                           \
+    gzdbg << _msg << std::endl;             \
+    return;                                 \
+}
+
 namespace DRPlugin {
 
     // Plugin messages
