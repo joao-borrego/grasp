@@ -33,3 +33,24 @@ int kbhit(void)
 
     return 0;
 }
+
+//////////////////////////////////////////////////
+
+// Random integer generator
+std::random_device rng;
+std::mt19937 mt_rng(rng());
+std::uniform_int_distribution<int> uniform_dist;
+
+//////////////////////////////////////////////////
+int getRandomInt(int min, int max)
+{
+    int aux = uniform_dist(mt_rng);
+    return aux % (max - min + 1) + min;;
+}
+
+//////////////////////////////////////////////////
+double getRandomDouble(double min, double max)
+{
+    double aux = ((double) uniform_dist(mt_rng)) / (double) RAND_MAX;
+    return aux * (max - min) + min;
+}

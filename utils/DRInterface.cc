@@ -10,6 +10,7 @@
 // Constants
 const char DRInterface::REQUEST_TOPIC[]  = "~/dr";
 const char DRInterface::RESPONSE_TOPIC[] = "~/dr/response";
+const char DRInterface::VISUAL_TOPIC[]   = "~/visual";
 const int  DRInterface::POSITION = 0;
 const int  DRInterface::VELOCITY = 1;
 
@@ -20,6 +21,8 @@ DRInterface::DRInterface()
     node->Init();
     pub = node->Advertise<DRRequest>(REQUEST_TOPIC);
     pub->WaitForConnection();
+    pub_visual = node->Advertise<gazebo::msgs::Visual>(VISUAL_TOPIC);
+    pub_visual->WaitForConnection();
 }
 
 //////////////////////////////////////////////////
@@ -33,6 +36,12 @@ DRRequest DRInterface::createRequest()
 void DRInterface::publish(const DRRequest & msg)
 {
     pub->Publish(msg);
+}
+
+//////////////////////////////////////////////////
+void DRInterface::publish(const gazebo::msgs::Visual & msg)
+{
+    pub_visual->Publish(msg);
 }
 
 //////////////////////////////////////////////////
@@ -186,4 +195,30 @@ void DRInterface::addModelCmd(DRRequest & msg,
     if (p_gain != INFINITY) { pid->set_p_gain(p_gain); }
     if (i_gain != INFINITY) { pid->set_i_gain(i_gain); }
     if (d_gain != INFINITY) { pid->set_d_gain(d_gain); }
+}
+
+//////////////////////////////////////////////////
+void DRInterface::addColors(gazebo::msgs::Visual & msg,
+    const std::string & visual,
+    const std::string & parent,
+    const ignition::math::Color & ambient,
+    const ignition::math::Color & diffuse,
+    const ignition::math::Color & emissive,
+    const ignition::math::Color & specular)
+{
+    gazebo::msgs::Material *material_msg;
+    gazebo::msgs::Color *ambient_msg,
+        *diffuse_msg, *emissive_msg, *specular_msg;
+
+    msg.set_name(visual);
+    msg.set_parent_name(parent);
+    material_msg = msg.mutable_material();
+    ambient_msg = material_msg->mutable_ambient();
+    diffuse_msg = material_msg->mutable_diffuse();
+    emissive_msg = material_msg->mutable_emissive();
+    specular_msg = material_msg->mutable_specular();
+    gazebo::msgs::Set(ambient_msg, ambient);
+    gazebo::msgs::Set(diffuse_msg, diffuse);
+    gazebo::msgs::Set(emissive_msg, emissive);
+    gazebo::msgs::Set(specular_msg, specular);
 }

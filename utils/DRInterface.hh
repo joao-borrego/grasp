@@ -48,10 +48,12 @@ typedef boost::shared_ptr <gazebo::physics::ODESurfaceParams>
 class DRInterface
 {
 
-    /// Topic for incoming requests
+    /// Topic for DRPlugin requests
     public: static const char REQUEST_TOPIC[];
-    /// Topic for outgoing responses
+    /// Topic for DRPlugin responses
     public: static const char RESPONSE_TOPIC[];
+    /// Topic for outgoing visual requests
+    public: static const char VISUAL_TOPIC[];
     /// Position controller type
     public: static const int POSITION;
     /// Velocity controller type
@@ -61,6 +63,8 @@ class DRInterface
     private: gazebo::transport::NodePtr node;
     /// Publisher to the request topic
     private: gazebo::transport::PublisherPtr pub;
+    /// Publisher to the visual topic
+    private: gazebo::transport::PublisherPtr pub_visual;
 
     /// \brief Constructor
     public: DRInterface();
@@ -71,7 +75,11 @@ class DRInterface
 
     /// \brief Publishes request
     /// \param Domain randomization request
-    public: void publish(const DRRequest & msg);    
+    public: void publish(const DRRequest & msg);
+
+    /// \brief Publishes visual request
+    /// \param Visual message request
+    public: void publish(const gazebo::msgs::Visual & msg);   
 
     // Features
 
@@ -168,6 +176,25 @@ class DRInterface
         double p_gain = INFINITY,
         double i_gain = INFINITY,
         double d_gain = INFINITY);
+
+    /// \brief Updates visual color
+    /// 
+    /// \note Does not update value if it is INFINITY
+    ///
+    /// \param msg Output visual message request
+    /// \param visual The target visual name
+    /// \param visual The target visual's parent name
+    /// \param ambient The ambient color
+    /// \param diffuse The diffuse color
+    /// \param emissive The emissive color
+    /// \param specular The specular color
+    public: void addColors(gazebo::msgs::Visual & msg,
+        const std::string & visual,
+        const std::string & parent,
+        const ignition::math::Color & ambient,
+        const ignition::math::Color & diffuse,
+        const ignition::math::Color & emissive,
+        const ignition::math::Color & specular);
 };
 
 #endif

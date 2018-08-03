@@ -77,6 +77,16 @@ target_link_libraries(contacts_example
 add_dependencies(contacts_example
     grasp_msgs)
 
+# Domain randomization plugin example client
+add_executable (dr_example dr_example.cc)
+target_link_libraries(dr_example
+    grasp_msgs
+    dr_interface
+    ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
+add_dependencies(dr_example
+    grasp_msgs
+    dr_interface)
+
 # Configure interface header
 configure_file (${PROJECT_SOURCE_DIR}/utils/GraspShape.hh
   ${CMAKE_CURRENT_BINARY_DIR}/GraspShape.hh )
