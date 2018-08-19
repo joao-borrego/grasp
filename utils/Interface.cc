@@ -103,7 +103,7 @@ void Interface::reset()
 }
 
 /////////////////////////////////////////////////
-void Interface::openFingers(double timeout)
+void Interface::openFingers(double timeout, bool force)
 {
     grasp::msgs::Hand msg;
     // TODO allow grasp to be chosen
@@ -116,6 +116,7 @@ void Interface::openFingers(double timeout)
         target->set_value(pair.second);
     }
     if (timeout > 0) { msg.set_timeout(timeout); }
+    if (force)       { msg.set_force_target(true); }
     pub->Publish(msg);
 }
 
@@ -148,7 +149,7 @@ void Interface::raiseHand(double timeout)
         "virtual_px_joint","virtual_py_joint", "virtual_pz_joint",
         "virtual_rr_joint","virtual_rp_joint", "virtual_ry_joint"
     };
-    values = {0,0,0.8,0,0,0};
+    values = {0,0,0.6,0,0,0};
 
     for (unsigned int i = 0; i < virtual_joints.size(); i++)
     {

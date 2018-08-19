@@ -83,7 +83,8 @@ class Interface
 
     /// \brief Releases fingers and opens hand.
     /// \param timeout Timer value
-    void openFingers(double timeout=-1);
+    /// \param force Force joint position to target value
+    void openFingers(double timeout=-1, bool force=false);
 
     /// \brief Clenches fingers and closes hand.
     /// \param timeout Timer value

@@ -45,7 +45,7 @@ add_library(dr_interface SHARED
 )
 target_link_libraries(dr_interface
     grasp_msgs)
-add_dependencies(grasp_interface
+add_dependencies(dr_interface
     grasp_msgs)
 
 # Hand plugin example client
