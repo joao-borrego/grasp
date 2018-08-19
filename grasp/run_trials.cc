@@ -19,18 +19,20 @@ std::mutex g_timeout_mutex;
 bool g_resting  {false};
 /// Mutex for global object resting flag
 std::mutex g_resting_mutex;
-/// Global hand resting pose
-ignition::math::Pose3d g_safe_pose  {0,0,1,0,0,0};
-/// Global object pose
-ignition::math::Pose3d g_obj_pose   {0,0,0,0,0,0};
-/// Global object resting pose
-ignition::math::Pose3d g_rest_pose  {0,0,0,0,0,0};
 /// Global setp finished flag
 bool g_finished {false};
 /// Mutex for global step finished flag
 std::mutex g_finished_mutex;
+
+/// Global hand resting pose
+ignition::math::Pose3d g_safe_pose  {0,0,0.9,0,0,0};
+/// Global object pose
+ignition::math::Pose3d g_obj_pose   {0,0,0.1,0,0,0};
+/// Global object resting pose
+ignition::math::Pose3d g_rest_pose  {0,0,0,0,0,0};
+
 /// Global trial outcome
-bool g_success  {false};
+bool g_success  {false}; 
 
 int main(int _argc, char **_argv)
 {
@@ -74,9 +76,6 @@ int main(int _argc, char **_argv)
     debugPrintTrace("Camera connected");
     */
 
-    // Initial target object pose
-    ignition::math::Pose3d model_pose(0,0,0.1,0,0,0);
-
     std::string model_filename;
 
     // For each target object
@@ -99,7 +98,7 @@ int main(int _argc, char **_argv)
         while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
 
         // Spawn object
-        spawnModelFromFilename(pubs["factory"], model_pose, model_filename);
+        spawnModelFromFilename(pubs["factory"], g_obj_pose, model_filename);
         pubs["target"]->WaitForConnection();
         debugPrintTrace("Target connected");
         debugPrint("\tObtaining rest pose ");
@@ -111,12 +110,14 @@ int main(int _argc, char **_argv)
             debugPrint("." << std::flush);
         }
         debugPrint(" Done!\n");
-        debugPrintTrace("Obtained target object pose");
 
         // Perform trials
         for (auto candidate : grasps)
         {
             tryGrasp(candidate, interface, pubs, model_name);
+            // Place target in rest pose
+            resetTarget(pubs["target"]);
+            while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
         }
 
         // Cleanup
@@ -255,17 +256,17 @@ void obtainTargets(std::vector<std::string> & targets,
 }
 
 /////////////////////////////////////////////////
-void getContacts(gazebo::transport::PublisherPtr pub,
-    const std::string & target,
-    const std::string & hand)
+void checkHandCollisions(gazebo::transport::PublisherPtr pub,
+    const std::string & hand,
+    std::vector<std::string> & targets)
 {
     ContactRequest msg;
-    CollisionRequest *msg_col_gnd = msg.add_collision();
-    msg_col_gnd->set_collision1("ground_plane");
-    msg_col_gnd->set_collision2(hand);
-    CollisionRequest *msg_col_tgt = msg.add_collision();
-    msg_col_tgt->set_collision1(target);
-    msg_col_tgt->set_collision2(hand);
+    for (const auto & target : targets)
+    {
+        CollisionRequest *msg_col_gnd = msg.add_collision();
+        msg_col_gnd->set_collision1(target);
+        msg_col_gnd->set_collision2(hand);    
+    }
     pub->Publish(msg);
 }
 
@@ -279,10 +280,10 @@ void getTargetPose(gazebo::transport::PublisherPtr pub, bool rest)
 }
 
 /////////////////////////////////////////////////
-void reset(gazebo::transport::PublisherPtr pub)
+void resetTarget(gazebo::transport::PublisherPtr pub)
 {
-    HandMsg msg;
-    msg.set_reset(true);
+    TargetRequest msg;
+    msg.set_type(REQ_RESET);
     pub->Publish(msg);
 }
 
@@ -293,11 +294,13 @@ void tryGrasp(
     std::map<std::string, gazebo::transport::PublisherPtr> & pubs,
     const std::string & target)
 {
+    std::vector<std::string> target_and_ground {target, "ground_plane"};
+    std::vector<std::string> ground {"ground_plane"};
+
     // Get pose in world frame, given the object pose
     ignition::math::Pose3d hand_pose = grasp.getPose(g_rest_pose);
 
     debugPrintTrace("\tCandidate " << hand_pose);
-    debugPrintTrace("\tTarget " << g_obj_pose);
     if (hand_pose.Pos().Z() < 0) {
         debugPrintTrace("\tPose beneath ground plane. Aborting grasp");
         return;
@@ -305,7 +308,7 @@ void tryGrasp(
 
     // Teleport hand to grasp candidate pose
     // Add the resting position transformation first
-    interface.setPose(g_safe_pose, 0.00001);
+    interface.setPose(g_safe_pose, 0.0001);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
     debugPrintTrace("\tHand moved to safe pose");
     interface.openFingers(0.001);
@@ -316,7 +319,8 @@ void tryGrasp(
     debugPrintTrace("\tHand moved to grasp candidate pose");
 
     // Check if hand is already in collision
-    getContacts(pubs["contact"], target, interface.getRobotName());
+    checkHandCollisions(pubs["contact"],
+        interface.getRobotName(), target_and_ground);
     while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
     if (!g_success) {
         grasp.success = false;
@@ -326,28 +330,23 @@ void tryGrasp(
     debugPrintTrace("\tNo collisions detected");
 
     // Close fingers
-    interface.closeFingers(0.5);
+    interface.closeFingers(1.0);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
     debugPrintTrace("\tFingers closed");
 
     // Lift object
-    interface.raiseHand(2.0);
+    interface.raiseHand(5.0);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
-    debugPrintTrace("\tObject lifted");
+    debugPrintTrace("\tHand lifted");
 
     // Check if object was grasped
-    getContacts(pubs["contact"], target, "ground_plane");
+    checkHandCollisions(pubs["contact"], target, ground);
     while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
 
-    if (g_success) debugPrintTrace("Success - Object lifted");
-    else           errorPrintTrace("Failed - Object fell");
+    if (g_success) debugPrintTrace("Success - Object is not on the ground");
+    else           errorPrintTrace("Failed - Object is on the ground");
 
     grasp.success = g_success;
-    // Resetting interface places target in rest pose
-    interface.reset();
-
-    // TODO - Proper synchronisation with reset signal
-    waitMs(100);
 }
 
 /////////////////////////////////////////////////
@@ -381,13 +380,18 @@ void onHandResponse(HandMsgPtr & _msg)
 /////////////////////////////////////////////////
 void onTargetResponse(TargetResponsePtr & _msg)
 {
-    debugPrint("\tTarget plugin response\n");
+    debugPrint("\tTarget plugin response.\n");
     if (_msg->has_pose()) {
         if (_msg->type() == RES_REST_POSE)
         {
             std::lock_guard<std::mutex> lock(g_resting_mutex);
             g_rest_pose = gazebo::msgs::ConvertIgn(_msg->pose());
             g_resting = true;
+        }
+        else if (_msg->type() == RES_POSE)
+        {
+            std::lock_guard<std::mutex> lock(g_finished_mutex);
+            g_finished = true;
         }
     }
 }

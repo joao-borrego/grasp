@@ -73,6 +73,8 @@
 #define REQ_SET_POSE   grasp::msgs::TargetRequest::SET_POSE
 /// Update rest pose request
 #define REQ_REST_POSE  grasp::msgs::TargetRequest::GET_REST_POSE
+/// Reset request
+#define REQ_RESET      grasp::msgs::TargetRequest::RESET
 /// Current pose response
 #define RES_POSE       grasp::msgs::TargetResponse::POSE
 /// Updated rest pose response
@@ -182,9 +184,9 @@ void setPose(gazebo::transport::PublisherPtr pub,
 /// \param pub Publisher to contact topic
 /// \param target The target object name
 /// \param hand The hand model name
-void getContacts(gazebo::transport::PublisherPtr pub,
-    const std::string & target,
-    const std::string & hand);
+void checkHandCollisions(gazebo::transport::PublisherPtr pub,
+    const std::string & hand,
+    std::vector<std::string> & targets);
 
 /// TODO
 void closeFingers(gazebo::transport::PublisherPtr pub,
@@ -197,9 +199,9 @@ void liftHand(gazebo::transport::PublisherPtr pub,
 /// TODO
 void getTargetPose(gazebo::transport::PublisherPtr pub, bool rest);
 
-/// \brief Resets simulation world
-/// \param pub Publisher to hand's topic
-void reset(gazebo::transport::PublisherPtr pub);
+/// \brief Resets target object to rest pose
+/// \param pub Publisher to target's topic
+void resetTarget(gazebo::transport::PublisherPtr pub);
 
 /// \brief Attempts to grasp object
 /// \param grasp The grasp configuration
