@@ -28,12 +28,23 @@ link_directories(${PROJECT_BINARY_DIR}/msgs)
 include_directories(${PROJECT_BINARY_DIR}/utils)
 link_directories(${PROJECT_BINARY_DIR}/utils)
 
+# Obtain target object resting pose script
+add_executable (gen_rest_poses
+  gen_rest_poses.cc
+  object_utils.cc)
+target_link_libraries(gen_rest_poses
+    grasp_msgs
+    ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES}
+    ${YAML_CPP_LIBRARIES})
+add_dependencies(gen_rest_poses
+    grasp_msgs)
+
 # Run grasping trials script
 add_executable (run_trials
-	run_trials.cc
-	gen_grasps.cc
-	object_utils.cc
-	Grasp.cc)
+  run_trials.cc
+  gen_grasps.cc
+  object_utils.cc
+  Grasp.cc)
 target_link_libraries(run_trials
     grasp_msgs
     grasp_interface
