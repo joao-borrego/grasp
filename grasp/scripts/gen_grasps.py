@@ -281,13 +281,13 @@ def main(argv):
             print("\x1b[2K{:10.4f}".format(progress) + \
                 ' % - ' + hand + ' - ' + target, end="\r")
 
-            out_file = out_dir + '/' + target + '.' + robot + '.grasp.yml'
+            out_file = out_dir + '/' + target + '.' + hand + '.grasp.yml'
             mesh_filename = objects_data[target]['mesh'] 
         
             mesh = loadMesh(mesh_filename)
             grasps = generateCandidates(mesh, SAMPLES,
                 palm_offset, palm_normal)
-            writeOutput(out_file, target, robot, grasps)
+            writeOutput(out_file, target, hand, grasps)
 
             if (DEBUG):
                 plotMeshWithNormals(mesh, grasps, palm_normal)
