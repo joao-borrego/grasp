@@ -55,6 +55,8 @@ int main(int _argc, char **_argv)
     std::string camera_name("rgbd_camera");
     std::string camera_filename = "model://" + camera_name;
     ignition::math::Pose3d camera_pose(0,0,0.8,0,1.57,0);
+    // TODO - Compute camera reference frame
+    ignition::math::Pose3d ref_cam(0,0.05,0,0,0,1.57);
     spawnModelFromFilename(pubs["factory"], camera_pose, camera_filename);
     pubs["camera"]->WaitForConnection();
     debugPrintTrace("Camera connected");
@@ -84,15 +86,13 @@ int main(int _argc, char **_argv)
         debugPrintTrace(model_name << " - Target connected");
         waitMs(100);
 
-        ignition::math::Pose3d cam_pose;
-
         // Render frame per grasp candidate
         for (auto candidate : grasps)
         {
             // Move camera to grasp candidate pose
             // TODO - Add offset and reference frame rotation
-            cam_pose = candidate.getPose(rest_pose);
-            moveCamera(pubs["camera"], cam_pose);
+            camera_pose = ref_cam + candidate.getPose(rest_pose);
+            moveCamera(pubs["camera"], camera_pose);
             // Ensure camera was moved
             while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
             // Capture frame
@@ -100,6 +100,8 @@ int main(int _argc, char **_argv)
             // Ensure frame was stored
             while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
 
+            // DEBUG
+            std::cin.ignore();
         }
 
         // Cleanup
@@ -225,6 +227,7 @@ void obtainTargets(std::vector<std::string> & targets,
 /////////////////////////////////////////////////
 void captureFrame(gazebo::transport::PublisherPtr pub)
 {
+    // TODO - Add (object) name to captured frame
     CameraRequest msg;
     msg.set_type(REQ_CAPTURE);
     pub->Publish(msg);

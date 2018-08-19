@@ -127,6 +127,11 @@ namespace gazebo {
         /// New desired pose
         private: ignition::math::Pose3d new_pose;
 
+        /// Flag for RGB successfully captured
+        private: bool rgb_captured {false};
+        /// Flag for depth successfully captured
+        private: bool depth_captured {false};
+
         // Public methods
 
         /// \brief Constructs the object

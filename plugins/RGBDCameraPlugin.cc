@@ -201,10 +201,21 @@ void RGBDCameraPlugin::onUpdate()
         this->camera->SetWorldPose(new_pose);
         update_pose = false;
 
+        // DEBUG
+        this->model->SetWorldPose(new_pose);
+
         // Notify subscribers
         gzdbg << "Camera moved to " << new_pose << std::endl;
         msg.set_type(MOVE_RESPONSE);
         this->data_ptr->pub->Publish(msg);
+    }
+
+    // Synchronise RGB and depth frames
+    if (capture && rgb_captured && depth_captured)
+    {
+        msg.set_type(CAPTURE_RESPONSE);
+        this->data_ptr->pub->Publish(msg);
+        capture = rgb_captured = depth_captured = false;
     }
 }
 
@@ -216,19 +227,14 @@ void RGBDCameraPlugin::onNewRGBFrame(
     unsigned int _depth,
     const std::string &_format)
 {
-    grasp::msgs::CameraResponse msg;
-    msg.set_type(CAPTURE_RESPONSE);
-
     bool save = false;
     {
         std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
-        if (capture) {
-            save = true;
-            capture = false;
-        }
+        if (capture && !rgb_captured) { save = true; }
     }
 
-    if (save) {
+    if (save)
+    {
         // Copy frame data to save buffer
         size_t size = rendering::Camera::ImageByteSize(_width, _height, _format);
         unsigned char *buffer = new unsigned char[size];
@@ -236,9 +242,8 @@ void RGBDCameraPlugin::onNewRGBFrame(
         // Blocking call until queue has room
         this->rgb_queue->enqueue(buffer);
 
-        // Notify subscribers
-        gzdbg << "RGB frame stored in memory" << std::endl;
-        this->data_ptr->pub->Publish(msg);
+        std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+        rgb_captured = true;
     }
 }
 
@@ -250,13 +255,23 @@ void RGBDCameraPlugin::onNewDepthFrame(
     unsigned int _depth,
     const std::string &_format)
 {
-    /*
-    // Copy frame data to save buffer
-    size_t size = rendering::Camera::ImageByteSize(_width, _height, _format);
-    float *buffer = new float[size];
-    std::memcpy(buffer, _image, size);
-    this->depth_queue->enqueue(buffer);
-    */
+    bool save = false;
+    {
+        std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+        if (capture && !depth_captured) { save = true; }
+    }
+
+    if (save)
+    {
+        // Copy frame data to save buffer
+        size_t size = rendering::Camera::ImageByteSize(_width, _height, _format);
+        float *buffer = new float[size];
+        std::memcpy(buffer, _image, size);
+        this->depth_queue->enqueue(buffer);        
+
+        std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+        depth_captured = true;
+    }
 }
 
 //////////////////////////////////////////////////
