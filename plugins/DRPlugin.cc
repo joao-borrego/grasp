@@ -134,19 +134,10 @@ void DRPlugin::processModel(const msgs::Model & msg)
         model->SetScale(scale, true);
         gzdbg << "Scaled " << model_name << " by " << scale << std::endl;
     }
-    // MAYBE
-    /*
     for (const auto & nested_model : msg.model())
     {
         processModel(nested_model);
     }
-    */
-    // TODO
-    /*
-    for (const auto & visual : msg->visual()) {
-        //processModel(model);
-    }
-    */
 }
 
 /////////////////////////////////////////////////

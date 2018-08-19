@@ -118,6 +118,13 @@ void TargetPlugin::onUpdate()
                 reply_pose = true;
             }
         }
+        if (this->reset)
+        {
+            reset = false;
+            msg.set_type(RES_POSE);
+            this->onReset();
+            reply_pose = true;
+        }
     }
 
     if (reply_pose)
@@ -132,7 +139,7 @@ void TargetPlugin::onUpdate()
 /////////////////////////////////////////////////
 void TargetPlugin::onReset()
 {
-    std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+    //std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
     this->model->SetWorldPose(this->init_pose);
     gzdbg << "Model reset to pose " << init_pose << std::endl;
 }
@@ -158,6 +165,11 @@ void TargetPlugin::onRequest(TargetRequestPtr &_msg)
         {
             std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
             this->update_rest_pose = true;
+        }
+        else if (type == REQ_RESET)
+        {
+            std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+            this->reset = true;
         }
     }
 }

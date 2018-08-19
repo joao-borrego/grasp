@@ -183,7 +183,7 @@ namespace gazebo {
         private: void setPIDController(
             physics::JointControllerPtr controller,
             int type,
-            const std::string & joint,
+            physics::JointPtr joint,
             double p, double i, double d,
             double initial_value);
 
@@ -191,8 +191,12 @@ namespace gazebo {
         /// \param type Type of PID control
         /// \param joint Scoped name of controlled joint
         /// \param value Desired target value
+        /// \param force Force joint position to target value
         private: void setPIDTarget(
-            int type, const std::string & joint, double value);
+            int type,
+            physics::JointPtr joint,
+            double value,
+            bool force=false);
 
         /// \brief Changes hand's pid controller targets
         /// \param _msg The request message

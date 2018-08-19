@@ -218,19 +218,20 @@ bool HandPlugin::loadVirtualJoints(sdf::ElementPtr _sdf)
 void HandPlugin::setPIDController(
     physics::JointControllerPtr controller,
     int type,
-    const std::string & joint,
+    physics::JointPtr joint,
     double p, double i, double d,
     double initial_value)
 {
+    std::string joint_name = joint->GetScopedName();
     if (type == POSITION)
     {
-        controller->SetPositionPID(joint, common::PID(p,i,d));
-        controller->SetPositionTarget(joint, initial_value);
+        controller->SetPositionPID(joint_name, common::PID(p,i,d));
+        controller->SetPositionTarget(joint_name, initial_value);
     }
     else if (type == VELOCITY)
     {
-        controller->SetVelocityPID(joint, common::PID(p,i,d));
-        controller->SetVelocityTarget(joint, initial_value);
+        controller->SetVelocityPID(joint_name, common::PID(p,i,d));
+        controller->SetVelocityTarget(joint_name, initial_value);
     }
 }
 
@@ -279,18 +280,19 @@ bool HandPlugin::loadControllers(sdf::ElementPtr _sdf)
     for (const auto & joint : virtual_joints)
     {
        setPIDController(controller, v_type,
-            joint->GetScopedName(), v_p, v_i, v_d, 0.0);
+            joint, v_p, v_i, v_d, 0.0);
     }
     for (const auto & group : joint_groups)
     {
         setPIDController(controller, r_type,
-            group.actuated->GetScopedName(), r_p, r_i, r_d, 0.0);
-            setPIDTarget(r_type, group.actuated->GetScopedName(), group.target);
+            group.actuated, r_p, r_i, r_d, 0.0);
+            setPIDTarget(r_type, group.actuated, group.target, true);
         for (int i = 0; i < group.mimic.size(); i++)
         {
             setPIDController(controller, r_type,
-                group.mimic.at(i)->GetScopedName(),
-                r_p, r_i, r_d, group.target * group.multipliers.at(i));
+                group.mimic.at(i), r_p, r_i, r_d, 0.0);
+            setPIDTarget(r_type, group.mimic.at(i), 
+                group.target * group.multipliers.at(i), true);
         }
     }
 
@@ -367,6 +369,9 @@ void HandPlugin::setPose(const ignition::math::Pose3d & pose)
     virtual_joints.at(4)->SetPosition(0, rot.Pitch());
     virtual_joints.at(5)->SetPosition(0, rot.Yaw());
 
+    // DEBUG
+    gzdbg << "Set pose " << pose << std::endl;
+
     //resetJoints();
     imobilise();
 }
@@ -395,23 +400,31 @@ void HandPlugin::updateTimer(HandMsgPtr &_msg)
 }
 
 /////////////////////////////////////////////////
-void HandPlugin::setPIDTarget(int type, const std::string & joint, double value)
+void HandPlugin::setPIDTarget(
+    int type,
+    physics::JointPtr joint,
+    double value,
+    bool force)
 {
     physics::JointControllerPtr ctrl = model->GetJointController();
+    std::string joint_name = joint->GetScopedName();
 
     if (type == VELOCITY)
     {
-        ctrl->SetVelocityTarget(joint, value);
+        ctrl->SetVelocityTarget(joint_name, value);
     }
     else if (type == POSITION)
     {
-        ctrl->SetPositionTarget(joint, value);
+        ctrl->SetPositionTarget(joint_name, value);
+        if (force) {
+            joint->SetPosition(0, value);
+        }
 
         // DEBUG
         ctrl->Update();
         std::map<std::string, double> positions;
         positions = ctrl->GetPositions();
-        gzdbg << joint << " : " << positions[joint] << "\n";
+        gzdbg << joint_name << " : " << positions[joint_name] << "\n";
     }
 }
 
@@ -420,6 +433,8 @@ void HandPlugin::updatePIDTargets(HandMsgPtr &_msg)
 {
     if (_msg->pid_targets_size() > 0)
     {
+        bool force = (_msg->has_force_target())? _msg->force_target() : false;
+
         for (const auto target : _msg->pid_targets())
         {
             int type = target.type();
@@ -434,15 +449,15 @@ void HandPlugin::updatePIDTargets(HandMsgPtr &_msg)
             }
 
             // Update PID target
-            setPIDTarget(type, joint->GetScopedName(), value);
+            setPIDTarget(type, joint, value, force);
             // Update mimic joints' PIDs
             for (const auto & group : joint_groups)
             {
                 if (group.actuated == joint){
                     for (int i = 0; i < group.mimic.size(); i++) {
                         physics::JointPtr mimic = group.mimic.at(i);
-                        setPIDTarget(type, mimic->GetScopedName(),
-                            value * group.multipliers.at(i));
+                        setPIDTarget(type, mimic,
+                            value * group.multipliers.at(i), force);
                     }
                 }
             }

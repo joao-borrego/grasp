@@ -35,6 +35,8 @@ namespace TargetPlugin {
     #define REQ_SET_POSE        grasp::msgs::TargetRequest::SET_POSE
     /// Get updated resting pose request
     #define REQ_GET_REST_POSE   grasp::msgs::TargetRequest::GET_REST_POSE
+    /// Reset request
+    #define REQ_RESET           grasp::msgs::TargetRequest::RESET
     /// Current pose response
     #define RES_POSE            grasp::msgs::TargetResponse::POSE
     /// Updated rest pose response
@@ -78,8 +80,10 @@ namespace gazebo {
         private: bool get_pose {false};
         /// Flag for pending set pose request
         private: bool set_pose {false};
-        /// Falg for pending update resting pose request
+        /// Flag for pending update resting pose request
         private: bool update_rest_pose {false};
+        /// Flag for pending reset
+        private: bool reset {false};
         /// Initial pose
         private: ignition::math::Pose3d init_pose;
         /// New pose
