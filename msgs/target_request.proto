@@ -18,6 +18,8 @@ message TargetRequest
         SET_POSE = 2;
         /// Request grasp target updated resting pose
         GET_REST_POSE = 3;
+        /// Request reset
+        RESET = 4;
     }
 
     /// Type of request

@@ -14,8 +14,10 @@ message Hand
     optional gazebo.msgs.Pose   pose                = 1;
     /// New pid targets
     repeated Target             pid_targets         = 2;
+    /// Force joint position to target
+    optional bool 				force_target 		= 3;
     /// Controller timeout
-    optional double             timeout             = 3;
+    optional double             timeout             = 4;
     /// Reset
-    optional bool               reset               = 4;
+    optional bool               reset               = 5;
 }

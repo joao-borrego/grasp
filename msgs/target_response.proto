@@ -9,10 +9,10 @@ import "pose.proto";
 
 message TargetResponse
 { 
-	/// Type of response 
+    /// Type of response 
     enum Type
     {
-    	/// Current pose
+        /// Current pose
         POSE = 1;
         /// Updated rest pose
         REST_POSE = 2;
