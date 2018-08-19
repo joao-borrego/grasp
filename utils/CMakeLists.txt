@@ -100,7 +100,4 @@ configure_file (${PROJECT_SOURCE_DIR}/utils/DRInterface.hh
 # Configure header-only debug utilities
 configure_file (${PROJECT_SOURCE_DIR}/utils/debug.hh.in
   ${CMAKE_CURRENT_BINARY_DIR}/debug.hh )
-# Configure header-only default topic specifications
-configure_file (${PROJECT_SOURCE_DIR}/utils/topics.hh.in
-  ${CMAKE_CURRENT_BINARY_DIR}/topics.hh )
 
