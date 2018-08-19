@@ -25,6 +25,8 @@ int main(int _argc, char **_argv)
 {
     // List of grasp targets
     std::vector<std::string> targets;
+    // List of output rest poses
+    std::vector<ignition::math::Pose3d> rest_poses;
 
     // Command-line args
     std::map<std::string, std::string> args;
@@ -69,13 +71,16 @@ int main(int _argc, char **_argv)
         debugPrint(" Done!\n");
         debugPrintTrace("Rest pose: " << g_rest_pose);
 
+        // Store object rest pose
+        rest_poses.push_back(g_rest_pose);
+
         // Cleanup
         removeModel(pubs["request"], model_name);
         // Prevent spawning next object without first removing current
         waitMs(500);
     }
 
-    debugPrintTrace("All rest poses obtained!");
+    writeRestPoses(out_rest_dir, targets, rest_poses);
 
     // Shut down
     gazebo::client::shutdown();
@@ -171,6 +176,44 @@ void obtainTargets(std::vector<std::string> & targets,
         std::cerr << "Unable to parse " << file_name << "\n";
     }
     debugPrintTrace("Found " << targets.size() << " objects in " << file_name);
+}
+
+/////////////////////////////////////////////////
+void writeRestPoses(
+    std::string & output,
+    std::vector<std::string> & targets,
+    std::vector<ignition::math::Pose3d> & poses)
+{
+    YAML::Node root;
+    unsigned int size = targets.size();
+
+    if (size != poses.size()) {
+        errorPrintTrace("Size mismatch: # targets and # rest poses");
+        exit(EXIT_FAILURE);
+    }
+
+    // TODO - Write to output
+    std::ostringstream init_os;
+    init_os << INIT_POSE;
+    std::string init_pose = init_os.str();
+
+    // Build YAML node
+    for (unsigned int i = 0; i < size; i++)
+    {
+        std::ostringstream os;
+        os << poses.at(i);
+        root[targets.at(i)]["rest"] = os.str();
+    }
+
+    // Write output to file
+    std::ofstream fout(output);
+    if (!fout) {
+        errorPrintTrace("Could write output to " << output);
+    } else {
+        fout << root;
+        debugPrintTrace("All rest poses written to " << output);
+    }
+
 }
 
 /////////////////////////////////////////////////

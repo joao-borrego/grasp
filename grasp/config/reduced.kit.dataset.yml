@@ -1,3 +1,7 @@
+BakingSoda:
+  mesh: datasets/kit/BakingSoda/meshes/BakingSoda.stl
+  name: BakingSoda
+  path: model://BakingSoda
 Curry:
   mesh: datasets/kit/Curry/meshes/Curry.stl
   name: Curry
