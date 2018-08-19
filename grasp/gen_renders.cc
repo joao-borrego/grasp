@@ -82,20 +82,29 @@ int main(int _argc, char **_argv)
         spawnModelFromFilename(pubs["factory"], rest_pose, model_filename);
         pubs["target"]->WaitForConnection();
         debugPrintTrace(model_name << " - Target connected");
-        waitMs(1000);
+        waitMs(100);
+
+        ignition::math::Pose3d cam_pose;
 
         // Render frame per grasp candidate
         for (auto candidate : grasps)
         {
-            // Move camera
+            // Move camera to grasp candidate pose
+            // TODO - Add offset and reference frame rotation
+            cam_pose = candidate.getPose(rest_pose);
+            moveCamera(pubs["camera"], cam_pose);
             // Ensure camera was moved
+            while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
             // Capture frame
+            captureFrame(pubs["camera"]);
             // Ensure frame was stored
+            while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
+
         }
 
         // Cleanup
         removeModel(pubs["request"], model_name);
-        waitMs(200);
+        waitMs(100);
     }
 
     // Cleanup
@@ -221,6 +230,19 @@ void captureFrame(gazebo::transport::PublisherPtr pub)
     pub->Publish(msg);
 }
 
+/////////////////////////////////////////////////
+void moveCamera(gazebo::transport::PublisherPtr pub,
+    ignition::math::Pose3d & pose)
+{
+    CameraRequest msg;
+    gazebo::msgs::Pose *pose_msg;
+
+    msg.set_type(REQ_MOVE);
+    pose_msg = msg.mutable_pose();
+    gazebo::msgs::Set(pose_msg, pose);
+    pub->Publish(msg);
+}
+
 //////////////////////////////////////////////////
 bool waitingTrigger(std::mutex & mutex, bool & trigger)
 {
@@ -235,7 +257,6 @@ bool waitingTrigger(std::mutex & mutex, bool & trigger)
 /////////////////////////////////////////////////
 void onCameraResponse(CameraResponsePtr & _msg)
 {
-    debugPrint("\tCamera plugin response\n");
     std::lock_guard<std::mutex> lock(g_finished_mutex);
     g_finished = true;
 }

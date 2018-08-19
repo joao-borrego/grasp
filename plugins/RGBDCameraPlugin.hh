@@ -67,7 +67,7 @@ namespace RGBDCameraPlugin {
     /// Captured frame response
     #define CAPTURE_RESPONSE    grasp::msgs::CameraResponse::CAPTURE
     /// Camera moved response
-    #define MOVE_RSPONSE        grasp::msgs::CameraResponse::MOVE
+    #define MOVE_RESPONSE        grasp::msgs::CameraResponse::MOVE
 }
 
 namespace gazebo {
@@ -88,7 +88,7 @@ namespace gazebo {
         // Private attributes
 
         /// Class with private attributes
-        private: std::unique_ptr<RGBDCameraPluginPrivate> data_ptr; 
+        private: std::unique_ptr<RGBDCameraPluginPrivate> data_ptr;
 
         /// Camera model
         private: physics::ModelPtr model;

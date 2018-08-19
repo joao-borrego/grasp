@@ -32,7 +32,7 @@ ignition::math::Pose3d g_obj_pose   {0,0,0.1,0,0,0};
 ignition::math::Pose3d g_rest_pose  {0,0,0,0,0,0};
 
 /// Global trial outcome
-bool g_success  {false}; 
+bool g_success  {false};
 
 int main(int _argc, char **_argv)
 {
@@ -265,7 +265,7 @@ void checkHandCollisions(gazebo::transport::PublisherPtr pub,
     {
         CollisionRequest *msg_col_gnd = msg.add_collision();
         msg_col_gnd->set_collision1(target);
-        msg_col_gnd->set_collision2(hand);    
+        msg_col_gnd->set_collision2(hand);
     }
     pub->Publish(msg);
 }

@@ -9,16 +9,16 @@ import "pose.proto";
 
 message CameraResponse
 {
-    /// Type of response 
+    /// Type of response
     enum Type
     {
-        /// Acquired frame and saved it to disk 
+        /// Acquired frame and saved it to disk
         CAPTURE     = 1;
         /// Moved camera
         MOVE        = 2;
     }
 
-    /// Type of response 
+    /// Type of response
     optional Type               type    = 1;
     /// Expected camera pose
     optional gazebo.msgs.Pose   pose    = 2;

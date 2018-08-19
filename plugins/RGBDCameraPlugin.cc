@@ -173,14 +173,13 @@ void RGBDCameraPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 /////////////////////////////////////////////////
 void RGBDCameraPlugin::onRequest(CameraRequestPtr &_msg)
 {
-    if (_msg->type() == CAPTURE_REQUEST) 
+    if (_msg->type() == CAPTURE_REQUEST)
     {
+        std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+        capture = true;
+
         this->camera->SetCaptureDataOnce();
         gzdbg << "Capture request received" << std::endl;
-
-        std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
-        capture = true; 
-    
     }
     else if (_msg->type() == MOVE_REQUEST)
     {
@@ -195,10 +194,17 @@ void RGBDCameraPlugin::onUpdate()
 {
     std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
 
+    grasp::msgs::CameraResponse msg;
+
     if (update_pose)
     {
         this->camera->SetWorldPose(new_pose);
         update_pose = false;
+
+        // Notify subscribers
+        gzdbg << "Camera moved to " << new_pose << std::endl;
+        msg.set_type(MOVE_RESPONSE);
+        this->data_ptr->pub->Publish(msg);
     }
 }
 
@@ -210,6 +216,9 @@ void RGBDCameraPlugin::onNewRGBFrame(
     unsigned int _depth,
     const std::string &_format)
 {
+    grasp::msgs::CameraResponse msg;
+    msg.set_type(CAPTURE_RESPONSE);
+
     bool save = false;
     {
         std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
@@ -224,7 +233,12 @@ void RGBDCameraPlugin::onNewRGBFrame(
         size_t size = rendering::Camera::ImageByteSize(_width, _height, _format);
         unsigned char *buffer = new unsigned char[size];
         std::memcpy(buffer, _image, size);
-        this->rgb_queue->enqueue(buffer);        
+        // Blocking call until queue has room
+        this->rgb_queue->enqueue(buffer);
+
+        // Notify subscribers
+        gzdbg << "RGB frame stored in memory" << std::endl;
+        this->data_ptr->pub->Publish(msg);
     }
 }
 
@@ -256,9 +270,6 @@ void RGBDCameraPlugin::saveRenderRGB()
     unsigned int counter = 0;
     std::string extension(".png");
 
-    grasp::msgs::CameraResponse msg;
-    msg.set_type(CAPTURE_RESPONSE);
-
     while(true)
     {
         {
@@ -267,14 +278,11 @@ void RGBDCameraPlugin::saveRenderRGB()
         }
         if (rgb_queue->dequeue(image_rgb))
         {
-            std::string filename = output_dir + "/rgb_" + 
+            std::string filename = output_dir + "/rgb_" +
                 std::to_string(counter++) + "." + output_ext;
             rendering::Camera::SaveFrame(image_rgb, width, height,
                 depth, format, filename);
             delete [] image_rgb;
-
-            // Notify subscribers
-            this->data_ptr->pub->Publish(msg);            
         }
     }
 }
@@ -285,7 +293,7 @@ void RGBDCameraPlugin::saveRenderDepth()
     float *image_depth;
     unsigned int width = camera->ImageWidth();
     unsigned int height = camera->ImageHeight();
-    unsigned int depth = 1;   
+    unsigned int depth = 1;
     std::string format = "FLOAT32";
     unsigned int counter = 0;
     std::string extension(".png");

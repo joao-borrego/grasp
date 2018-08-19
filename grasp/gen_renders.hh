@@ -40,6 +40,12 @@
 
 /// Request to capture frame
 #define REQ_CAPTURE    grasp::msgs::CameraRequest::CAPTURE
+/// Request to move camera
+#define REQ_MOVE       grasp::msgs::CameraRequest::MOVE
+/// Response to capture frame
+#define RES_CAPTURE    grasp::msgs::CameraResponse::CAPTURE
+/// Response to move camera
+#define RES_MOVE       grasp::msgs::CameraResponse::MOVE
 
 // Message type definitions
 
@@ -96,6 +102,10 @@ void obtainTargets(std::vector<std::string> & targets,
 
 /// TODO
 void captureFrame(gazebo::transport::PublisherPtr pub);
+
+/// TODO
+void moveCamera(gazebo::transport::PublisherPtr pub,
+    ignition::math::Pose3d & pose);
 
 /// \brief Returns whether to keep waiting for trigger
 /// \param mutex   Mutex that protects trigger variable
