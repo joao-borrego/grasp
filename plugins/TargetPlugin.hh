@@ -42,8 +42,10 @@ namespace TargetPlugin {
     /// Updated rest pose response
     #define RES_REST_POSE       grasp::msgs::TargetResponse::REST_POSE
 
-    /// Maximum velocity for an object to be considered static
-    #define VELOCITY_EPSILON 0.000001
+    /// Maximum linear velocity for an object to be considered static
+    #define LIN_VEL_EPSILON 0.000001
+    /// Maximum angular velocity for an object to be considered static
+    #define ANG_VEL_EPSILON 0.00001
 }
 
 namespace gazebo {

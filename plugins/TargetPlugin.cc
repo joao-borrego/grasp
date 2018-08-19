@@ -80,6 +80,7 @@ void TargetPlugin::onUpdate()
 {
     bool reply_pose = false;
     TargetResponse msg;
+    double epsilon;
 
     {
         std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
@@ -99,14 +100,15 @@ void TargetPlugin::onUpdate()
         if (this->update_rest_pose)
         {
             bool resting = true;
-            double epsilon = VELOCITY_EPSILON;
             ignition::math::Vector3d lin_vel = model->WorldLinearVel();
             ignition::math::Vector3d ang_vel = model->WorldAngularVel();
 
             // Object is resting iif vel_i < epsilon, for all i
+            epsilon = LIN_VEL_EPSILON;
             for (int i = 0; i < 3 && resting; i++) {
                 if (std::abs(lin_vel[i]) > epsilon) { resting = false; }
             }
+            epsilon = ANG_VEL_EPSILON;
             for (int i = 0; i < 3 && resting; i++) {
                 if (std::abs(ang_vel[i]) > epsilon) { resting = false; }
             }

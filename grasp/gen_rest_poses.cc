@@ -57,23 +57,25 @@ int main(int _argc, char **_argv)
         model_filename = "model://" + model_name;
         spawnModelFromFilename(pubs["factory"], init_pose, model_filename);
         pubs["target"]->WaitForConnection();
-        debugPrintTrace("Target connected");
+        debugPrintTrace(model_name << " - Target connected");
 
         // Obtain object resting position
-        debugPrint("\tObtaining rest pose ");
+        debugPrint("\t" << model_name << " - Obtaining rest pose ");
         while (waitingTrigger(g_resting_mutex, g_resting)) {
             getTargetRestPose(pubs["target"]);
             waitMs(200);
             debugPrint("." << std::flush);
         }
         debugPrint(" Done!\n");
-        debugPrintTrace("Rest pose " << g_rest_pose);
+        debugPrintTrace("Rest pose: " << g_rest_pose);
 
         // Cleanup
         removeModel(pubs["request"], model_name);
         // Prevent spawning next object without first removing current
         waitMs(500);
     }
+
+    debugPrintTrace("All rest poses obtained!");
 
     // Shut down
     gazebo::client::shutdown();
