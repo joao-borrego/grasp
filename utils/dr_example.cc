@@ -22,10 +22,37 @@ int main(int _argc, char **_argv)
     std::string joint_scoped = model + "::" + joint;
     std::string link("gripper_l_finger");
     std::vector<std::string> visuals {
-        "baxter_gripper::gripper_l_finger",
-        "baxter_gripper::gripper_r_finger",
-        "baxter_gripper::gripper_base"};
-    std::string parent("baxter_gripper");
+        "shadowhand::base_footprint",
+        "shadowhand::rh_palm",
+        "shadowhand::rh_imu",
+        "shadowhand::rh_ffknuckle",
+        "shadowhand::rh_ffproximal",
+        "shadowhand::rh_ffmiddle",
+        "shadowhand::rh_ffdistal",
+        "shadowhand::rh_fftip",
+        "shadowhand::rh_mfknuckle",
+        "shadowhand::rh_mfproximal",
+        "shadowhand::rh_mfmiddle",
+        "shadowhand::rh_mfdistal",
+        "shadowhand::rh_mftip",
+        "shadowhand::rh_rfknuckle",
+        "shadowhand::rh_rfproximal",
+        "shadowhand::rh_rfmiddle",
+        "shadowhand::rh_rfdistal",
+        "shadowhand::rh_rftip",
+        "shadowhand::rh_lfmetacarpal",
+        "shadowhand::rh_lfknuckle",
+        "shadowhand::rh_lfproximal",
+        "shadowhand::rh_lfmiddle",
+        "shadowhand::rh_lfdistal",
+        "shadowhand::rh_lftip",
+        "shadowhand::rh_thbase",
+        "shadowhand::rh_thproximal",
+        "shadowhand::rh_thhub",
+        "shadowhand::rh_thmiddle",
+        "shadowhand::rh_thdistal",
+        "shadowhand::rh_thtip"};
+    std::string parent("shadowhand");
     int pid_type = DRInterface::POSITION;
     double inf = INFINITY;
 
