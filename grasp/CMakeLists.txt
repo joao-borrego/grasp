@@ -53,3 +53,16 @@ target_link_libraries(run_trials
 add_dependencies(run_trials
     grasp_msgs
     grasp_interface)
+
+# Obtain camera frame per grasp trial
+add_executable (gen_renders
+  gen_renders.cc
+  gen_grasps.cc
+  object_utils.cc
+  Grasp.cc)
+target_link_libraries(gen_renders
+    grasp_msgs
+    ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES}
+    ${YAML_CPP_LIBRARIES})
+add_dependencies(gen_renders
+    grasp_msgs)
