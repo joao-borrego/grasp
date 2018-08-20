@@ -101,7 +101,7 @@ int main(int _argc, char **_argv)
             while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
 
             // DEBUG
-            std::cin.ignore();
+            //std::cin.ignore();
         }
 
         // Cleanup

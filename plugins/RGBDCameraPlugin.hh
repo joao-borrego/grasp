@@ -187,6 +187,15 @@ namespace gazebo {
         private: void saveRenderDepth();
 
         /// TODO
+        private: void saveDepthFrame(
+            const float *_image,
+            unsigned int _width,
+            unsigned int _height,
+            unsigned int _depth,
+            const std::string &_format,
+            const std::string &_filename);
+
+        /// TODO
         private: void clearQueues();
 
         /// \brief Get the OGRE image pixel format

@@ -295,9 +295,11 @@ void RGBDCameraPlugin::saveRenderRGB()
         {
             std::string filename = output_dir + "/rgb_" +
                 std::to_string(counter++) + "." + output_ext;
+            gzdbg << "Saving rgb image frame to " << filename << std::endl;
             rendering::Camera::SaveFrame(image_rgb, width, height,
                 depth, format, filename);
             delete [] image_rgb;
+
         }
     }
 }
@@ -311,7 +313,7 @@ void RGBDCameraPlugin::saveRenderDepth()
     unsigned int depth = 1;
     std::string format = "FLOAT32";
     unsigned int counter = 0;
-    std::string extension(".png");
+    std::string output_ext_raw = "raw";
 
     while(true)
     {
@@ -322,8 +324,42 @@ void RGBDCameraPlugin::saveRenderDepth()
 
         if (depth_queue->dequeue(image_depth))
         {
-            // TODO Process depth image and save to file
+            // Output as PNG
+            std::string filename = output_dir + "/depth_" +
+                std::to_string(counter++) + "." + output_ext_raw;
+            gzdbg << "Saving raw depth frame to " << filename << std::endl;
+            saveDepthFrame(image_depth, width, height,
+                depth, format, filename);
             delete [] image_depth;
+        }
+    }
+}
+
+//////////////////////////////////////////////////
+void RGBDCameraPlugin::saveDepthFrame(
+    const float *_image,
+    unsigned int _width,
+    unsigned int _height,
+    unsigned int _depth,
+    const std::string &_format,
+    const std::string &_filename)
+{
+    // TODO - Improve
+    size_t bytes;
+    if (_format == "FLOAT32")
+    {
+        float a_float;
+        bytes = _width * _height * _depth * sizeof(a_float);
+        
+        FILE *write_ptr;
+        write_ptr = fopen(_filename.c_str(),"wb");
+        if(write_ptr)
+        {
+            fwrite(_image, bytes, 1, write_ptr);
+        }
+        else
+        {
+            gzerr << "Could not open " << filename << std::endl;
         }
     }
 }
