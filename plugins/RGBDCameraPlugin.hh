@@ -64,10 +64,14 @@ namespace RGBDCameraPlugin {
     #define CAPTURE_REQUEST     grasp::msgs::CameraRequest::CAPTURE
     /// Request to update pose
     #define MOVE_REQUEST        grasp::msgs::CameraRequest::MOVE
+    /// Request to change image filename prefix
+    #define PREFIX_REQUEST      grasp::msgs::CameraRequest::PREFIX
     /// Captured frame response
     #define CAPTURE_RESPONSE    grasp::msgs::CameraResponse::CAPTURE
     /// Camera moved response
-    #define MOVE_RESPONSE        grasp::msgs::CameraResponse::MOVE
+    #define MOVE_RESPONSE       grasp::msgs::CameraResponse::MOVE
+    /// Image filename prefix chnaged response
+    #define PREFIX_RESPONSE     grasp::msgs::CameraResponse::PREFIX
 }
 
 namespace gazebo {
@@ -117,6 +121,8 @@ namespace gazebo {
 
         /// Render output directory
         private: std::string output_dir;
+        /// Rendered output filename prefix
+        private: std::string output_prefix {""};
         /// Rendered output format
         private: std::string output_ext;
 

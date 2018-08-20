@@ -16,10 +16,14 @@ message CameraRequest
         CAPTURE     = 1;
         /// Move camera
         MOVE        = 2;
+        /// Change image filename prefix
+        PREFIX      = 3;
     }
 
     /// Type of request
     optional Type               type    = 1;
-    /// Expected camera pose
+    /// Desired camera pose
     optional gazebo.msgs.Pose   pose    = 2;
+    /// Image filename prefix
+    optional string             prefix  = 3;
 }

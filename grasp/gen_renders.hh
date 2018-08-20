@@ -42,10 +42,14 @@
 #define REQ_CAPTURE    grasp::msgs::CameraRequest::CAPTURE
 /// Request to move camera
 #define REQ_MOVE       grasp::msgs::CameraRequest::MOVE
+/// Request to change image filename prefix
+#define REQ_PREFIX      grasp::msgs::CameraRequest::PREFIX
 /// Response to capture frame
 #define RES_CAPTURE    grasp::msgs::CameraResponse::CAPTURE
 /// Response to move camera
 #define RES_MOVE       grasp::msgs::CameraResponse::MOVE
+/// Image filename prefix chnaged response
+#define RES_PREFIX     grasp::msgs::CameraResponse::PREFIX
 
 // Message type definitions
 
@@ -99,6 +103,10 @@ void setupCommunications(
 /// TODO
 void obtainTargets(std::vector<std::string> & targets,
     const std::string & file_name);
+
+/// TODO
+void changeImagePrefix(gazebo::transport::PublisherPtr pub,
+    const std::string & prefix);
 
 /// TODO
 void captureFrame(gazebo::transport::PublisherPtr pub);

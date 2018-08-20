@@ -80,15 +80,23 @@ int main(int _argc, char **_argv)
             continue;
         }
 
+        waitMs(100); // TODO? - Replace by notification of empty image queue
+
+        // Change image save prefix
+        changeImagePrefix(pubs["camera"], model_name);
+        while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
+
         // Spawn object
         spawnModelFromFilename(pubs["factory"], rest_pose, model_filename);
         pubs["target"]->WaitForConnection();
         debugPrintTrace(model_name << " - Target connected");
-        waitMs(100);
+
+        waitMs(100); // TODO - Remove
 
         // Render frame per grasp candidate
         for (auto candidate : grasps)
         {
+
             // Move camera to grasp candidate pose
             // TODO - Add offset and reference frame rotation
             camera_pose = ref_cam + candidate.getPose(rest_pose);
@@ -225,9 +233,18 @@ void obtainTargets(std::vector<std::string> & targets,
 }
 
 /////////////////////////////////////////////////
+void changeImagePrefix(gazebo::transport::PublisherPtr pub,
+    const std::string & prefix)
+{
+    CameraRequest msg;
+    msg.set_type(REQ_PREFIX);
+    msg.set_prefix(prefix);
+    pub->Publish(msg);
+}
+
+/////////////////////////////////////////////////
 void captureFrame(gazebo::transport::PublisherPtr pub)
 {
-    // TODO - Add (object) name to captured frame
     CameraRequest msg;
     msg.set_type(REQ_CAPTURE);
     pub->Publish(msg);

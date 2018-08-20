@@ -183,9 +183,25 @@ void RGBDCameraPlugin::onRequest(CameraRequestPtr &_msg)
     }
     else if (_msg->type() == MOVE_REQUEST)
     {
-        std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
-        new_pose = msgs::ConvertIgn(_msg->pose());
-        update_pose = true;
+        if (_msg->has_pose())
+        {
+            std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+            new_pose = msgs::ConvertIgn(_msg->pose());
+            update_pose = true;
+        }
+    }
+    // TODO? - Alternatively allow each frame to have a specified name
+    //  This requires the name to be put on the queue along with the binary data
+    else if (_msg->type() == PREFIX_REQUEST)
+    {
+        if (_msg->has_prefix())
+        {
+            std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+            output_prefix = _msg->prefix();
+            grasp::msgs::CameraResponse msg;
+            msg.set_type(PREFIX_RESPONSE);
+            this->data_ptr->pub->Publish(msg);
+        }
     }
 }
 
@@ -284,6 +300,7 @@ void RGBDCameraPlugin::saveRenderRGB()
     std::string format = "R8G8B8";
     unsigned int counter = 0;
     std::string extension(".png");
+    std::string prefix("");
 
     while(true)
     {
@@ -293,7 +310,11 @@ void RGBDCameraPlugin::saveRenderRGB()
         }
         if (rgb_queue->dequeue(image_rgb))
         {
-            std::string filename = output_dir + "/rgb_" +
+            {
+                std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+                prefix = this->output_prefix;
+            }
+            std::string filename = output_dir + "/" + prefix + "_rgb_" +
                 std::to_string(counter++) + "." + output_ext;
             gzdbg << "Saving rgb image frame to " << filename << std::endl;
             rendering::Camera::SaveFrame(image_rgb, width, height,
@@ -314,6 +335,7 @@ void RGBDCameraPlugin::saveRenderDepth()
     std::string format = "FLOAT32";
     unsigned int counter = 0;
     std::string output_ext_raw = "raw";
+    std::string prefix("");
 
     while(true)
     {
@@ -324,8 +346,11 @@ void RGBDCameraPlugin::saveRenderDepth()
 
         if (depth_queue->dequeue(image_depth))
         {
-            // Output as PNG
-            std::string filename = output_dir + "/depth_" +
+            {
+                std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+                prefix = this->output_prefix;
+            }
+            std::string filename = output_dir + "/" + prefix + "_depth_" +
                 std::to_string(counter++) + "." + output_ext_raw;
             gzdbg << "Saving raw depth frame to " << filename << std::endl;
             saveDepthFrame(image_depth, width, height,

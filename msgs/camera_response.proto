@@ -16,6 +16,8 @@ message CameraResponse
         CAPTURE     = 1;
         /// Moved camera
         MOVE        = 2;
+        /// Changed image filename prefix
+        PREFIX      = 3;
     }
 
     /// Type of response
