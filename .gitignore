@@ -1,11 +1,7 @@
 # Compilation
 build/
 # 3D object datasets
-datasets/3dnet
-datasets/dexnet
-datasets/kit
-datasets/ShapeNetSem
-datasets/ycb
+data/datasets/*
 # Grasp candidates files
 config/
 # Exclude important configs

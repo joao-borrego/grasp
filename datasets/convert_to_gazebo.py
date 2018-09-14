@@ -23,19 +23,22 @@ import yaml
 # Default parameters
 
 # Mesh root directory
-DEF_IN_DIR = 'COLLADA'
-# Dataset file list yml file
-DEF_DS_LIST = None
+DEF_IN_DIR = 'path/to/dir'
 # Template model root directory
-DEF_TEMPLATE = 'data/template'
-# Preproc MeshLab script
-DEF_SCRIPT = None
+DEF_TEMPLATE = 'datasets/template'
 # Output model directory
-DEF_OUT_DIR = 'out_ds'
+DEF_OUT_DIR = 'data/datasets/out'
 # Output dataset yml file
-DEF_OUT_YML = 'cfg/ds.yml'
+DEF_OUT_YML = 'data/datasets/ds.yml'
 # Output mesh format
 DEF_MESH_EXT = 'stl'
+
+# Dataset file list yml file
+#   If None the whole input dir is searched for meshes
+DEF_DS_LIST = None
+# Preproc MeshLab script
+#   If None no script is applied to input meshes
+DEF_SCRIPT = None
 
 # Usage
 USAGE = 'options: -i <input mesh directory>\n' +   \
@@ -95,11 +98,15 @@ def parseArgs(argv):
   return [in_dir, ds_list, out_dir, out_yml, template, script]
 
 def search_and_replace(filename, search, replace):
+  ''' Opens file by name and performs search and replace
+  '''
   with fileinput.FileInput(filename, inplace=True) as file:
     for line in file:
       print(line.replace(search, replace), end='')
 
 def main(argv):
+  ''' Main executable
+  '''
 
   # Obtain command-line arguments
   [in_dir, ds_list, out_dir, out_yml, template, script] = parseArgs(argv)

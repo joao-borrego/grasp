@@ -9,8 +9,8 @@ export GAZEBO_PLUGIN_PATH=${GAZEBO_PLUGIN_PATH}:`pwd`/build/plugins
 # Export location of Gazebo models
 
 # Datasets
-export GAZEBO_MODEL_PATH=${GAZEBO_MODEL_PATH}:`pwd`/datasets/kit
-export GAZEBO_MODEL_PATH=${GAZEBO_MODEL_PATH}:`pwd`/datasets/parametric
+export GAZEBO_MODEL_PATH=${GAZEBO_MODEL_PATH}:`pwd`/data/datasets/kit
+export GAZEBO_MODEL_PATH=${GAZEBO_MODEL_PATH}:`pwd`/data/datasets/random
 
 # Other
 export GAZEBO_MODEL_PATH=${GAZEBO_MODEL_PATH}:`pwd`/models
