@@ -173,7 +173,7 @@ def main(argv):
     copyfile(template_cfg, out_cfg)
 
     search_and_replace(out_model, 'TEMPLATE', obj_name)
-    search_and_replace(out_model, 'MESH_EXT', 'stl')
+    search_and_replace(out_model, 'MESH_EXT', DEF_MESH_EXT)
     search_and_replace(out_model, 'SCALE', '1 1 1')
     search_and_replace(out_cfg, 'TEMPLATE', obj_name)
     search_and_replace(out_cfg, 'DESCRIPTION', obj_name)
