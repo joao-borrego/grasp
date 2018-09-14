@@ -24,9 +24,9 @@
 #include "debug.hh"
 
 /// TODO
-void obtainGrasps(const std::string file_name,
-	const std::string robot,
-	std::vector<Grasp> & grasps);
+void obtainGrasps(const std::string & file_name,
+    const std::string & robot,
+    std::vector<Grasp> & grasps);
 
 /// \brief Get a random double in a given interval
 ///

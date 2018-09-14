@@ -11,8 +11,8 @@
 
 using namespace ignition::math;
 
-void obtainGrasps(const std::string file_name,
-    const std::string robot,
+void obtainGrasps(const std::string & file_name,
+    const std::string & robot,
     std::vector<Grasp> & grasps)
 {
     Matrix4d tf_mat (Matrix4d::Identity);
