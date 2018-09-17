@@ -36,13 +36,14 @@ bool g_success  {false};
 
 int main(int _argc, char **_argv)
 {
+
     // List of grasp targets
     std::vector<std::string> targets;
 
     // Command-line args
-    std::map<std::string, std::string> args;
+    Config config;
     std::string obj_cfg_dir, grasp_cfg_dir, out_img_dir, out_trials_dir, robot;
-    parseArgs(_argc, _argv,
+    parseArgs(_argc, _argv, config,
         obj_cfg_dir, grasp_cfg_dir, out_img_dir, out_trials_dir, robot);
 
     // Obtain target objects
@@ -148,17 +149,14 @@ const std::string getUsage(const char* argv_0)
 {
     return \
         "usage:   " + std::string(argv_0) + " [options]\n" +
-        "options: -d <object dataset yaml>\n"  +
-        "         -g <grasp candidates yaml>\n" +
-        "         -i <image output directory>\n" +
-        "         -o <dataset output directory>\n" +
-        "         -r <robot>\n";
+        "options: -c <config yml>";
 }
 
 //////////////////////////////////////////////////
 void parseArgs(
     int argc,
     char** argv,
+    Config & config,
     std::string & obj_cfg_dir,
     std::string & grasp_cfg_dir,
     std::string & out_img_dir,

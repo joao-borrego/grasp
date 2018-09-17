@@ -35,10 +35,20 @@
 // Debug streams
 #include "debug.hh"
 
+
+// GAP
+
+// Custom messages
+#include "dr_request.pb.h"
+// Domain randomization plugin interface
+#include "DRInterface.hh"
+
 /// Height threshold
 #define Z_LIFTED 0.2
 
 #define SHADOWHAND
+
+typedef std::map<std::string, std::string> Config;
 
 // Topics
 
@@ -153,6 +163,7 @@ const std::string getUsage(const char* argv_0);
 void parseArgs(
     int argc,
     char** argv,
+    Config & config,
     std::string & obj_cfg_dir,
     std::string & grasp_cfg_dir,
     std::string & out_img_dir,
