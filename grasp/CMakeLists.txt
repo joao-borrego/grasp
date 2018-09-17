@@ -48,7 +48,8 @@ add_executable (run_trials
   run_trials.cc
   gen_grasps.cc
   object_utils.cc
-  Grasp.cc)
+  Grasp.cc
+  Randomiser.cc)
 target_link_libraries(run_trials
   grasp_msgs
   grasp_interface

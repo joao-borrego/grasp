@@ -6,6 +6,10 @@
       <topic>grasp/contact/world</topic>
     </plugin>
 
+    <plugin name="domain_randomization_plugin" filename="libDRPlugin.so">
+      <topic>"~/dr"</topic>
+    </plugin>
+
     <physics type="dart">
       <real_time_update_rate>0.000000</real_time_update_rate>
       <!--

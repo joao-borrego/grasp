@@ -34,6 +34,8 @@
 #include "object_utils.hh"
 // Debug streams
 #include "debug.hh"
+// Randomiser class
+#include "Randomiser.hh"
 
 // GAP
 
@@ -47,7 +49,7 @@
 
 #define SHADOWHAND
 
-typedef std::map<std::string, std::string> Config;
+typedef std::map<std::string,std::string> Config;
 
 // Topics
 
@@ -154,20 +156,11 @@ const std::string getUsage(const char* argv_0);
 /// \brief Parses command-line arguments
 /// \param argc Argument count
 /// \param argv Arguments
-/// \param obj_cfg_dir Path to object dataset yaml
-/// \param grasp_cfg_dir Path to grasp candidates yaml
-/// \param out_img_dir Directory for output images
-/// \param out_trials_dir Directory for trial outcomes
-/// \param robot Robot to use
+/// \param config Configuration YAML node
 void parseArgs(
     int argc,
     char** argv,
-    Config & config,
-    std::string & obj_cfg_dir,
-    std::string & grasp_cfg_dir,
-    std::string & out_img_dir,
-    std::string & out_trials_dir,
-    std::string & robot);
+    Config & config);
 
 /// \brief Sets up gazebo communication pubs/subs
 /// \param node Gazebo communication node pointer
