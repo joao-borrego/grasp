@@ -46,7 +46,7 @@ int main(int _argc, char **_argv)
     debugPrintTrace("Loaded configuration file.");
 
     // Obtain target objects
-    obtainTargets(targets, config["obj_cfg_dir"]);
+    obtainTargets(targets, config["obj_cfg"]);
     if (targets.empty()) {
         errorPrintTrace("No valid objects retrieved from file");
         exit(EXIT_FAILURE);
@@ -72,17 +72,15 @@ int main(int _argc, char **_argv)
 
     std::string model_filename;
 
-    /*
-
     // For each target object
     for (auto const & model_name : targets)
     {
         // Obtain candidate grasps
         model_filename = "model://" + model_name;
-        std::string cfg_file(grasp_cfg_dir +
-            model_name + "." + robot + ".grasp.yml");
+        std::string grasp_file(config["grasp_cfg_dir"] +
+            model_name + "." + config["robot"] + ".grasp.yml");
         std::vector<Grasp> grasps;
-        obtainGrasps(cfg_file, robot, grasps);
+        obtainGrasps(grasp_file, config["robot"], grasps);
         if (grasps.empty()) {
             errorPrintTrace("No valid grasps retrieved from file");
             continue;
@@ -120,18 +118,7 @@ int main(int _argc, char **_argv)
         removeModel(pubs["request"], model_name);
     }
 
-    // TODO - Render RGBD camera frames
-
-    // Capture and render frame
-    /*
-    captureFrame(pubs["camera"]);
-    while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
-    */
-
     // Cleanup
-    /*
-    removeModel(pubs["request"], camera_name);
-    */
     interface.setPose(g_safe_pose);
 
     // Shut down
@@ -176,7 +163,7 @@ void parseArgs(int argc, char** argv, Config & config)
     try
     {
         YAML::Node node = YAML::LoadFile(config_path);
-        config["obj_cfg_dir"]    = node["obj_cfg_dir"].as<std::string>();
+        config["obj_cfg"]        = node["obj_cfg"].as<std::string>();
         config["grasp_cfg_dir"]  = node["grasp_cfg_dir"].as<std::string>();
         config["out_trials_dir"] = node["out_trials_dir"].as<std::string>();
         config["robot_cfg"]      = node["robot_cfg"].as<std::string>();
