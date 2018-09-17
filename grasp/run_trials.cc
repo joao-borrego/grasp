@@ -63,6 +63,9 @@ int main(int _argc, char **_argv)
     setupCommunications(node, pubs, subs);
     // Interface for hand plugin
     Interface interface;
+    // Interface for DR plugin
+    DRInterface dr_interface;
+
     // TODO - Create parameter
     interface.init("grasp/config/robots.yml",robot);
 

@@ -35,7 +35,6 @@
 // Debug streams
 #include "debug.hh"
 
-
 // GAP
 
 // Custom messages

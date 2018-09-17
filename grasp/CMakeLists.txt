@@ -12,8 +12,6 @@ endif()
 find_package(yaml-cpp REQUIRED)
 find_package(gap REQUIRED VERSION 1.2)
 
-MESSAGE( STATUS "variable is: " ${GAP_LIBRARY_DIRS} )
-
 # Link GAP
 include_directories(${GAP_INCLUDE_DIRS})
 link_directories(${GAP_LIBRARY_DIRS})
@@ -54,7 +52,8 @@ add_executable (run_trials
 target_link_libraries(run_trials
   grasp_msgs
   grasp_interface
-  ${GAP_LIBRARIES}
+  gap_msgs
+  dr_interface
   ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES}
   ${YAML_CPP_LIBRARIES})
 add_dependencies(run_trials
