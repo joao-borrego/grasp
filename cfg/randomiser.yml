@@ -19,6 +19,21 @@ properties:
   friction_coefficients:
     uniform: {a: 0.7, b: 1.3}
     scale: True
+    links:
+      gripper_l_finger: {mu1: 1000, mu2: 1000, fdir1: [0 0 1], kp: 100000, kd: 1}
+      gripper_r_finger: {mu1: 1000, mu2: 1000, fdir1: [0 0 1], kp: 100000, kd: 1}
+  joint_damping_coefficients:
+    loguniform: {a: 0.3, b: 3.0}
+    scale: True
+    joints:
+      gripper_l_finger_joint: {damping: 0.7}
+      gripper_r_finger_joint: {damping: 0.7}
+  p_gain:
+    loguniform: {a: 0.75, b: 1.5}
+    scale: True
+    joints:
+      gripper_l_finger_joint: {p: 30}
+      gripper_r_finger_joint: {p: 30}
   joint_limits:
     gaussian: {mean: 0.0, std: 0.15}
     scale: False
