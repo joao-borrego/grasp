@@ -10,7 +10,7 @@ if (PKG_CONFIG_FOUND)
 endif()
 
 find_package(yaml-cpp REQUIRED)
-find_package(gap REQUIRED VERSION 1.2)
+find_package(gap 1.3 REQUIRED)
 
 # Link GAP
 include_directories(${GAP_INCLUDE_DIRS})
