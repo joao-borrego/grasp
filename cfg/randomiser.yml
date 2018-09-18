@@ -1,0 +1,31 @@
+# Randomiser settings
+
+# Number of trials
+trials: 10
+# Properties
+properties:
+  model_scale:
+    uniform: {a: 0.95, b: 1.05}
+    scale: True
+    model: TARGET
+  link_masses:
+    uniform: {a: 0.5, b: 1.5}
+    scale: True
+    links:
+      gripper_l_finger:     {mass: 0.02}
+      gripper_r_finger:     {mass: 0.02}
+      gripper_l_finger_tip: {mass: 0.01}
+      gripper_r_finger_tip: {mass: 0.01}
+  friction_coefficients:
+    uniform: {a: 0.7, b: 1.3}
+    scale: True
+  joint_limits:
+    gaussian: {mean: 0.0, std: 0.15}
+    scale: False
+    joints:
+      gripper_l_finger_joint: {lower: 0.0, upper: 0.020833}
+      gripper_r_finger_joint: {lower: -0.020833, upper: 0.0}
+  gravity:
+    gaussian: {mean: 0.0, std: 0.4}
+    scale: False
+    vector: [0 0 9.80665]

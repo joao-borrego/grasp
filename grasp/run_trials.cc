@@ -67,7 +67,7 @@ int main(int _argc, char **_argv)
     // Interface for DR plugin
     DRInterface dr_interface;
     // Domain randomiser 
-    Randomiser randomiser;
+    Randomiser randomiser(config["randomiser_cfg"]);
     debugPrintTrace("Initialised randomiser.");
 
     std::string model_filename;
@@ -108,6 +108,7 @@ int main(int _argc, char **_argv)
         // Perform trials
         for (auto candidate : grasps)
         {
+            // TODO - Use randomiser
             tryGrasp(candidate, interface, pubs, model_name);
             // Place target in rest pose
             resetTarget(pubs["target"]);
@@ -168,6 +169,7 @@ void parseArgs(int argc, char** argv, Config & config)
         config["out_trials_dir"] = node["out_trials_dir"].as<std::string>();
         config["robot_cfg"]      = node["robot_cfg"].as<std::string>();
         config["robot"]          = node["robot"].as<std::string>();
+        config["randomiser_cfg"] = node["randomiser_cfg"].as<std::string>();
     }
     catch (YAML::Exception& yamlException)
     {

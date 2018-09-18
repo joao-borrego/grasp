@@ -44,11 +44,7 @@
 // Domain randomization plugin interface
 #include "DRInterface.hh"
 
-/// Height threshold
-#define Z_LIFTED 0.2
-
-#define SHADOWHAND
-
+/// Config dictionary
 typedef std::map<std::string,std::string> Config;
 
 // Topics

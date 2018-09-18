@@ -10,9 +10,5 @@ out_trials_dir: data/trials/kit/
 robot_cfg: cfg/robots.yml
 # Robot name
 robot: baxter
-
-# Randomiser settings
-
-# Number of trials
-#   Runtime scales linearly with parameter
-num_trials: 10
+# Randomiser config yml
+randomiser_cfg: cfg/randomiser.yml
