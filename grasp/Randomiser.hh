@@ -19,11 +19,16 @@
 // Domain randomization plugin interface
 #include "DRInterface.hh"
 
+/// Declaration for request message type
+typedef gap::msgs::DRRequest DRRequest;
+/// Declaration for model command message type
+typedef gap::msgs::ModelCmd ModelCmdMsg;
+
 /// \brief Physics property with gaussian disturbance
 class GaussianProperty
 {
     /// \brief Property name
-    public: std::string property; 
+    public: std::string property;
     /// \brief Gaussian mean
     public: double mean;
     /// \brief Gaussian standard deviation
@@ -43,6 +48,11 @@ class GaussianProperty
         double mean,
         double std,
         double scale=0.0);
+
+    /// \brief Gets random sample
+    /// \param gen Pseudo random number generator
+    /// \returns Random sample
+    public: double sample(std::mt19937 & gen);
 };
 
 /// \brief Physics property with uniform disturbance
@@ -59,6 +69,9 @@ class UniformProperty
     /// \brief Uniform distribution
     public: std::uniform_real_distribution<double> dist;
 
+    /// \brief Whether to use log-uniform instead
+    public: bool log_uniform {false};
+
     /// \brief Constructor
     /// \param property Property name
     /// \param mean Uniform mean
@@ -68,18 +81,28 @@ class UniformProperty
         const std::string & property,
         double a,
         double b,
-        double scale=0.0);
+        double scale=0.0,
+        bool log_uniform=false);
+
+    /// \brief Gets random sample
+    /// \param gen Pseudo random number generator
+    /// \returns Random sample
+    public: double sample(std::mt19937 & gen);
 };
 
 /// \brief Randomiser representation class
 class Randomiser
 {
+
     // Public attributes
 
     // Private attributes
 
     /// Mersenne Twister pseudorandom number generator
     private: std::mt19937 m_mt;
+
+    /// DRInterface API
+    private: DRInterface api;
 
     /// Gaussian properties
     private: std::vector<GaussianProperty> n_p;
@@ -88,6 +111,12 @@ class Randomiser
 
     /// \brief Constructor
     public: Randomiser(const std::string & config);
+
+    /// TODO
+    private: void ProcessModelScale(
+        DRRequest & msg,
+        const std::string & model,
+        const double scale);
 };
 
 #endif

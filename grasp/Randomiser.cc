@@ -23,9 +23,26 @@ GaussianProperty::GaussianProperty(
 }
 
 //////////////////////////////////////////////////
+double GaussianProperty::sample(std::mt19937 & gen)
+{
+    return dist(gen);
+}
+
+//////////////////////////////////////////////////
 UniformProperty::UniformProperty(
     const std::string & property_, double a_,
-    double b_, double scale_):
-        property(property_), a(a_), b(b_), scale(scale_), dist(a_, b_)
+    double b_, double scale_, bool log_uniform_):
+        property(property_), a(a_), b(b_), scale(scale_), dist(a_, b_),
+        log_uniform(log_uniform_)
 {
+}
+
+//////////////////////////////////////////////////
+double UniformProperty::sample(std::mt19937 & gen)
+{
+    if (log_uniform) {
+        return std::exp(dist(gen));
+    } else {
+        return dist(gen);
+    }
 }
