@@ -355,16 +355,19 @@ class Randomiser
     public: static const char CFG_GAUSSIAN_MEAN[];
     /// \brief Gaussian distribution standard deviation yml field string
     public: static const char CFG_GAUSSIAN_STD[];
+
+    /// \brief Target yml keyword string
+    public: static const char CFG_TARGET[];
     /// \brief Model yml field string
     public: static const char CFG_MODEL[];
-    /// \brief Links yml field string
-    public: static const char CFG_LINKS[];
+    /// \brief Link yml field string
+    public: static const char CFG_LINK[];
     /// \brief Joints yml field string
-    public: static const char CFG_JOINTS[];
+    public: static const char CFG_JOINT[];
     /// \brief Vector yml field string
     public: static const char CFG_VECTOR[];
     /// \brief Target object yml keyword string
-    public: static const char CFG_TARGET[];
+    public: static const char CFG_TARGET_OBJ[];
     /// \brief Link mass yml field string
     public: static const char CFG_MASS[];
     /// \brief Joint damping yml field string

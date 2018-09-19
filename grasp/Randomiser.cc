@@ -25,11 +25,13 @@ const char Randomiser::CFG_UNIFORM_B[]     = "b";
 const char Randomiser::CFG_GAUSSIAN[]      = "gaussian";
 const char Randomiser::CFG_GAUSSIAN_MEAN[] = "mean";
 const char Randomiser::CFG_GAUSSIAN_STD[]  = "std";
+
+const char Randomiser::CFG_TARGET[]        = "target";
 const char Randomiser::CFG_MODEL[]         = "model";
-const char Randomiser::CFG_LINKS[]         = "links";
-const char Randomiser::CFG_JOINTS[]        = "joints";
+const char Randomiser::CFG_LINK[]          = "link";
+const char Randomiser::CFG_JOINT[]         = "joint";
 const char Randomiser::CFG_VECTOR[]        = "vector";
-const char Randomiser::CFG_TARGET[]        = "TARGET";
+const char Randomiser::CFG_TARGET_OBJ[]    = "TARGET_OBJECT";
 const char Randomiser::CFG_MASS[]          = "mass";
 const char Randomiser::CFG_DAMPING[]       = "damping";
 const char Randomiser::CFG_LOWER[]         = "lower";
