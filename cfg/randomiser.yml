@@ -7,12 +7,12 @@ properties:
   model_scale:
     dist:
       uniform: {a: 0.95, b: 1.05}
-    scale: True
+    additive: True
     model: TARGET
   link_mass:
     dist:
       uniform: {a: 0.5, b: 1.5}
-    scale: True
+    additive: True
     links:
       gripper_l_finger:     {mass: 0.02}
       gripper_r_finger:     {mass: 0.02}
@@ -21,33 +21,33 @@ properties:
   friction_coefficient:
     dist:
       uniform: {a: 0.7, b: 1.3}
-    scale: True
+    additive: True
     links:
       gripper_l_finger: {mu1: 1000, mu2: 1000, fdir1: [0 0 1], kp: 100000, kd: 1}
       gripper_r_finger: {mu1: 1000, mu2:   1000, fdir1: [0 0 1], kp: 100000, kd: 1}
   joint_damping_coefficient:
     dist:
       loguniform: {a: 0.3, b: 3.0}
-    scale: True
+    additive: True
     joints:
       gripper_l_finger_joint: {damping: 0.7}
       gripper_r_finger_joint: {damping: 0.7}
   p_gain:
     dist:
       loguniform: {a: 0.75, b: 1.5}
-    scale: True
+    additive: True
     joints:
       gripper_l_finger_joint: {p: 30}
       gripper_r_finger_joint: {p: 30}
   joint_limit:
     dist:
       gaussian: {mean: 0.0, std: 0.15}
-    scale: False
+    additive: False
     joints:
       gripper_l_finger_joint: {lower: 0.0, upper: 0.020833}
       gripper_r_finger_joint: {lower: -0.020833, upper: 0.0}
   gravity:
     dist:
       gaussian: {mean: 0.0, std: 0.4}
-    scale: False
+    additive: False
     vector: [0 0 9.80665]

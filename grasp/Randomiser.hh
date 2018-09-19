@@ -35,8 +35,6 @@ typedef gap::msgs::ModelCmd ModelCmdMsg;
 /// \brief Abstract PRNG sampler class
 class RandomSampler
 {
-    public: RandomSampler();
-
     /// \brief Gets random sample
     /// \param gen Pseudo random number generator
     /// \returns Random sample
@@ -104,124 +102,199 @@ class RandomProperty
     protected: RandomSampler sampler;
     /// \brief Whether term is additive or a scaling factor
     protected: bool additive;
-    /// \brief Model scale
-    protected: double scale;
 
-    /// \brief TODO
-    public: virtual void fillMsg(DRRequest & msg);
+    /// \brief Constructor
+    /// \param sampler_ PRNG sampler
+    /// \param additive_ Whether term is addictive or a scaling factor
+    protected: RandomProperty(
+        RandomSampler & sampler_,
+        bool additive_);
+
+    /// \brief Fills DR request with updated randomised property
+    /// \param msg DR request message
+    public: void fillMsg(DRRequest & msg);
 };
 
 /// \brief Model scale random property
 class ModelScale : public RandomProperty
 {
+    /// \brief List of affected models
+    std::vector<std::string> models;
+
     /// \brief Constructor
-    /// TODO params
+    /// \param sampler_ PRNG sampler
+    /// \param additive_ Whether term is addictive or a scaling factor
+    /// \param models_ List of affected models
+    /// \warning std::vectors params are moved inside instance!
     public: ModelScale(
         RandomSampler & sampler_,
         bool additive_,
-        bool scale_,
         std::vector<std::string> & models_);
 
-    /// \brief TODO
+    /// \brief Fills DR request with updated randomised property
+    /// \param msg DR request message
     public: void fillMsg(DRRequest & msg);
 };
 
 /// \brief Link mass random property
 class LinkMass : public RandomProperty
 {
+    /// \brief List of affected links
+    std::vector<std::string> links;
+    /// \brief Respective list of initial link masses 
+    std::vector<double> masses;
+
     /// \brief Constructor
-    /// TODO params
-    public: LinkMass(
+    /// \param sampler_ PRNG sampler
+    /// \param additive_ Whether term is addictive or a scaling factor
+    /// \param links_ List of affected links
+    /// \param masses_ Respective list of initial link masses
+    /// \warning std::vectors params are moved inside instance!
+        public: LinkMass(
         RandomSampler & sampler_,
         bool additive_,
-        bool scale_,
         std::vector<std::string> & links_,
         std::vector<double> & masses_);
 
-    /// \brief TODO
+    /// \brief Fills DR request with updated randomised property
+    /// \param msg DR request message
     public: void fillMsg(DRRequest & msg);
 };
 
 /// \brief Friction coefficients random property
 class FrictionCoefficient : public RandomProperty
 {
+    /// \brief List of affected links
+    std::vector<std::string> links;
+    /// \brief Respective list of initial mu1
+    std::vector<double> mu1;
+    /// \brief Respective list of initial mu2
+    std::vector<double> mu2;
+    /// \brief Respective list of initial kp
+    std::vector<double> kp;
+    /// \brief Respective list of initial kd
+    std::vector<double> kd;
+
     /// \brief Constructor
-    /// TODO params
+    /// \param sampler_ PRNG sampler
+    /// \param additive_ Whether term is addictive or a scaling factor
+    /// \param links_ List of affected links
+    /// \param mu1_ List of respective mu1
+    /// \param mu2_ List of respective mu2
+    /// \param kp_ List of respective kp
+    /// \param kd_ List of respective kd
+    /// \warning std::vectors params are moved inside instance!
     public: FrictionCoefficient(
         RandomSampler & sampler_,
         bool additive_,
-        bool scale_,
         std::vector<std::string> & links_,
         std::vector<double> & mu1_,
         std::vector<double> & mu2_,
         std::vector<double> & kp_,
         std::vector<double> & kd_);
 
-    /// \brief TODO
+    /// \brief Fills DR request with updated randomised property
+    /// \param msg DR request message
     public: void fillMsg(DRRequest & msg);
 };
 
 /// \brief Joint damping coefficients random property
 class JointDampingCoefficient : public RandomProperty
 {
+    /// \brief List of affected joints
+    std::vector<std::string> joints;
+    /// \brief Respective list of initial damping coefficients
+    std::vector<double> damping;
+
     /// \brief Constructor
-    /// TODO params
+    /// \param sampler_ PRNG sampler
+    /// \param additive_ Whether term is addictive or a scaling factor
+    /// \param joints_ List of affected joints
+    /// \param damping_ List of respective damping coefficients
+    /// \warning std::vectors params are moved inside instance!
     public: JointDampingCoefficient(
         RandomSampler & sampler_,
         bool additive_,
-        bool scale_,
         std::vector<std::string> & joints_,
         std::vector<double> & damping_);
 
-    /// \brief TODO
+    /// \brief Fills DR request with updated randomised property
+    /// \param msg DR request message
     public: void fillMsg(DRRequest & msg);
 };
 
 /// \brief P controller gains random property
 class PGain : public RandomProperty
 {
+    /// \brief List of affected joints
+    std::vector<std::string> joints;
+    /// \brief Respective list of initial P controller gains
+    std::vector<double> p_gains;
+
     /// \brief Constructor
-    /// TODO params
+    /// \param sampler_ PRNG sampler
+    /// \param additive_ Whether term is addictive or a scaling factor
+    /// \param joints_ List of affected joints
+    /// \param damping_ List of respective P controller gains
+    /// \warning std::vectors params are moved inside instance!
     public: PGain(
         RandomSampler & sampler_,
         bool additive_,
-        bool scale_,
         std::vector<std::string> & joints_,
         std::vector<double> & p_gains_);
 
-    /// \brief TODO
+    /// \brief Fills DR request with updated randomised property
+    /// \param msg DR request message
     public: void fillMsg(DRRequest & msg);
 };
 
 /// \brief Joint limits random property
 class JointLimit : public RandomProperty
 {
+    /// \brief List of affected joints
+    std::vector<std::string> joints;
+    /// \brief Respective list of initial joint lower limits
+    std::vector<double> lower;
+    /// \brief Respective list of initial joint upper limits
+    std::vector<double> upper;
+
     /// \brief Constructor
-    /// TODO params
+    /// \param sampler_ PRNG sampler
+    /// \param additive_ Whether term is addictive or a scaling factor
+    /// \param joints_ List of affected joints
+    /// \param lower_ List of respective joint lower limits
+    /// \param upper_ List of respective joint upper limits
+    /// \warning std::vectors params are moved inside instance!
     public: JointLimit(
         RandomSampler & sampler_,
         bool additive_,
-        bool scale_,
         std::vector<std::string> & joints_,
         std::vector<double> & lower_,
         std::vector<double> & upper_);
 
-    /// \brief TODO
+    /// \brief Fills DR request with updated randomised property
+    /// \param msg DR request message
     public: void fillMsg(DRRequest & msg);
 };
 
 /// \brief Joint limits random property
 class Gravity : public RandomProperty
 {
+    /// \brief Initial gravity vector
+    std::vector<double> gravity;
+
     /// \brief Constructor
-    /// TODO params
+    /// \param sampler_ PRNG sampler
+    /// \param additive_ Whether term is addictive or a scaling factor
+    /// \param gravity_ Initial gravity vector
+    /// \warning std::vectors params are moved inside instance!
     public: Gravity(
         RandomSampler & sampler_,
         bool additive_,
-        bool scale_,
-        std::vector<double> gravity_);
+        std::vector<double> & gravity_);
 
-    /// \brief TODO
+    /// \brief Fills DR request with updated randomised property
+    /// \param msg DR request message
     public: void fillMsg(DRRequest & msg);
 };
 
@@ -234,17 +307,18 @@ class Randomiser
 
     // Private attributes
 
-    /// Mersenne Twister pseudorandom number generator
-    private: std::mt19937 m_mt;
-
     /// DRInterface API
     private: DRInterface api;
+    /// \brief Randomised properties
+    private: std::vector<RandomProperty> properties;
+    /// Mersenne Twister pseudorandom number generator
+    private: std::mt19937 m_mt;
+    /// Target object string
+    private: std::string target;
 
     /// \brief Constructor
     public: Randomiser(const std::string & config);
 
-    /// \brief Randomised properties
-    private: std::vector<RandomProperty> properties;
 
     // Public constants for yml config file
     // TODO - move to file?
@@ -299,6 +373,8 @@ class Randomiser
     public: static const char CFG_LOWER[];
     /// \brief Joint upper limit yml field string
     public: static const char CFG_UPPER[];
+    /// \brief Additive yml field string
+    public: static const char CFG_ADDITIVE[];
 };
 
 #endif

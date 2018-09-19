@@ -34,6 +34,7 @@ const char Randomiser::CFG_MASS[]          = "mass";
 const char Randomiser::CFG_DAMPING[]       = "damping";
 const char Randomiser::CFG_LOWER[]         = "lower";
 const char Randomiser::CFG_UPPER[]         = "upper";
+const char Randomiser::CFG_ADDITIVE[]      = "additive";
 
 //////////////////////////////////////////////////
 Randomiser::Randomiser(const std::string & config):
@@ -126,13 +127,108 @@ Randomiser::Randomiser(const std::string & config):
     }
 }
 
+// Random properties
+
+//////////////////////////////////////////////////
+RandomProperty::RandomProperty(
+    RandomSampler & sampler_,
+    bool additive_) :
+        sampler(sampler_), additive(additive_)
+{
+}
+
 //////////////////////////////////////////////////
 void RandomProperty::fillMsg(DRRequest & msg)
 {
 }
 
 //////////////////////////////////////////////////
-RandomSampler::RandomSampler(){}
+ModelScale::ModelScale(
+    RandomSampler & sampler_,
+    bool additive_,
+    std::vector<std::string> & models_):
+        RandomProperty(sampler_, additive_),
+        models(std::move(models_))
+{
+}
+
+//////////////////////////////////////////////////
+void ModelScale::fillMsg(DRRequest & msg)
+{
+}
+
+//////////////////////////////////////////////////
+LinkMass::LinkMass(
+    RandomSampler & sampler_,
+    bool additive_,
+    std::vector<std::string> & links_,
+    std::vector<double> & masses_):
+        RandomProperty(sampler_, additive_),
+        links(std::move(links_)), masses(std::move(masses_))
+{
+}
+
+//////////////////////////////////////////////////
+FrictionCoefficient::FrictionCoefficient(
+    RandomSampler & sampler_,
+    bool additive_,
+    std::vector<std::string> & links_,
+    std::vector<double> & mu1_,
+    std::vector<double> & mu2_,
+    std::vector<double> & kp_,
+    std::vector<double> & kd_):
+        RandomProperty(sampler_, additive_),
+        links(std::move(links_)), mu1(std::move(mu1_)),
+        mu2(std::move(mu2_)), kp(std::move(kp_)), kd(std::move(kd_))
+{
+}
+
+//////////////////////////////////////////////////
+JointDampingCoefficient::JointDampingCoefficient(
+    RandomSampler & sampler_,
+    bool additive_,
+    std::vector<std::string> & joints_,
+    std::vector<double> & damping_):
+        RandomProperty(sampler_, additive_),
+        joints(std::move(joints_)), damping(std::move(damping_))
+{
+}
+
+//////////////////////////////////////////////////
+PGain::PGain(
+    RandomSampler & sampler_,
+    bool additive_,
+    std::vector<std::string> & joints_,
+    std::vector<double> & p_gains_):
+        RandomProperty(sampler_, additive_),
+        joints(std::move(joints_)), p_gains(std::move(p_gains_))
+{
+}
+
+//////////////////////////////////////////////////
+JointLimit::JointLimit(
+    RandomSampler & sampler_,
+    bool additive_,
+    std::vector<std::string> & joints_,
+    std::vector<double> & lower_,
+    std::vector<double> & upper_):
+        RandomProperty(sampler_, additive_),
+        joints(std::move(joints_)), lower(std::move(lower_)),
+        upper(std::move(upper_))
+{
+}
+
+//////////////////////////////////////////////////
+Gravity::Gravity(
+    RandomSampler & sampler_,
+    bool additive_,
+    std::vector<double> & gravity_):
+        RandomProperty(sampler_, additive_),
+        gravity(std::move(gravity_))
+{
+}
+
+// Random samplers
 
 //////////////////////////////////////////////////
 double RandomSampler::sample(std::mt19937 & gen)
