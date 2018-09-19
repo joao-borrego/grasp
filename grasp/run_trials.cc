@@ -60,15 +60,16 @@ int main(int _argc, char **_argv)
     std::map<std::string, gazebo::transport::PublisherPtr> pubs;
     std::map<std::string, gazebo::transport::SubscriberPtr> subs;
     setupCommunications(node, pubs, subs);
+    // Domain randomiser 
+    Randomiser randomiser(config["randomiser_cfg"]);
+    debugPrintTrace("Initialised randomiser.");
+    
+    return 0;
+
     // Interface for hand plugin
     Interface interface;
     interface.init(config["robot_cfg"],  config["robot"]);
     debugPrintTrace("Initialised hand interface.");
-    // Interface for DR plugin
-    DRInterface dr_interface;
-    // Domain randomiser 
-    Randomiser randomiser(config["randomiser_cfg"]);
-    debugPrintTrace("Initialised randomiser.");
 
     std::string model_filename;
 
