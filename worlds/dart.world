@@ -7,7 +7,8 @@
     </plugin>
 
     <plugin name="domain_randomization_plugin" filename="libDRPlugin.so">
-      <topic>"~/dr"</topic>
+      <request_topic>~/gap/dr</request_topic>
+      <response_topic>~/gap/dr/response</response_topic>
     </plugin>
 
     <physics type="dart">

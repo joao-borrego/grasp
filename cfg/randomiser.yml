@@ -38,8 +38,8 @@ properties:
       loguniform: {a: 0.75, b: 1.5}
     additive: False
     target:
-      0: {model: baxter, joint: gripper_l_finger_joint, p: 30}
-      1: {model: baxter, joint: gripper_r_finger_joint, p: 30}
+      0: {model: baxter, joint: gripper_l_finger_joint, p: 30, type: position}
+      1: {model: baxter, joint: gripper_r_finger_joint, p: 30, type: position}
   joint_limit:
     dist:
       gaussian: {mean: 0.0, std: 0.15}

@@ -10,6 +10,8 @@
 
 // Random distributions
 #include <random>
+// Required fields workaround
+#include <limits>
 
 // Open YAML config files
 #include "yaml-cpp/yaml.h"
@@ -99,27 +101,23 @@ class UniformSampler : public RandomSampler
 class RandomProperty
 {
     /// \brief Random distribution sampler
-    protected: RandomSampler sampler;
+    public: RandomSampler sampler;
     /// \brief Whether term is additive or a scaling factor
-    protected: bool additive;
+    public: bool additive;
 
     /// \brief Constructor
     /// \param sampler_ PRNG sampler
     /// \param additive_ Whether term is addictive or a scaling factor
-    protected: RandomProperty(
+    public: RandomProperty(
         RandomSampler & sampler_,
         bool additive_);
-
-    /// \brief Fills DR request with updated randomised property
-    /// \param msg DR request message
-    public: void fillMsg(DRRequest & msg);
 };
 
 /// \brief Model scale random property
 class ModelScale : public RandomProperty
 {
     /// \brief List of affected models
-    std::vector<std::string> models;
+    public: std::vector<std::string> models;
 
     /// \brief Constructor
     /// \param sampler_ PRNG sampler
@@ -130,21 +128,17 @@ class ModelScale : public RandomProperty
         RandomSampler & sampler_,
         bool additive_,
         std::vector<std::string> & models_);
-
-    /// \brief Fills DR request with updated randomised property
-    /// \param msg DR request message
-    public: void fillMsg(DRRequest & msg);
 };
 
 /// \brief Link mass random property
 class LinkMass : public RandomProperty
 {
     /// \brief List of affected models
-    std::vector<std::string> models;
+    public: std::vector<std::string> models;
     /// \brief List of affected links
-    std::vector<std::string> links;
+    public: std::vector<std::string> links;
     /// \brief Respective list of initial link masses
-    std::vector<double> masses;
+    public: std::vector<double> masses;
 
     /// \brief Constructor
     /// \param sampler_ PRNG sampler
@@ -159,27 +153,23 @@ class LinkMass : public RandomProperty
         std::vector<std::string> & models_,
         std::vector<std::string> & links_,
         std::vector<double> & masses_);
-
-    /// \brief Fills DR request with updated randomised property
-    /// \param msg DR request message
-    public: void fillMsg(DRRequest & msg);
 };
 
 /// \brief Friction coefficients random property
 class FrictionCoefficient : public RandomProperty
 {
     /// \brief List of affected models
-    std::vector<std::string> models;
+    public: std::vector<std::string> models;
     /// \brief List of affected links
-    std::vector<std::string> links;
+    public: std::vector<std::string> links;
     /// \brief Respective list of initial mu1
-    std::vector<double> mu1;
+    public: std::vector<double> mu1;
     /// \brief Respective list of initial mu2
-    std::vector<double> mu2;
+    public: std::vector<double> mu2;
     /// \brief Respective list of initial kp
-    std::vector<double> kp;
+    public: std::vector<double> kp;
     /// \brief Respective list of initial kd
-    std::vector<double> kd;
+    public: std::vector<double> kd;
 
     /// \brief Constructor
     /// \param sampler_ PRNG sampler
@@ -200,21 +190,17 @@ class FrictionCoefficient : public RandomProperty
         std::vector<double> & mu2_,
         std::vector<double> & kp_,
         std::vector<double> & kd_);
-
-    /// \brief Fills DR request with updated randomised property
-    /// \param msg DR request message
-    public: void fillMsg(DRRequest & msg);
 };
 
 /// \brief Joint damping coefficients random property
 class JointDampingCoefficient : public RandomProperty
 {
     /// \brief List of affected models
-    std::vector<std::string> models;
+    public: std::vector<std::string> models;
     /// \brief List of affected joints
-    std::vector<std::string> joints;
+    public: std::vector<std::string> joints;
     /// \brief Respective list of initial damping coefficients
-    std::vector<double> damping;
+    public: std::vector<double> damping;
 
     /// \brief Constructor
     /// \param sampler_ PRNG sampler
@@ -229,27 +215,26 @@ class JointDampingCoefficient : public RandomProperty
         std::vector<std::string> & models_,
         std::vector<std::string> & joints_,
         std::vector<double> & damping_);
-
-    /// \brief Fills DR request with updated randomised property
-    /// \param msg DR request message
-    public: void fillMsg(DRRequest & msg);
 };
 
 /// \brief P controller gains random property
 class PGain : public RandomProperty
 {
     /// \brief List of affected models
-    std::vector<std::string> models;
+    public: std::vector<std::string> models;
     /// \brief List of affected joints
-    std::vector<std::string> joints;
+    public: std::vector<std::string> joints;
+    /// \brief Respective list of controller types
+    public: std::vector<int> types;
     /// \brief Respective list of initial P controller gains
-    std::vector<double> p_gains;
+    public: std::vector<double> p_gains;
 
     /// \brief Constructor
     /// \param sampler_ PRNG sampler
     /// \param additive_ Whether term is addictive or a scaling factor
     /// \param models_ List of affected models
     /// \param joints_ List of affected joints
+    /// \param damping_ List of respective controller types
     /// \param damping_ List of respective P controller gains
     /// \warning std::vectors params are moved inside instance!
     public: PGain(
@@ -257,24 +242,21 @@ class PGain : public RandomProperty
         bool additive_,
         std::vector<std::string> & models_,
         std::vector<std::string> & joints_,
+        std::vector<int> & types_,
         std::vector<double> & p_gains_);
-
-    /// \brief Fills DR request with updated randomised property
-    /// \param msg DR request message
-    public: void fillMsg(DRRequest & msg);
 };
 
 /// \brief Joint limits random property
 class JointLimit : public RandomProperty
 {
     /// \brief List of affected models
-    std::vector<std::string> models;
+    public: std::vector<std::string> models;
     /// \brief List of affected joints
-    std::vector<std::string> joints;
+    public: std::vector<std::string> joints;
     /// \brief Respective list of initial joint lower limits
-    std::vector<double> lower;
+    public: std::vector<double> lower;
     /// \brief Respective list of initial joint upper limits
-    std::vector<double> upper;
+    public: std::vector<double> upper;
 
     /// \brief Constructor
     /// \param sampler_ PRNG sampler
@@ -291,17 +273,13 @@ class JointLimit : public RandomProperty
         std::vector<std::string> & joints_,
         std::vector<double> & lower_,
         std::vector<double> & upper_);
-
-    /// \brief Fills DR request with updated randomised property
-    /// \param msg DR request message
-    public: void fillMsg(DRRequest & msg);
 };
 
 /// \brief Joint limits random property
 class Gravity : public RandomProperty
 {
     /// \brief Initial gravity vector
-    std::vector<double> gravity;
+    public: std::vector<double> gravity;
 
     /// \brief Constructor
     /// \param sampler_ PRNG sampler
@@ -312,10 +290,6 @@ class Gravity : public RandomProperty
         RandomSampler & sampler_,
         bool additive_,
         std::vector<double> & gravity_);
-
-    /// \brief Fills DR request with updated randomised property
-    /// \param msg DR request message
-    public: void fillMsg(DRRequest & msg);
 };
 
 
@@ -334,11 +308,56 @@ class Randomiser
     /// Mersenne Twister pseudorandom number generator
     private: std::mt19937 m_mt;
     /// Target object string
-    private: std::string target;
+    private: std::string target {"TARGET_OBJECT"};
 
     /// \brief Constructor
     public: Randomiser(const std::string & config);
 
+    /// \brief Apply batch randomisation
+    /// \param blocking Whether to wait for response
+    public: void randomise(bool blocking=true);
+
+    // Handle different properties
+
+    /// \brief Handle generic property; Meant to be overriden!
+    /// \param msg DR request message
+    /// \param property Random property
+    private: void apply(DRRequest & msg, RandomProperty & property);
+
+    /// \brief Handle ModelScale property
+    /// \param msg DR request message
+    /// \param property ModelScale random property
+    private: void apply(DRRequest & msg, ModelScale & property);
+
+    /// \brief Handle LinkMass property
+    /// \param msg DR request message
+    /// \param property LinkMass random property
+    private: void apply(DRRequest & msg, LinkMass & property);
+
+    /// \brief Handle FrictionCoefficient property
+    /// \param msg DR request message
+    /// \param property FrictionCoefficient random property
+    private: void apply(DRRequest & msg, FrictionCoefficient & property);
+
+    /// \brief Handle JointDampingCoefficient property
+    /// \param msg DR request message
+    /// \param property JointDampingCoefficient random property
+    private: void apply(DRRequest & msg, JointDampingCoefficient & property);
+
+    /// \brief Handle PGain property
+    /// \param msg DR request message
+    /// \param property PGain random property
+    private: void apply(DRRequest & msg, PGain & property);
+
+    /// \brief Handle JointLimit property
+    /// \param msg DR request message
+    /// \param property JointLimit random property
+    private: void apply(DRRequest & msg, JointLimit & property);
+
+    /// \brief Handle Gravity property
+    /// \param msg DR request message
+    /// \param property Gravity random property
+    private: void apply(DRRequest & msg, Gravity & property);
 
     // Public constants for yml config file
     // TODO - move to file?
@@ -406,11 +425,15 @@ class Randomiser
     public: static const char CFG_KP[];
     /// \brief Surface kd  yml field string
     public: static const char CFG_KD[];
+    /// \brief Controller type yml field string
+    public: static const char CFG_TYPE[];
     /// \brief P controller gain yml field string
     public: static const char CFG_P[];
 
     /// \brief Target object yml keyword string
     public: static const char CFG_TARGET_OBJ[];
+    /// \brief Position controller keyword string
+    public: static const char CFG_TYPE_POS[];
 };
 
 #endif

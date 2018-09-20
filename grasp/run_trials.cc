@@ -61,10 +61,14 @@ int main(int _argc, char **_argv)
     std::map<std::string, gazebo::transport::SubscriberPtr> subs;
     setupCommunications(node, pubs, subs);
     // Domain randomiser
-    Randomiser randomiser(config["randomiser_cfg"]);
+    Randomiser rand_api(config["randomiser_cfg"]);
     debugPrintTrace("Initialised randomiser.");
 
+
+    // DEBUG randomiser
+    rand_api.randomise();
     return 0;
+
 
     // Interface for hand plugin
     Interface interface;
