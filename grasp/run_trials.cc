@@ -39,7 +39,7 @@ int main(int _argc, char **_argv)
 
     // List of grasp targets
     std::vector<std::string> targets;
-    
+
     // YAML node for configs
     Config config;
     parseArgs(_argc, _argv, config);
@@ -60,10 +60,10 @@ int main(int _argc, char **_argv)
     std::map<std::string, gazebo::transport::PublisherPtr> pubs;
     std::map<std::string, gazebo::transport::SubscriberPtr> subs;
     setupCommunications(node, pubs, subs);
-    // Domain randomiser 
+    // Domain randomiser
     Randomiser randomiser(config["randomiser_cfg"]);
     debugPrintTrace("Initialised randomiser.");
-    
+
     return 0;
 
     // Interface for hand plugin

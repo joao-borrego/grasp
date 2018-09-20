@@ -70,7 +70,7 @@ class UniformSampler : public RandomSampler
 {
     /// \brief Uniform distribution
     public: std::uniform_real_distribution<double> dist;
- 
+
     /// \brief Uniform lower limit
     private: double a;
     /// \brief Uniform higher limit
@@ -139,20 +139,24 @@ class ModelScale : public RandomProperty
 /// \brief Link mass random property
 class LinkMass : public RandomProperty
 {
+    /// \brief List of affected models
+    std::vector<std::string> models;
     /// \brief List of affected links
     std::vector<std::string> links;
-    /// \brief Respective list of initial link masses 
+    /// \brief Respective list of initial link masses
     std::vector<double> masses;
 
     /// \brief Constructor
     /// \param sampler_ PRNG sampler
     /// \param additive_ Whether term is addictive or a scaling factor
+    /// \param models_ List of affected models
     /// \param links_ List of affected links
     /// \param masses_ Respective list of initial link masses
     /// \warning std::vectors params are moved inside instance!
         public: LinkMass(
         RandomSampler & sampler_,
         bool additive_,
+        std::vector<std::string> & models_,
         std::vector<std::string> & links_,
         std::vector<double> & masses_);
 
@@ -164,6 +168,8 @@ class LinkMass : public RandomProperty
 /// \brief Friction coefficients random property
 class FrictionCoefficient : public RandomProperty
 {
+    /// \brief List of affected models
+    std::vector<std::string> models;
     /// \brief List of affected links
     std::vector<std::string> links;
     /// \brief Respective list of initial mu1
@@ -178,6 +184,7 @@ class FrictionCoefficient : public RandomProperty
     /// \brief Constructor
     /// \param sampler_ PRNG sampler
     /// \param additive_ Whether term is addictive or a scaling factor
+    /// \param models_ List of affected models
     /// \param links_ List of affected links
     /// \param mu1_ List of respective mu1
     /// \param mu2_ List of respective mu2
@@ -187,6 +194,7 @@ class FrictionCoefficient : public RandomProperty
     public: FrictionCoefficient(
         RandomSampler & sampler_,
         bool additive_,
+        std::vector<std::string> & models_,
         std::vector<std::string> & links_,
         std::vector<double> & mu1_,
         std::vector<double> & mu2_,
@@ -201,6 +209,8 @@ class FrictionCoefficient : public RandomProperty
 /// \brief Joint damping coefficients random property
 class JointDampingCoefficient : public RandomProperty
 {
+    /// \brief List of affected models
+    std::vector<std::string> models;
     /// \brief List of affected joints
     std::vector<std::string> joints;
     /// \brief Respective list of initial damping coefficients
@@ -209,12 +219,14 @@ class JointDampingCoefficient : public RandomProperty
     /// \brief Constructor
     /// \param sampler_ PRNG sampler
     /// \param additive_ Whether term is addictive or a scaling factor
+    /// \param models_ List of affected models
     /// \param joints_ List of affected joints
     /// \param damping_ List of respective damping coefficients
     /// \warning std::vectors params are moved inside instance!
     public: JointDampingCoefficient(
         RandomSampler & sampler_,
         bool additive_,
+        std::vector<std::string> & models_,
         std::vector<std::string> & joints_,
         std::vector<double> & damping_);
 
@@ -226,6 +238,8 @@ class JointDampingCoefficient : public RandomProperty
 /// \brief P controller gains random property
 class PGain : public RandomProperty
 {
+    /// \brief List of affected models
+    std::vector<std::string> models;
     /// \brief List of affected joints
     std::vector<std::string> joints;
     /// \brief Respective list of initial P controller gains
@@ -234,12 +248,14 @@ class PGain : public RandomProperty
     /// \brief Constructor
     /// \param sampler_ PRNG sampler
     /// \param additive_ Whether term is addictive or a scaling factor
+    /// \param models_ List of affected models
     /// \param joints_ List of affected joints
     /// \param damping_ List of respective P controller gains
     /// \warning std::vectors params are moved inside instance!
     public: PGain(
         RandomSampler & sampler_,
         bool additive_,
+        std::vector<std::string> & models_,
         std::vector<std::string> & joints_,
         std::vector<double> & p_gains_);
 
@@ -251,6 +267,8 @@ class PGain : public RandomProperty
 /// \brief Joint limits random property
 class JointLimit : public RandomProperty
 {
+    /// \brief List of affected models
+    std::vector<std::string> models;
     /// \brief List of affected joints
     std::vector<std::string> joints;
     /// \brief Respective list of initial joint lower limits
@@ -261,6 +279,7 @@ class JointLimit : public RandomProperty
     /// \brief Constructor
     /// \param sampler_ PRNG sampler
     /// \param additive_ Whether term is addictive or a scaling factor
+    /// \param models_ List of affected models
     /// \param joints_ List of affected joints
     /// \param lower_ List of respective joint lower limits
     /// \param upper_ List of respective joint upper limits
@@ -268,6 +287,7 @@ class JointLimit : public RandomProperty
     public: JointLimit(
         RandomSampler & sampler_,
         bool additive_,
+        std::vector<std::string> & models_,
         std::vector<std::string> & joints_,
         std::vector<double> & lower_,
         std::vector<double> & upper_);
@@ -339,6 +359,7 @@ class Randomiser
     public: static const char CFG_JOINT_LIMIT[];
     /// \brief Gravity vector yml field string
     public: static const char CFG_GRAVITY[];
+
     /// \brief Distribution yml field string
     public: static const char CFG_DIST[];
     /// \brief Uniform distribution yml field string
@@ -356,18 +377,19 @@ class Randomiser
     /// \brief Gaussian distribution standard deviation yml field string
     public: static const char CFG_GAUSSIAN_STD[];
 
+    /// \brief Additive yml field string
+    public: static const char CFG_ADDITIVE[];
+    /// \brief Vector yml field string
+    public: static const char CFG_VECTOR[];
     /// \brief Target yml keyword string
     public: static const char CFG_TARGET[];
+
     /// \brief Model yml field string
     public: static const char CFG_MODEL[];
     /// \brief Link yml field string
     public: static const char CFG_LINK[];
     /// \brief Joints yml field string
     public: static const char CFG_JOINT[];
-    /// \brief Vector yml field string
-    public: static const char CFG_VECTOR[];
-    /// \brief Target object yml keyword string
-    public: static const char CFG_TARGET_OBJ[];
     /// \brief Link mass yml field string
     public: static const char CFG_MASS[];
     /// \brief Joint damping yml field string
@@ -376,8 +398,19 @@ class Randomiser
     public: static const char CFG_LOWER[];
     /// \brief Joint upper limit yml field string
     public: static const char CFG_UPPER[];
-    /// \brief Additive yml field string
-    public: static const char CFG_ADDITIVE[];
+    /// \brief Surface mu1 yml field string
+    public: static const char CFG_MU1[];
+    /// \brief Surface mu2 yml field string
+    public: static const char CFG_MU2[];
+    /// \brief Surface kp yml field string
+    public: static const char CFG_KP[];
+    /// \brief Surface kd  yml field string
+    public: static const char CFG_KD[];
+    /// \brief P controller gain yml field string
+    public: static const char CFG_P[];
+
+    /// \brief Target object yml keyword string
+    public: static const char CFG_TARGET_OBJ[];
 };
 
 #endif
