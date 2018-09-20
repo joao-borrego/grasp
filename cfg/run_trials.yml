@@ -1,0 +1,14 @@
+# General settings
+
+# Object dataset yml
+obj_cfg: data/datasets/kit.ds.yml
+# Grasp candidates directory
+grasp_cfg_dir: data/grasps/kit/
+# Dataset output directory
+out_trials_dir: data/trials/kit/
+# Robot config yml
+robot_cfg: cfg/robots.yml
+# Robot name
+robot: baxter
+# Randomiser config yml
+randomiser_cfg: cfg/randomiser.yml

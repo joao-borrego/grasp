@@ -29,9 +29,6 @@ set (msgs
   # Contact messages
   contact_request.proto
   contact_response.proto
-  # Domain randomization messages
-  model_cmd.proto
-  dr_request.proto
   # Message dependencies
   ${PROTOBUF_SOURCES}
 )

@@ -61,12 +61,3 @@ target_link_libraries(ContactSensorPlugin
     ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
 add_dependencies(ContactSensorPlugin
     grasp_msgs)
-
-# Domain Randomization Gazebo plugin
-add_library(DRPlugin SHARED
-    DRPlugin.cc)
-target_link_libraries(DRPlugin
-    grasp_msgs
-    ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
-add_dependencies(DRPlugin
-    grasp_msgs)

@@ -36,17 +36,17 @@ bool g_success  {false};
 
 int main(int _argc, char **_argv)
 {
+
     // List of grasp targets
     std::vector<std::string> targets;
 
-    // Command-line args
-    std::map<std::string, std::string> args;
-    std::string obj_cfg_dir, grasp_cfg_dir, out_img_dir, out_trials_dir, robot;
-    parseArgs(_argc, _argv,
-        obj_cfg_dir, grasp_cfg_dir, out_img_dir, out_trials_dir, robot);
+    // YAML node for configs
+    Config config;
+    parseArgs(_argc, _argv, config);
+    debugPrintTrace("Loaded configuration file.");
 
     // Obtain target objects
-    obtainTargets(targets, obj_cfg_dir);
+    obtainTargets(targets, config["obj_cfg"]);
     if (targets.empty()) {
         errorPrintTrace("No valid objects retrieved from file");
         exit(EXIT_FAILURE);
@@ -60,21 +60,16 @@ int main(int _argc, char **_argv)
     std::map<std::string, gazebo::transport::PublisherPtr> pubs;
     std::map<std::string, gazebo::transport::SubscriberPtr> subs;
     setupCommunications(node, pubs, subs);
+    // Domain randomiser
+    Randomiser randomiser(config["randomiser_cfg"]);
+    debugPrintTrace("Initialised randomiser.");
+
+    return 0;
+
     // Interface for hand plugin
     Interface interface;
-    // TODO - Create parameter
-    interface.init("grasp/config/robots.yml",robot);
-
-    // TODO - Add camera
-    // Spawn camera
-    /*
-    std::string camera_name("rgbd_camera");
-    std::string camera_filename = "model://" + camera_name;
-    ignition::math::Pose3d camera_pose(0,0,0.8,0,1.57,0);
-    spawnModelFromFilename(pubs["factory"], camera_pose, camera_filename);
-    pubs["camera"]->WaitForConnection();
-    debugPrintTrace("Camera connected");
-    */
+    interface.init(config["robot_cfg"],  config["robot"]);
+    debugPrintTrace("Initialised hand interface.");
 
     std::string model_filename;
 
@@ -83,10 +78,10 @@ int main(int _argc, char **_argv)
     {
         // Obtain candidate grasps
         model_filename = "model://" + model_name;
-        std::string cfg_file(grasp_cfg_dir +
-            model_name + "." + robot + ".grasp.yml");
+        std::string grasp_file(config["grasp_cfg_dir"] +
+            model_name + "." + config["robot"] + ".grasp.yml");
         std::vector<Grasp> grasps;
-        obtainGrasps(cfg_file, robot, grasps);
+        obtainGrasps(grasp_file, config["robot"], grasps);
         if (grasps.empty()) {
             errorPrintTrace("No valid grasps retrieved from file");
             continue;
@@ -114,6 +109,7 @@ int main(int _argc, char **_argv)
         // Perform trials
         for (auto candidate : grasps)
         {
+            // TODO - Use randomiser
             tryGrasp(candidate, interface, pubs, model_name);
             // Place target in rest pose
             resetTarget(pubs["target"]);
@@ -124,18 +120,7 @@ int main(int _argc, char **_argv)
         removeModel(pubs["request"], model_name);
     }
 
-    // TODO - Render RGBD camera frames
-
-    // Capture and render frame
-    /*
-    captureFrame(pubs["camera"]);
-    while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
-    */
-
     // Cleanup
-    /*
-    removeModel(pubs["request"], camera_name);
-    */
     interface.setPose(g_safe_pose);
 
     // Shut down
@@ -148,40 +133,22 @@ const std::string getUsage(const char* argv_0)
 {
     return \
         "usage:   " + std::string(argv_0) + " [options]\n" +
-        "options: -d <object dataset yaml>\n"  +
-        "         -g <grasp candidates yaml>\n" +
-        "         -i <image output directory>\n" +
-        "         -o <dataset output directory>\n" +
-        "         -r <robot>\n";
+        "options: -c <config yml>";
 }
 
 //////////////////////////////////////////////////
-void parseArgs(
-    int argc,
-    char** argv,
-    std::string & obj_cfg_dir,
-    std::string & grasp_cfg_dir,
-    std::string & out_img_dir,
-    std::string & out_trials_dir,
-    std::string & robot)
+void parseArgs(int argc, char** argv, Config & config)
 {
     int opt;
-    bool d, g, i, o, r;
+    bool c;
+    std::string config_path;
 
-    while ((opt = getopt(argc,argv,"d: g: i: o: r:")) != EOF)
+    while ((opt = getopt(argc,argv,"c:")) != EOF)
     {
         switch (opt)
         {
-            case 'd':
-                d = true; obj_cfg_dir = optarg;    break;
-            case 'g':
-                g = true; grasp_cfg_dir = optarg;  break;
-            case 'i':
-                i = true; out_img_dir = optarg;    break;
-            case 'o':
-                o = true; out_trials_dir = optarg; break;
-            case 'r':
-                r = true; robot = optarg; break;
+            case 'c':
+                c = true; config_path = optarg; break;
             case '?':
                 std::cerr << getUsage(argv[0]);
             default:
@@ -190,17 +157,28 @@ void parseArgs(
         }
     }
 
-    if (!d || !g || !i || !o || !r) {
+    if (!c) {
         std::cerr << getUsage(argv[0]);
         exit(EXIT_FAILURE);
     }
 
+    try
+    {
+        YAML::Node node = YAML::LoadFile(config_path);
+        config["obj_cfg"]        = node["obj_cfg"].as<std::string>();
+        config["grasp_cfg_dir"]  = node["grasp_cfg_dir"].as<std::string>();
+        config["out_trials_dir"] = node["out_trials_dir"].as<std::string>();
+        config["robot_cfg"]      = node["robot_cfg"].as<std::string>();
+        config["robot"]          = node["robot"].as<std::string>();
+        config["randomiser_cfg"] = node["randomiser_cfg"].as<std::string>();
+    }
+    catch (YAML::Exception& yamlException)
+    {
+        std::cerr << "Unable to parse " << config_path << "\n";
+    }
+
     debugPrint("Parameters:\n" <<
-        "   Object dataset yaml      '" << obj_cfg_dir << "'\n" <<
-        "   Grasp candidates yaml    '" << grasp_cfg_dir << "'\n" <<
-        "   Image output directory   '" << out_img_dir << "'\n" <<
-        "   Dataset output directory '" << out_trials_dir << "'\n" <<
-        "   Robot                    '" << robot << "'\n");
+        "   Configuration yml        '" << config_path << "'\n");
 }
 
 /////////////////////////////////////////////////
@@ -218,8 +196,6 @@ void setupCommunications(
     subs["target"] = node->Subscribe(TARGET_RES_TOPIC, onTargetResponse);
     pubs["contact"] = node->Advertise<ContactRequest>(CONTACT_REQ_TOPIC);
     subs["contact"] = node->Subscribe(CONTACT_RES_TOPIC, onContactResponse);
-    pubs["camera"] = node->Advertise<CameraRequest>(CAMERA_REQ_TOPIC);
-    subs["camera"] = node->Subscribe(CAMERA_RES_TOPIC, onCameraResponse);
     pubs["factory"] = node->Advertise<gazebo::msgs::Factory>(FACTORY_TOPIC);
     pubs["request"] = node->Advertise<gazebo::msgs::Request>(REQUEST_TOPIC);
 

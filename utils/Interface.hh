@@ -32,11 +32,6 @@
 // DEBUG
 #include <iostream>
 
-/// Position control
-#define POSITION grasp::msgs::Target::POSITION
-/// Velocity control
-#define VELOCITY grasp::msgs::Target::VELOCITY
-
 /// Topic monitored by hand plugin for incoming requests
 #define HAND_PLUGIN_TOPIC "~/hand"
 
@@ -46,6 +41,13 @@
 /// \brief Hand interface
 class Interface
 {
+    /// TODO
+    public: static const grasp::msgs::Target_Type POSITION = 
+        grasp::msgs::Target::POSITION;
+    /// TODO
+    public: static const grasp::msgs::Target_Type VELOCITY =
+        grasp::msgs::Target::VELOCITY;
+
     /// TODO
     private: std::string robot_name;
     /// TODO
