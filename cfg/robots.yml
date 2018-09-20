@@ -41,7 +41,7 @@ shadow:
 # Baxter parallel plates gripper
 baxter:
   name: baxter_gripper
-  path: models/baxter_gripper.urdf
+  path: models/baxter_standard_basic.urdf
   palm_normal: "0 0 -1"
   grasp_configurations:
     pinch:

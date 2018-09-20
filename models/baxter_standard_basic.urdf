@@ -169,7 +169,7 @@
       </geometry>
     </collision>
   </link>
-    <joint name="virtual_rr_joint" type="continuous">
+  <joint name="virtual_rr_joint" type="continuous">
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <axis xyz="1 0 0"/>
     <parent link="virtual_rp_link"/>

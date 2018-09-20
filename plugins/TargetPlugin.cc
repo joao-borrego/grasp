@@ -39,6 +39,9 @@ TargetPlugin::TargetPlugin() : ModelPlugin(),
 /////////////////////////////////////////////////
 TargetPlugin::~TargetPlugin()
 {
+    this->update_connection.reset();
+    this->reset_connection.reset();
+       
     gzmsg << "[TargetPlugin] Unloaded plugin." << std::endl;
 }
 

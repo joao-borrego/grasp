@@ -64,12 +64,6 @@ int main(int _argc, char **_argv)
     Randomiser rand_api(config["randomiser_cfg"]);
     debugPrintTrace("Initialised randomiser.");
 
-
-    // DEBUG randomiser
-    rand_api.randomise();
-    return 0;
-
-
     // Interface for hand plugin
     Interface interface;
     interface.init(config["robot_cfg"],  config["robot"]);
@@ -83,7 +77,7 @@ int main(int _argc, char **_argv)
         // Obtain candidate grasps
         model_filename = "model://" + model_name;
         std::string grasp_file(config["grasp_cfg_dir"] +
-            model_name + "." + config["robot"] + ".grasp.yml");
+            model_name + ".grasp.yml");
         std::vector<Grasp> grasps;
         obtainGrasps(grasp_file, config["robot"], grasps);
         if (grasps.empty()) {
@@ -110,10 +104,14 @@ int main(int _argc, char **_argv)
         }
         debugPrint(" Done!\n");
 
+        rand_api.setTargetName(model_name);
+
         // Perform trials
         for (auto candidate : grasps)
         {
-            // TODO - Use randomiser
+            // Randomise scene
+            rand_api.randomise();
+            // Try grasp
             tryGrasp(candidate, interface, pubs, model_name);
             // Place target in rest pose
             resetTarget(pubs["target"]);
@@ -221,10 +219,7 @@ void obtainTargets(std::vector<std::string> & targets,
         YAML::Node config = YAML::LoadFile(file_name);
         for (const auto & kv_pair : config)
         {
-            // TODO? - Use proper object for target object data
             name = kv_pair.second["name"].as<std::string>();
-            //mesh = kv_pair.second["mesh"].as<std::string>();
-            //path = kv_pair.second["path"].as<std::string>();
             targets.push_back(name);
         }
     }

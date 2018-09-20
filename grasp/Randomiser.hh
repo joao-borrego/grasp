@@ -35,8 +35,11 @@ typedef gap::msgs::ModelCmd ModelCmdMsg;
 // Random samplers
 
 /// \brief Abstract PRNG sampler class
-class RandomSampler
+class IRandomSampler
 {
+    /// \brief Destructor
+    public: virtual ~IRandomSampler() {};
+
     /// \brief Gets random sample
     /// \param gen Pseudo random number generator
     /// \returns Random sample
@@ -44,7 +47,7 @@ class RandomSampler
 };
 
 /// \brief Gaussian distribution sampler
-class GaussianSampler : public RandomSampler
+class GaussianSampler : public IRandomSampler
 {
     /// \brief Gaussian distribution
     public: std::normal_distribution<double> dist;
@@ -61,14 +64,17 @@ class GaussianSampler : public RandomSampler
         double mean,
         double std);
 
+    /// \brief Destructor
+    public: ~GaussianSampler() override {};
+
     /// \brief Gets random sample
     /// \param gen Pseudo random number generator
     /// \returns Random sample
-    public: double sample(std::mt19937 & gen);
+    public: double sample(std::mt19937 & gen) override;
 };
 
 /// \brief Uniform/Log-uniform distribution sampler
-class UniformSampler : public RandomSampler
+class UniformSampler : public IRandomSampler
 {
     /// \brief Uniform distribution
     public: std::uniform_real_distribution<double> dist;
@@ -89,10 +95,13 @@ class UniformSampler : public RandomSampler
         double b,
         bool log_uniform=false);
 
+    /// \brief Destructor
+    public: ~UniformSampler() override {};
+
     /// \brief Gets random sample
     /// \param gen Pseudo random number generator
     /// \returns Random sample
-    public: double sample(std::mt19937 & gen);
+    public: double sample(std::mt19937 & gen) override;
 };
 
 // Random properties
@@ -101,16 +110,31 @@ class UniformSampler : public RandomSampler
 class RandomProperty
 {
     /// \brief Random distribution sampler
-    public: RandomSampler sampler;
+    public: IRandomSampler *sampler;
     /// \brief Whether term is additive or a scaling factor
     public: bool additive;
+
+    /// \brief Target object yml keyword string
+    public: static const char CFG_TARGET_OBJ[];
 
     /// \brief Constructor
     /// \param sampler_ PRNG sampler
     /// \param additive_ Whether term is addictive or a scaling factor
     public: RandomProperty(
-        RandomSampler & sampler_,
+        IRandomSampler *sampler_,
         bool additive_);
+
+    /// \brief Destructor
+    public: virtual ~RandomProperty();
+
+    /// \brief Fill DR request message
+    /// \param msg DR request message
+    /// \param api DR interface
+    /// \param gen PRNG
+    public: virtual void fillMsg(DRRequest & msg,
+        DRInterface & api,
+        std::mt19937 & gen,
+        std::string & target);
 };
 
 /// \brief Model scale random property
@@ -125,9 +149,21 @@ class ModelScale : public RandomProperty
     /// \param models_ List of affected models
     /// \warning std::vectors params are moved inside instance!
     public: ModelScale(
-        RandomSampler & sampler_,
+        IRandomSampler *sampler_,
         bool additive_,
         std::vector<std::string> & models_);
+
+    /// \brief Destructor
+    public: ~ModelScale() override {};
+
+    /// \brief Fill DR request message
+    /// \param msg DR request message
+    /// \param api DR interface
+    /// \param gen PRNG
+    public: void fillMsg(DRRequest & msg,
+        DRInterface & api,
+        std::mt19937 & gen,
+        std::string & target) override;
 };
 
 /// \brief Link mass random property
@@ -147,12 +183,24 @@ class LinkMass : public RandomProperty
     /// \param links_ List of affected links
     /// \param masses_ Respective list of initial link masses
     /// \warning std::vectors params are moved inside instance!
-        public: LinkMass(
-        RandomSampler & sampler_,
+    public: LinkMass(
+        IRandomSampler *sampler_,
         bool additive_,
         std::vector<std::string> & models_,
         std::vector<std::string> & links_,
         std::vector<double> & masses_);
+
+    /// \brief Destructor
+    public: ~LinkMass() override {};
+
+    /// \brief Fill DR request message
+    /// \param msg DR request message
+    /// \param api DR interface
+    /// \param gen PRNG
+    public: void fillMsg(DRRequest & msg,
+        DRInterface & api,
+        std::mt19937 & gen,
+        std::string & target) override;
 };
 
 /// \brief Friction coefficients random property
@@ -182,7 +230,7 @@ class FrictionCoefficient : public RandomProperty
     /// \param kd_ List of respective kd
     /// \warning std::vectors params are moved inside instance!
     public: FrictionCoefficient(
-        RandomSampler & sampler_,
+        IRandomSampler *sampler_,
         bool additive_,
         std::vector<std::string> & models_,
         std::vector<std::string> & links_,
@@ -190,6 +238,18 @@ class FrictionCoefficient : public RandomProperty
         std::vector<double> & mu2_,
         std::vector<double> & kp_,
         std::vector<double> & kd_);
+
+    /// \brief Destructor
+    public: ~FrictionCoefficient() override {};
+
+    /// \brief Fill DR request message
+    /// \param msg DR request message
+    /// \param api DR interface
+    /// \param gen PRNG
+    public: void fillMsg(DRRequest & msg,
+        DRInterface & api,
+        std::mt19937 & gen,
+        std::string & target) override;
 };
 
 /// \brief Joint damping coefficients random property
@@ -210,11 +270,23 @@ class JointDampingCoefficient : public RandomProperty
     /// \param damping_ List of respective damping coefficients
     /// \warning std::vectors params are moved inside instance!
     public: JointDampingCoefficient(
-        RandomSampler & sampler_,
+        IRandomSampler *sampler_,
         bool additive_,
         std::vector<std::string> & models_,
         std::vector<std::string> & joints_,
         std::vector<double> & damping_);
+
+    /// \brief Destructor
+    public: ~JointDampingCoefficient() override {};
+
+    /// \brief Fill DR request message
+    /// \param msg DR request message
+    /// \param api DR interface
+    /// \param gen PRNG
+    public: void fillMsg(DRRequest & msg,
+        DRInterface & api,
+        std::mt19937 & gen,
+        std::string & target) override;
 };
 
 /// \brief P controller gains random property
@@ -238,12 +310,24 @@ class PGain : public RandomProperty
     /// \param damping_ List of respective P controller gains
     /// \warning std::vectors params are moved inside instance!
     public: PGain(
-        RandomSampler & sampler_,
+        IRandomSampler *sampler_,
         bool additive_,
         std::vector<std::string> & models_,
         std::vector<std::string> & joints_,
         std::vector<int> & types_,
         std::vector<double> & p_gains_);
+
+    /// \brief Destructor
+    public: ~PGain() override {};
+
+    /// \brief Fill DR request message
+    /// \param msg DR request message
+    /// \param api DR interface
+    /// \param gen PRNG
+    public: void fillMsg(DRRequest & msg,
+        DRInterface & api,
+        std::mt19937 & gen,
+        std::string & target) override;
 };
 
 /// \brief Joint limits random property
@@ -267,12 +351,24 @@ class JointLimit : public RandomProperty
     /// \param upper_ List of respective joint upper limits
     /// \warning std::vectors params are moved inside instance!
     public: JointLimit(
-        RandomSampler & sampler_,
+        IRandomSampler *sampler_,
         bool additive_,
         std::vector<std::string> & models_,
         std::vector<std::string> & joints_,
         std::vector<double> & lower_,
         std::vector<double> & upper_);
+
+    /// \brief Destructor
+    public: ~JointLimit() override {};
+
+    /// \brief Fill DR request message
+    /// \param msg DR request message
+    /// \param api DR interface
+    /// \param gen PRNG
+    public: void fillMsg(DRRequest & msg,
+        DRInterface & api,
+        std::mt19937 & gen,
+        std::string & target) override;
 };
 
 /// \brief Joint limits random property
@@ -287,9 +383,21 @@ class Gravity : public RandomProperty
     /// \param gravity_ Initial gravity vector
     /// \warning std::vectors params are moved inside instance!
     public: Gravity(
-        RandomSampler & sampler_,
+        IRandomSampler *sampler_,
         bool additive_,
         std::vector<double> & gravity_);
+
+    /// \brief Destructor
+    public: ~Gravity() override {};
+
+    /// \brief Fill DR request message
+    /// \param msg DR request message
+    /// \param api DR interface
+    /// \param gen PRNG
+    public: void fillMsg(DRRequest & msg,
+        DRInterface & api,
+        std::mt19937 & gen,
+        std::string & target) override;
 };
 
 
@@ -298,13 +406,12 @@ class Gravity : public RandomProperty
 /// \brief Randomiser representation class
 class Randomiser
 {
-
     // Private attributes
 
     /// DRInterface API
     private: DRInterface api;
     /// \brief Randomised properties
-    private: std::vector<RandomProperty> properties;
+    private: std::vector<RandomProperty*> properties;
     /// Mersenne Twister pseudorandom number generator
     private: std::mt19937 m_mt;
     /// Target object string
@@ -313,51 +420,16 @@ class Randomiser
     /// \brief Constructor
     public: Randomiser(const std::string & config);
 
+    /// \brief Destructor
+    public: ~Randomiser();
+
     /// \brief Apply batch randomisation
     /// \param blocking Whether to wait for response
     public: void randomise(bool blocking=true);
 
-    // Handle different properties
-
-    /// \brief Handle generic property; Meant to be overriden!
-    /// \param msg DR request message
-    /// \param property Random property
-    private: void apply(DRRequest & msg, RandomProperty & property);
-
-    /// \brief Handle ModelScale property
-    /// \param msg DR request message
-    /// \param property ModelScale random property
-    private: void apply(DRRequest & msg, ModelScale & property);
-
-    /// \brief Handle LinkMass property
-    /// \param msg DR request message
-    /// \param property LinkMass random property
-    private: void apply(DRRequest & msg, LinkMass & property);
-
-    /// \brief Handle FrictionCoefficient property
-    /// \param msg DR request message
-    /// \param property FrictionCoefficient random property
-    private: void apply(DRRequest & msg, FrictionCoefficient & property);
-
-    /// \brief Handle JointDampingCoefficient property
-    /// \param msg DR request message
-    /// \param property JointDampingCoefficient random property
-    private: void apply(DRRequest & msg, JointDampingCoefficient & property);
-
-    /// \brief Handle PGain property
-    /// \param msg DR request message
-    /// \param property PGain random property
-    private: void apply(DRRequest & msg, PGain & property);
-
-    /// \brief Handle JointLimit property
-    /// \param msg DR request message
-    /// \param property JointLimit random property
-    private: void apply(DRRequest & msg, JointLimit & property);
-
-    /// \brief Handle Gravity property
-    /// \param msg DR request message
-    /// \param property Gravity random property
-    private: void apply(DRRequest & msg, Gravity & property);
+    /// \brief Sets target object name
+    /// \param target New target object name
+    public: void setTargetName(const std::string & target);
 
     // Public constants for yml config file
     // TODO - move to file?
@@ -429,9 +501,6 @@ class Randomiser
     public: static const char CFG_TYPE[];
     /// \brief P controller gain yml field string
     public: static const char CFG_P[];
-
-    /// \brief Target object yml keyword string
-    public: static const char CFG_TARGET_OBJ[];
     /// \brief Position controller keyword string
     public: static const char CFG_TYPE_POS[];
 };

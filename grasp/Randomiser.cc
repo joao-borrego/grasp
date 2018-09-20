@@ -44,9 +44,9 @@ const char Randomiser::CFG_KP[]            = "kp";
 const char Randomiser::CFG_KD[]            = "kd";
 const char Randomiser::CFG_TYPE[]          = "type";
 const char Randomiser::CFG_P[]             = "p";
-
-const char Randomiser::CFG_TARGET_OBJ[]    = "TARGET_OBJECT";
 const char Randomiser::CFG_TYPE_POS[]      = "position";
+
+const char RandomProperty::CFG_TARGET_OBJ[]  = "TARGET_OBJECT";
 
 //////////////////////////////////////////////////
 Randomiser::Randomiser(const std::string & config):
@@ -57,7 +57,7 @@ Randomiser::Randomiser(const std::string & config):
     // Distribution type
     std::string d_type;
     // Random sampler
-    RandomSampler sampler;
+    IRandomSampler *sampler;
     // Distribution parameters
     double a=0, b=0, mean=0, std=0;
     // Whether distribution is loguniform or uniform
@@ -71,8 +71,8 @@ Randomiser::Randomiser(const std::string & config):
     try
     {
         YAML::Node root = YAML::LoadFile(config);
-        YAML::Node properties = root[CFG_PROPERTIES];
-        for (const auto & property : properties)
+        YAML::Node properties_node = root[CFG_PROPERTIES];
+        for (const auto & property : properties_node)
         {
             p_type = property.first.as<std::string>();
             // TODO - Find decent solution for this?
@@ -88,7 +88,7 @@ Randomiser::Randomiser(const std::string & config):
                     [d_type][CFG_GAUSSIAN_MEAN].as<double>();
                 std = root[CFG_PROPERTIES][p_type][CFG_DIST]
                     [d_type][CFG_GAUSSIAN_MEAN].as<double>();
-                sampler = GaussianSampler(mean, std);
+                sampler = new GaussianSampler(mean, std);
             }
             else if (d_type == CFG_UNIFORM || d_type == CFG_LOG_UNIFORM)
             {
@@ -97,7 +97,7 @@ Randomiser::Randomiser(const std::string & config):
                 b = root[CFG_PROPERTIES][p_type][CFG_DIST]
                     [d_type][CFG_UNIFORM_B].as<double>();
                 log_uniform = (d_type == CFG_LOG_UNIFORM);
-                sampler = UniformSampler(a, b, log_uniform);
+                sampler = new UniformSampler(a, b, log_uniform);
             }
             else
             {
@@ -116,7 +116,7 @@ Randomiser::Randomiser(const std::string & config):
                     YAML::Node target = root[CFG_PROPERTIES][p_type][CFG_TARGET][i];
                     models.push_back(target[CFG_MODEL].as<std::string>());
                 }
-                ModelScale property(sampler, additive, models);
+                properties.push_back(new ModelScale(sampler, additive, models));
             }
             else if (p_type == CFG_LINK_MASS)
             {
@@ -131,7 +131,8 @@ Randomiser::Randomiser(const std::string & config):
                     links.push_back(target[CFG_LINK].as<std::string>());
                     masses.push_back(target[CFG_MASS].as<double>());
                 }
-                LinkMass property(sampler, additive, models, links, masses);
+                properties.push_back( new LinkMass(sampler, additive,
+                    models, links, masses));
             }
             else if (p_type == CFG_FRICTION)
             {
@@ -152,8 +153,8 @@ Randomiser::Randomiser(const std::string & config):
                     kp.push_back(target[CFG_KP].as<double>());
                     kd.push_back(target[CFG_KD].as<double>());
                 }
-                FrictionCoefficient property(sampler, additive, models, links,
-                    mu1, mu2, kp, kd);
+                properties.push_back(new FrictionCoefficient(sampler, additive,
+                    models, links, mu1, mu2, kp, kd));
             }
             else if (p_type == CFG_JOINT_DAMPING)
             {
@@ -168,8 +169,8 @@ Randomiser::Randomiser(const std::string & config):
                     joints.push_back(target[CFG_JOINT].as<std::string>());
                     damping.push_back(target[CFG_DAMPING].as<double>());
                 }
-                JointDampingCoefficient property(sampler, additive, models, joints,
-                    damping);
+                properties.push_back(new JointDampingCoefficient(sampler, additive,
+                    models, joints, damping));
             }
             else if (p_type == CFG_P_GAIN)
             {
@@ -189,8 +190,8 @@ Randomiser::Randomiser(const std::string & config):
                         DRInterface::POSITION : DRInterface::VELOCITY;
                     types.push_back(type);
                 }
-                PGain property(sampler, additive, models, joints,
-                    types, p_gains);
+                properties.push_back(new PGain( sampler, additive,
+                    models, joints, types, p_gains));
             }
             else if (p_type == CFG_JOINT_LIMIT)
             {
@@ -207,15 +208,15 @@ Randomiser::Randomiser(const std::string & config):
                     lower.push_back(target[CFG_LOWER].as<double>());
                     upper.push_back(target[CFG_UPPER].as<double>());
                 }
-                JointLimit property(sampler, additive, models, joints,
-                    lower, upper);
+                properties.push_back(new JointLimit(sampler, additive,
+                    models, joints, lower, upper));
             }
             else if (p_type == CFG_GRAVITY)
             {
                 std::vector<double> gravity;
                 YAML::Node target = root[CFG_PROPERTIES][p_type][CFG_VECTOR];
                 gravity = target.as<std::vector<double>>();
-                Gravity property(sampler, additive, gravity);
+                properties.push_back(new Gravity(sampler, additive, gravity));
             }
         }
     }
@@ -228,154 +229,212 @@ Randomiser::Randomiser(const std::string & config):
 }
 
 //////////////////////////////////////////////////
+Randomiser::~Randomiser()
+{
+    for (int i = 0; i < properties.size(); i++)
+    {
+        delete properties[i];
+    }
+    properties.clear();
+}
+
+//////////////////////////////////////////////////
 void Randomiser::randomise(bool blocking)
 {
     DRRequest msg = this->api.createRequest();
     for (auto & property : properties)
     {
-        apply(msg, property);
+        property->fillMsg(msg, api, m_mt, target);
     }
-    this->api.publish(msg, false);
+    this->api.publish(msg, true);
 }
 
 //////////////////////////////////////////////////
-void Randomiser::apply(DRRequest & msg, RandomProperty & property)
+void Randomiser::setTargetName(const std::string & target_)
+{
+    target = target_;
+}
+
+//////////////////////////////////////////////////
+void RandomProperty::fillMsg(DRRequest & msg,
+    DRInterface & api,
+    std::mt19937 & gen,
+    std::string & target)
 {
     // Meant to be overriden
 }
 
 //////////////////////////////////////////////////
-void Randomiser::apply(DRRequest & msg, ModelScale & property)
+void ModelScale::fillMsg(DRRequest & msg,
+    DRInterface & api,
+    std::mt19937 & gen,
+    std::string & target)
 {
-    int num_targets = property.models.size();
+    int num_targets = models.size();
     for (int i = 0; i < num_targets; i++)
     {
-        std::string model = property.models.at(i);
+        std::string model = models.at(i);
         // Replace target object keyword with actual object name
-        if (model == CFG_TARGET_OBJ) model = this->target;
+        if (model == CFG_TARGET_OBJ) model = target;
 
-        double sample = property.sampler.sample(this->m_mt);
-        double scale = (property.additive)? 1.0 + sample : sample;
+        double sample = sampler->sample(gen);
+        double scale = (additive)? 1.0 + sample : sample;
         ignition::math::Vector3d vector(scale, scale, scale);
-        this->api.addModelScale(msg, model, vector);
+        api.addModelScale(msg, model, vector);
+
+        debugPrintTrace("Apply scale " << vector << " to model " << model);
     }
 }
 
 //////////////////////////////////////////////////
-void Randomiser::apply(DRRequest & msg, LinkMass & property)
+void LinkMass::fillMsg(DRRequest & msg,
+    DRInterface & api,
+    std::mt19937 & gen,
+    std::string & target)
 {
-    int num_targets = property.models.size();
+    int num_targets = models.size();
     for (int i = 0; i < num_targets; i++)
     {
-        std::string model = property.models.at(i);
-        if (model == CFG_TARGET_OBJ) model = this->target;
+        std::string model = models.at(i);
+        if (model == CFG_TARGET_OBJ) model = target;
 
-        double i_mass = property.masses.at(i);
-        double sample = property.sampler.sample(this->m_mt);
-        double mass = (property.additive)? (i_mass + sample) : (i_mass * sample);
-        this->api.addLinkMass(msg, model, property.links.at(i), mass);
+        double i_mass = masses.at(i);
+        double sample = sampler->sample(gen);
+        double mass = (additive)? (i_mass + sample) : (i_mass * sample);
+        api.addLinkMass(msg, model, links.at(i), mass);
+
+        debugPrintTrace("Apply mass " << mass << " to " << links.at(i));
     }
 }
 
 //////////////////////////////////////////////////
-void Randomiser::apply(DRRequest & msg, FrictionCoefficient & property)
+void FrictionCoefficient::fillMsg(DRRequest & msg,
+    DRInterface & api,
+    std::mt19937 & gen,
+    std::string & target)
 {
-    int num_targets = property.models.size();
+    int num_targets = models.size();
     for (int i = 0; i < num_targets; i++)
     {
-        std::string model = property.models.at(i);
-        if (model == CFG_TARGET_OBJ) model = this->target;
+        std::string model = models.at(i);
+        if (model == CFG_TARGET_OBJ) model = target;
         
         // TODO - Which parameters are relevant?
     }
 }
 
 //////////////////////////////////////////////////
-void Randomiser::apply(DRRequest & msg, JointDampingCoefficient & property)
+void JointDampingCoefficient::fillMsg(DRRequest & msg,
+    DRInterface & api,
+    std::mt19937 & gen,
+    std::string & target)
 {
-    int num_targets = property.models.size();
+    int num_targets = models.size();
     for (int i = 0; i < num_targets; i++)
     {
-        std::string model = property.models.at(i);
-        std::string joint = property.joints.at(i);
-        double i_damp = property.damping.at(i);
-        double sample = property.sampler.sample(this->m_mt);
-        double damp = (property.additive)? (i_damp + sample) : (i_damp * sample);
-        this->api.addJoint(msg, model, joint,
+        std::string model = models.at(i);
+        std::string joint = joints.at(i);
+        double i_damp = damping.at(i);
+        double sample = sampler->sample(gen);
+        double damp = (additive)? (i_damp + sample) : (i_damp * sample);
+        api.addJoint(msg, model, joint,
             /* lower = */ INFINITY, /* upper = */ INFINITY,
             /* effort = */ INFINITY, /* velocity = */ INFINITY, 
             /* damping = */ damp, /* friction = */ INFINITY);
+
+        debugPrintTrace("Add damping " << damp << " to joint " << joint);
     }
 }
 
 //////////////////////////////////////////////////
-void Randomiser::apply(DRRequest & msg, PGain & property)
+void PGain::fillMsg(DRRequest & msg,
+    DRInterface & api,
+    std::mt19937 & gen,
+    std::string & target)
 {
-    int num_targets = property.models.size();
+    int num_targets = models.size();
     for (int i = 0; i < num_targets; i++)
     {
-        std::string model = property.models.at(i);
-        std::string joint = property.joints.at(i);
-        int type = property.types.at(i);
-        double i_p_gain = property.p_gains.at(i);
-        double sample = property.sampler.sample(this->m_mt);
-        double p_gain = (property.additive)? (i_p_gain + sample) : (i_p_gain * sample);
-        this->api.addModelCmd(msg, model, joint, type, p_gain,
+        std::string model = models.at(i);
+        std::string joint = joints.at(i);
+        int type = types.at(i);
+        double i_p_gain = p_gains.at(i);
+        double sample = sampler->sample(gen);
+        double p_gain = (additive)? (i_p_gain + sample) : (i_p_gain * sample);
+        api.addModelCmd(msg, model, joint, type, p_gain,
             /* i_gain = */ INFINITY, /* d_gain = */ INFINITY);
+
+        debugPrintTrace("Add p gain " << p_gain << " to joint " << joint);
     }
 }
 
 //////////////////////////////////////////////////
-void Randomiser::apply(DRRequest & msg, JointLimit & property)
+void JointLimit::fillMsg(DRRequest & msg,
+    DRInterface & api,
+    std::mt19937 & gen,
+    std::string & target)
 {
-    int num_targets = property.models.size();
-
+    int num_targets = models.size();
     for (int i = 0; i < num_targets; i++)
     {
-        std::string model = property.models.at(i);
-        std::string joint = property.joints.at(i);
-        double i_lower = property.lower.at(i);
-        double i_upper = property.upper.at(i);
-        double sample_l = property.sampler.sample(this->m_mt);
-        double sample_u = property.sampler.sample(this->m_mt);
-        double lower = (property.additive)? (i_lower + sample_l) : (i_lower * sample_l);
-        double upper = (property.additive)? (i_upper + sample_u) : (i_upper * sample_u);
-        this->api.addJoint(msg, model, joint,
+        std::string model = models.at(i);
+        std::string joint = joints.at(i);
+        double i_lower = lower.at(i);
+        double i_upper = upper.at(i);
+        double sample_l = sampler->sample(gen);
+        double sample_u = sampler->sample(gen);
+        double lower = (additive)? (i_lower + sample_l) : (i_lower * sample_l);
+        double upper = (additive)? (i_upper + sample_u) : (i_upper * sample_u);
+        api.addJoint(msg, model, joint,
             /* lower = */ lower, /* upper = */ upper,
             /* effort = */ INFINITY, /* velocity = */ INFINITY, 
             /* damping = */ INFINITY, /* friction = */ INFINITY);
+
+        debugPrintTrace("Add limits (" << lower << "," << upper
+            << ") to joint " << joint);
     }
 }
 
 //////////////////////////////////////////////////
-void Randomiser::apply(DRRequest & msg, Gravity & property)
+void Gravity::fillMsg(DRRequest & msg,
+    DRInterface & api,
+    std::mt19937 & gen,
+    std::string & target)
 {
-    double x = property.gravity.at(0);
-    double y = property.gravity.at(1);
-    double z = property.gravity.at(2);
-    double sample_x = property.sampler.sample(this->m_mt);
-    double sample_y = property.sampler.sample(this->m_mt);
-    double sample_z = property.sampler.sample(this->m_mt);
-    double gravity_x = (property.additive)?  (x + sample_x) : (x * sample_x);
-    double gravity_y = (property.additive)?  (y + sample_y) : (y * sample_y);
-    double gravity_z = (property.additive)?  (z + sample_z) : (z * sample_z);
+    double x = gravity.at(0);
+    double y = gravity.at(1);
+    double z = gravity.at(2);
+    double sample_x = sampler->sample(gen);
+    double sample_y = sampler->sample(gen);
+    double sample_z = sampler->sample(gen);
+    double gravity_x = (additive)?  (x + sample_x) : (x * sample_x);
+    double gravity_y = (additive)?  (y + sample_y) : (y * sample_y);
+    double gravity_z = (additive)?  (z + sample_z) : (z * sample_z);
     ignition::math::Vector3d vector(gravity_x, gravity_y, gravity_z);
-    this->api.addGravity(msg, vector);
+    api.addGravity(msg, vector);
+
+    debugPrintTrace("Add gravity " << vector);
 }
 
 // Random properties
 
 //////////////////////////////////////////////////
 RandomProperty::RandomProperty(
-    RandomSampler & sampler_,
+    IRandomSampler *sampler_,
     bool additive_) :
         sampler(sampler_), additive(additive_)
 {
 }
 
 //////////////////////////////////////////////////
+RandomProperty::~RandomProperty()
+{
+    delete sampler;
+}
+
+//////////////////////////////////////////////////
 ModelScale::ModelScale(
-    RandomSampler & sampler_,
+    IRandomSampler *sampler_,
     bool additive_,
     std::vector<std::string> & models_):
         RandomProperty(sampler_, additive_),
@@ -385,7 +444,7 @@ ModelScale::ModelScale(
 
 //////////////////////////////////////////////////
 LinkMass::LinkMass(
-    RandomSampler & sampler_,
+    IRandomSampler *sampler_,
     bool additive_,
     std::vector<std::string> & models_,
     std::vector<std::string> & links_,
@@ -398,7 +457,7 @@ LinkMass::LinkMass(
 
 //////////////////////////////////////////////////
 FrictionCoefficient::FrictionCoefficient(
-    RandomSampler & sampler_,
+    IRandomSampler *sampler_,
     bool additive_,
     std::vector<std::string> & models_,
     std::vector<std::string> & links_,
@@ -415,7 +474,7 @@ FrictionCoefficient::FrictionCoefficient(
 
 //////////////////////////////////////////////////
 JointDampingCoefficient::JointDampingCoefficient(
-    RandomSampler & sampler_,
+    IRandomSampler *sampler_,
     bool additive_,
     std::vector<std::string> & models_,
     std::vector<std::string> & joints_,
@@ -428,7 +487,7 @@ JointDampingCoefficient::JointDampingCoefficient(
 
 //////////////////////////////////////////////////
 PGain::PGain(
-    RandomSampler & sampler_,
+    IRandomSampler *sampler_,
     bool additive_,
     std::vector<std::string> & models_,
     std::vector<std::string> & joints_,
@@ -442,7 +501,7 @@ PGain::PGain(
 
 //////////////////////////////////////////////////
 JointLimit::JointLimit(
-    RandomSampler & sampler_,
+    IRandomSampler *sampler_,
     bool additive_,
     std::vector<std::string> & models_,
     std::vector<std::string> & joints_,
@@ -456,7 +515,7 @@ JointLimit::JointLimit(
 
 //////////////////////////////////////////////////
 Gravity::Gravity(
-    RandomSampler & sampler_,
+    IRandomSampler *sampler_,
     bool additive_,
     std::vector<double> & gravity_):
         RandomProperty(sampler_, additive_),
@@ -467,7 +526,7 @@ Gravity::Gravity(
 // Random samplers
 
 //////////////////////////////////////////////////
-double RandomSampler::sample(std::mt19937 & gen)
+double IRandomSampler::sample(std::mt19937 & gen)
 {
     return 0.0;
 }
