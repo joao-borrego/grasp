@@ -87,7 +87,7 @@ Randomiser::Randomiser(const std::string & config):
                 mean = root[CFG_PROPERTIES][p_type][CFG_DIST]
                     [d_type][CFG_GAUSSIAN_MEAN].as<double>();
                 std = root[CFG_PROPERTIES][p_type][CFG_DIST]
-                    [d_type][CFG_GAUSSIAN_MEAN].as<double>();
+                    [d_type][CFG_GAUSSIAN_STD].as<double>();
                 sampler = new GaussianSampler(mean, std);
             }
             else if (d_type == CFG_UNIFORM || d_type == CFG_LOG_UNIFORM)
