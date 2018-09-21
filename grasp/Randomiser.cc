@@ -545,8 +545,14 @@ double GaussianSampler::sample(std::mt19937 & gen)
 
 //////////////////////////////////////////////////
 UniformSampler::UniformSampler(double a_, double b_, bool log_uniform_):
-    a(a_), b(b_), dist(a_, b_), log_uniform(log_uniform_)
+    log_uniform(log_uniform_)
 {
+    if (log_uniform) {
+        a = std::log(a_); b = std::log(b_);
+    } else {
+        a = a_; b = b_;
+    }
+    dist = std::uniform_real_distribution<double>(a,b);
 }
 
 //////////////////////////////////////////////////
