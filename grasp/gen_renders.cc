@@ -74,7 +74,7 @@ int main(int _argc, char **_argv)
         std::string cfg_file(grasp_cfg_dir +
             model_name + "." + robot + ".grasp.yml");
         std::vector<Grasp> grasps;
-        obtainGrasps(cfg_file, robot, grasps);
+        Grasp::loadFromYml(cfg_file, robot, grasps);
         if (grasps.empty()) {
             errorPrintTrace("No valid grasps retrieved from file");
             continue;
@@ -98,8 +98,9 @@ int main(int _argc, char **_argv)
         {
 
             // Move camera to grasp candidate pose
+            // TODO - Compute camera pose depending on camera TF
             // TODO - Add offset and reference frame rotation
-            camera_pose = ref_cam + candidate.getPose(rest_pose);
+            //camera_pose = ref_cam + candidate.getPose(rest_pose);
             moveCamera(pubs["camera"], camera_pose);
             // Ensure camera was moved
             while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}

@@ -46,7 +46,6 @@ add_dependencies(gen_rest_poses
 # Run grasping trials script
 add_executable (run_trials
   run_trials.cc
-  gen_grasps.cc
   object_utils.cc
   Grasp.cc
   Randomiser.cc)
@@ -64,7 +63,6 @@ add_dependencies(run_trials
 # Obtain camera frame per grasp trial
 add_executable (gen_renders
   gen_renders.cc
-  gen_grasps.cc
   object_utils.cc
   Grasp.cc)
 target_link_libraries(gen_renders

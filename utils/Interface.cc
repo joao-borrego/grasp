@@ -65,6 +65,10 @@ bool Interface::init(
             debugPrintTrace("Grasp configuration " << grasps.back().name << 
                 " : " << grasps.back().pre.size() << " joints.");
         }
+        // Read transformation matrix from pose
+        std::vector<double> p = config[robot]["pose"].as<std::vector<double>>();
+        ignition::math::Pose3d pose(p.at(0),p.at(1),p.at(2),p.at(3),p.at(4),p.at(5));
+        t_base_gripper = ignition::math::Matrix4d(pose);
     }
     catch (YAML::Exception& yamlException)
     {
@@ -72,6 +76,12 @@ bool Interface::init(
         return false;
     }
     return true;
+}
+
+/////////////////////////////////////////////////
+ignition::math::Matrix4d Interface::getTransformBaseGripper()
+{
+    return t_base_gripper;
 }
 
 /////////////////////////////////////////////////

@@ -38,7 +38,7 @@
     <parent link="world"/>
     <child link="virtual_px_link"/>
     <limit effort="25.0" lower="-1.0" upper="1.0" velocity="25.0"/>
-    <dynamics damping="30.0"/>
+    <dynamics damping="100.0" friction="100.0"/>
   </joint>
   <link name="virtual_px_link">
     <visual>
@@ -65,7 +65,7 @@
     <parent link="virtual_px_link"/>
     <child link="virtual_py_link"/>
     <limit effort="25.0" lower="-1.0" upper="1.0" velocity="25.0"/>
-    <dynamics damping="30.0"/>
+    <dynamics damping="100.0" friction="100.0"/>
   </joint>
   <link name="virtual_py_link">
     <visual>
@@ -92,7 +92,7 @@
     <parent link="virtual_py_link"/>
     <child link="virtual_pz_link"/>
     <limit effort="25.0" lower="0.0" upper="1.0" velocity="25.0"/>
-    <dynamics damping="30.0"/>
+    <dynamics damping="10.0" friction="1.0"/>
   </joint>
   <link name="virtual_pz_link">
     <visual>
@@ -121,7 +121,7 @@
     <parent link="virtual_pz_link"/>
     <child link="virtual_ry_link"/>
     <limit effort="25.0" velocity="25.0"/>
-    <dynamics damping="10.0" friction="20.0"/>
+    <dynamics damping="100.0" friction="100.0"/>
   </joint>
   <link name="virtual_ry_link">
     <visual>
@@ -148,7 +148,7 @@
     <parent link="virtual_ry_link"/>
     <child link="virtual_rp_link"/>
     <limit effort="25.0" velocity="25.0"/>
-    <dynamics damping="10.0" friction="20.0"/>
+    <dynamics damping="100.0" friction="100.0"/>
   </joint>
   <link name="virtual_rp_link">
     <visual>
@@ -175,7 +175,7 @@
     <parent link="virtual_rp_link"/>
     <child link="gripper_base"/>
     <limit effort="25.0" velocity="25.0"/>
-    <dynamics damping="10.0" friction="20.0"/>
+    <dynamics damping="100.0" friction="100.0"/>
   </joint>
 
   <!-- Base of end effector -->

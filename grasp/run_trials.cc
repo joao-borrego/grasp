@@ -27,7 +27,7 @@ std::mutex g_finished_mutex;
 /// Global hand resting pose
 ignition::math::Pose3d g_safe_pose  {0,0,0.9,0,0,0};
 /// Global object pose
-ignition::math::Pose3d g_obj_pose   {0,0,0.1,0,0,0};
+ignition::math::Pose3d g_obj_pose   {0.5,0.5,0.1,0,0,0};
 /// Global object resting pose
 ignition::math::Pose3d g_rest_pose  {0,0,0,0,0,0};
 
@@ -79,7 +79,7 @@ int main(int _argc, char **_argv)
         std::string grasp_file(config["grasp_cfg_dir"] +
             model_name + ".grasp.yml");
         std::vector<Grasp> grasps;
-        obtainGrasps(grasp_file, config["robot"], grasps);
+        Grasp::loadFromYml(grasp_file, config["robot"], grasps);
         if (grasps.empty()) {
             errorPrintTrace("No valid grasps retrieved from file");
             continue;
@@ -110,7 +110,7 @@ int main(int _argc, char **_argv)
         for (auto candidate : grasps)
         {
             // Randomise scene
-            rand_api.randomise();
+            //rand_api.randomise();
             // Try grasp
             tryGrasp(candidate, interface, pubs, model_name);
             // Place target in rest pose
@@ -273,7 +273,10 @@ void tryGrasp(
     std::vector<std::string> ground {"ground_plane"};
 
     // Get pose in world frame, given the object pose
-    ignition::math::Pose3d hand_pose = grasp.getPose(g_rest_pose);
+    ignition::math::Pose3d hand_pose;
+    ignition::math::Pose3d t_gripper_object = grasp.t_gripper_object.Pose();
+    ignition::math::Pose3d t_base_gripper = interface.getTransformBaseGripper().Pose();
+    hand_pose = t_base_gripper.Inverse() + t_gripper_object + g_rest_pose;
 
     debugPrintTrace("\tCandidate " << hand_pose);
     if (hand_pose.Pos().Z() < 0) {
@@ -283,10 +286,10 @@ void tryGrasp(
 
     // Teleport hand to grasp candidate pose
     // Add the resting position transformation first
-    interface.setPose(g_safe_pose, 0.0001);
+    interface.setPose(g_safe_pose, 0.1);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
     debugPrintTrace("\tHand moved to safe pose");
-    interface.openFingers(0.001);
+    interface.openFingers(1.0, true);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
     debugPrintTrace("\tHand opened fingers");
     interface.setPose(hand_pose, 0.00001);
@@ -305,12 +308,12 @@ void tryGrasp(
     debugPrintTrace("\tNo collisions detected");
 
     // Close fingers
-    interface.closeFingers(1.0);
+    interface.closeFingers(4.0);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
     debugPrintTrace("\tFingers closed");
 
     // Lift object
-    interface.raiseHand(5.0);
+    interface.raiseHand(2.0);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
     debugPrintTrace("\tHand lifted");
 

@@ -10,25 +10,37 @@
 
 // Gazebo
 #include <gazebo/gazebo_client.hh>
+// Open YAML config files
+#include "yaml-cpp/yaml.h"
+// Debug streams
+#include "debug.hh"
 
 /// \brief Grasp representation class
 class Grasp
 {
     // Public attributes
 
-    /// Homogenous transform matrix to object reference frame
-    public: ignition::math::Matrix4d tf_matrix;
-    /// Robot endpoint pose in world reference frame
-    public: ignition::math::Pose3d pose;
+    /// Grasp candidate name
+    public: std::string name;
+    /// Homogenous transform matrix from gripper to object reference frame
+    public: ignition::math::Matrix4d t_gripper_object;
     /// Grasp outcome
     public: bool success {false};
 
+    /// \brief Deafult constructor
+    public: Grasp();
     /// \brief Constructor
-    public: Grasp(ignition::math::Matrix4d _tf_matrix);
+    /// \param t_gripper_object Transform matrix from gripper to object frame
+    public: Grasp(ignition::math::Matrix4d t_gripper_object_);
 
-    /// TODO
-    public: ignition::math::Pose3d getPose(
-        ignition::math::Pose3d pose_ref);
+    /// \brief Load set of grasps from file
+    /// \param file_name Input file name
+    /// \param robot Target robot name
+    /// \param grasps Set of grasps retrieved from file
+    public: static void loadFromYml(
+        const std::string & file_name,
+        const std::string & robot,
+        std::vector<Grasp> & grasps);
 };
 
 #endif

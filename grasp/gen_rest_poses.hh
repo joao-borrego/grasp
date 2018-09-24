@@ -27,7 +27,6 @@
 #include "MessageTypes.hh"
 #include "MessageTopics.hh"
 // Tools
-#include "gen_grasps.hh"
 #include "object_utils.hh"
 // Debug streams
 #include "debug.hh"

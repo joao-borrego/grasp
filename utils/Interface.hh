@@ -41,25 +41,27 @@
 /// \brief Hand interface
 class Interface
 {
-    /// TODO
+    /// Position controller target
     public: static const grasp::msgs::Target_Type POSITION = 
         grasp::msgs::Target::POSITION;
-    /// TODO
+    /// Velocity controller target
     public: static const grasp::msgs::Target_Type VELOCITY =
         grasp::msgs::Target::VELOCITY;
 
-    /// TODO
+    /// Name of robot instance in Gazebo
     private: std::string robot_name;
-    /// TODO
+    /// Gazebo communication node
     private: gazebo::transport::NodePtr node;
-    /// TODO
+    /// Gazebo publisher
     private: gazebo::transport::PublisherPtr pub;
-    /// TODO
+    /// Name of actuated robot joints
     private: std::vector<std::string> joints;
-    /// TODO
+    /// Map with (name: value) states of each actuated joint
     private: std::map<std::string, double> state;
-    /// TODO
+    /// Set of grasp shapes
     private: std::vector<GraspShape> grasps;
+    /// Rigid transform from base link to gripper frame
+    private: ignition::math::Matrix4d t_base_gripper;
 
     /// \brief Constructor
     public: Interface();
@@ -70,9 +72,17 @@ class Interface
         const std::string & config_file,
         const std::string & robot);
 
+    // Getters
+
     /// \brief Gets robot name
     /// \return Robot name string
     public: std::string getRobotName();
+
+    /// \brief Get T base to gripper frame
+    /// \return Rigid transform from base link to gripper frame
+    public: ignition::math::Matrix4d getTransformBaseGripper();
+
+    // API
 
     /// \brief Sets hand pose
     /// \detailed Sets hand pose using virtual joints

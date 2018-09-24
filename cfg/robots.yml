@@ -1,22 +1,40 @@
 # Robotic hand parameters
 
+# Baxter parallel plates gripper
+baxter:
+  name: baxter_gripper
+  path: models/baxter_standard_basic.urdf
+  # Alternative representation for rigid transform
+  palm_offset: 0.02
+  palm_normal: "0 0 -1"
+  # Rigid transform from base link to gripper reference frame
+  pose: [0.0,0.0,0.0,0.0,0.0,0.0]
+  # Grasp joint configurations
+  grasp_configurations:
+    pinch:
+      gripper_l_finger_joint: {pre: 0.020833, post: 0.0}
+      gripper_r_finger_joint: {pre: -0.020833, post: 0.0}
+
 # Vizzy's right hand
 vizzy:
   name: vizzy_right_hand
   path: models/vizzy_right_hand.urdf
   palm_normal: "0 -1 0"
+  palm_offset: 0.01
+  pose: [0.0,0.0,0.0,0.0,0.0,0.0]
   grasp_configurations:
     cylindrical:
       r_thumb_phal_1_joint: {pre: 0.0, post: 0.570796}
       r_ind_phal_1_joint:   {pre: 0.0, post: 1.570796}
       r_med_phal_1_joint:   {pre: 0.0, post: 1.570796}
-  palm_offset: 0.01
 
 # Shadow robotics dexterous (right) hand
 shadow:
   name: shadowhand
   path: models/shadowhand.urdf
   palm_normal: "0 1 0"
+  palm_offset: 0.01
+  pose: [0.0,0.0,0.0,0.0,0.0,0.0]
   grasp_configurations:
     cylindrical:
       rh_FFJ4: {pre: 0.0, post: 1.570796}
@@ -36,15 +54,3 @@ shadow:
       rh_THJ4: {pre: 0.0, post: 1.570796}
       rh_THJ3: {pre: 0.0, post: 1.570796}
       rh_THJ2: {pre: 0.0, post: 1.570796}
-  palm_offset: 0.01
-
-# Baxter parallel plates gripper
-baxter:
-  name: baxter_gripper
-  path: models/baxter_standard_basic.urdf
-  palm_normal: "0 0 -1"
-  grasp_configurations:
-    pinch:
-      gripper_l_finger_joint: {pre: 0.020833, post: 0.0}
-      gripper_r_finger_joint: {pre: -0.020833, post: 0.0}
-  palm_offset: 0.02
