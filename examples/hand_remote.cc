@@ -19,14 +19,14 @@ int main(int _argc, char **_argv)
     gazebo::client::setup(_argc, _argv);
 
     // Interface
-    Interface io;
+    Interface api;
     // Init interface with config file
-    if (!io.init(config_file, robot)) {
-        errorPrintTrace("Exiting...");
+    if (!api.init(config_file, robot)) {
+        std::cout << "Exiting..." << std::endl;
         exit(EXIT_FAILURE);
     }
     // Main loop
-    io.loop();
+    api.loop();
 
     // Shut down
     gazebo::client::shutdown();
@@ -73,8 +73,8 @@ void parseArgs(
         exit(EXIT_FAILURE);
     }
 
-    debugPrint("Parameters:\n" <<
+    std::cout << "Parameters:\n" <<
         "   Robot configuration yaml '" << cfg_dir << "'\n" <<
-        "   Robot                    '" << robot << "'\n");
+        "   Robot                    '" << robot << "'\n" << std::endl;
 }
 

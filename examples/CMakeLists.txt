@@ -1,7 +1,6 @@
 # 2.8.8 required to use PROTOBUF_IMPORT_DIRS
 cmake_minimum_required(VERSION 2.8.8 FATAL_ERROR)
 FIND_PACKAGE( Boost COMPONENTS system REQUIRED )
-set (CMAKE_CXX_FLAGS "-g -Wall -std=c++11")
 
 # Find packages
 include (FindPkgConfig)
@@ -27,26 +26,31 @@ link_directories(${PROJECT_BINARY_DIR}/msgs)
 include_directories(${PROJECT_BINARY_DIR}/utils)
 link_directories(${PROJECT_BINARY_DIR}/utils)
 
-# Shared library for hand plugin interface
-add_library(grasp_interface SHARED
-    GraspShape.cc
-    Interface.cc
-    utils.cc
-)
-target_link_libraries(grasp_interface
-    grasp_msgs)
-add_dependencies(grasp_interface
+# Hand plugin example client
+add_executable (hand_remote
+    hand_remote.cc)
+target_link_libraries(hand_remote
+    grasp_msgs
+    grasp_interface
+    ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES}
+    ${YAML_CPP_LIBRARIES})
+add_dependencies(hand_remote
+    grasp_msgs
+    grasp_interface)
+
+# Target plugin example client
+add_executable (target_example target_example.cc)
+target_link_libraries(target_example
+    grasp_msgs
+    ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
+add_dependencies(target_example
     grasp_msgs)
 
-# Configure interface header
-configure_file (${PROJECT_SOURCE_DIR}/utils/GraspShape.hh
-  ${CMAKE_CURRENT_BINARY_DIR}/GraspShape.hh )
-configure_file (${PROJECT_SOURCE_DIR}/utils/Interface.hh
-  ${CMAKE_CURRENT_BINARY_DIR}/Interface.hh )
-configure_file (${PROJECT_SOURCE_DIR}/utils/utils.hh
-  ${CMAKE_CURRENT_BINARY_DIR}/utils.hh )
-
-# Configure header-only debug utilities
-configure_file (${PROJECT_SOURCE_DIR}/utils/debug.hh.in
-  ${CMAKE_CURRENT_BINARY_DIR}/debug.hh )
+# Contact world plugin example client
+add_executable (contacts_example contacts_example.cc)
+target_link_libraries(contacts_example
+    grasp_msgs
+    ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES})
+add_dependencies(contacts_example
+    grasp_msgs)
 

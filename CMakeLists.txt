@@ -32,10 +32,12 @@ add_subdirectory(msgs)
 # Gazebo plugins
 add_subdirectory(plugins)
 # Utilities
-# TODO - Migrate to TEST
 add_subdirectory(utils)
 # Main scripts
 add_subdirectory(grasp)
+
+# Examples
+add_subdirectory(examples)
 
 # Documentation
 add_subdirectory(doc)

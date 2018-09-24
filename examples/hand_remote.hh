@@ -16,8 +16,6 @@
 #include <gazebo/transport/transport.hh>
 #include <gazebo/msgs/msgs.hh>
 
-// Debug streams
-#include "debug.hh"
 // Interface
 #include "Interface.hh"
 
