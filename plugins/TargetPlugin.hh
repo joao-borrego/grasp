@@ -64,7 +64,7 @@ namespace gazebo {
     // Forward declaration of private data class
     class TargetPluginPrivate;
 
-    // TODO
+    /// \brief Grasp target plugin class
     class TargetPlugin : public ModelPlugin
     {
         // Private attributes

@@ -82,6 +82,7 @@ void TargetPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 void TargetPlugin::onUpdate()
 {
     bool reply_pose = false;
+    bool reset_aux = false;
     TargetResponse msg;
     double epsilon;
 
@@ -127,7 +128,7 @@ void TargetPlugin::onUpdate()
         {
             reset = false;
             msg.set_type(RES_POSE);
-            this->onReset();
+            reset_aux = true;
             reply_pose = true;
         }
     }
@@ -139,12 +140,18 @@ void TargetPlugin::onUpdate()
         msg.set_allocated_pose(pose_msg);
         this->data_ptr->pub->Publish(msg);
     }
+
+    if (reset_aux)
+    {
+        this->onReset();
+    }
 }
 
 /////////////////////////////////////////////////
 void TargetPlugin::onReset()
 {
-    //std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+    std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
+
     this->model->SetWorldPose(this->init_pose);
     gzdbg << "Model reset to pose " << init_pose << std::endl;
 }
@@ -155,25 +162,22 @@ void TargetPlugin::onRequest(TargetRequestPtr &_msg)
     if (_msg->has_type())
     {
         int type = _msg->type();
+        std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
         if (type == REQ_GET_POSE)
         {
-            std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
             this->get_pose = true;
         }
         else if (type == REQ_SET_POSE)
         {
-            std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
             this->set_pose = true;
             this->new_pose = msgs::ConvertIgn(_msg->pose());
         }
         else if (type == REQ_GET_REST_POSE)
         {
-            std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
             this->update_rest_pose = true;
         }
         else if (type == REQ_RESET)
         {
-            std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
             this->reset = true;
         }
     }
