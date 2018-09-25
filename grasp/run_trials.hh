@@ -27,6 +27,8 @@
 #include "MessageTypes.hh"
 // Grasp representation
 #include "Grasp.hh"
+// Rest pose utils
+#include "RestPose.hh"
 // Interface for hand plugin
 #include "Interface.hh"
 // Tools
@@ -193,9 +195,6 @@ void closeFingers(gazebo::transport::PublisherPtr pub,
 /// TODO
 void liftHand(gazebo::transport::PublisherPtr pub,
     double timeout=-1);
-
-/// TODO
-void getTargetPose(gazebo::transport::PublisherPtr pub, bool rest);
 
 /// \brief Resets target object to rest pose
 /// \param pub Publisher to target's topic

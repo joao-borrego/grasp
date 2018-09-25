@@ -49,6 +49,7 @@ add_executable (run_trials
   run_trials.cc
   object_utils.cc
   Grasp.cc
+  RestPose.cc
   Randomiser.cc)
 target_link_libraries(run_trials
   grasp_msgs

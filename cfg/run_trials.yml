@@ -4,6 +4,8 @@
 obj_cfg: data/datasets/kit/reduced_kit.ds.yml
 # Grasp candidates directory
 grasp_cfg_dir: data/datasets/kit/grasps/
+# Rest poses directory
+rest_cfg_dir: data/datasets/kit/rest/
 # Dataset output directory
 out_trials_dir: data/datasets/kit/trials/
 # Robot config yml
