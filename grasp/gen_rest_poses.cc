@@ -25,8 +25,6 @@ int main(int _argc, char **_argv)
 {
     // List of grasp targets
     std::vector<std::string> targets;
-    // List of output rest poses
-    std::vector<ignition::math::Pose3d> rest_poses;
 
     // Command-line args
     std::map<std::string, std::string> args;
@@ -55,6 +53,9 @@ int main(int _argc, char **_argv)
     // For each target object
     for (auto const & model_name : targets)
     {
+        // List of output rest poses
+        std::vector<ignition::math::Pose3d> rest_poses;
+
         // Spawn object
         model_filename = "model://" + model_name;
         spawnModelFromFilename(pubs["factory"], init_pose, model_filename);
@@ -72,15 +73,16 @@ int main(int _argc, char **_argv)
         debugPrintTrace("Rest pose: " << g_rest_pose);
 
         // Store object rest pose
-        rest_poses.push_back(g_rest_pose);
+        rest_poses.push_back(g_rest_pose);        
+        std::string out_file = out_rest_dir + "/" + model_name + ".rest.yml"; 
+        RestPose::writeToYml(out_file, model_name, rest_poses);
 
         // Cleanup
         removeModel(pubs["request"], model_name);
+        rest_poses.clear();
         // Prevent spawning next object without first removing current
         waitMs(500);
     }
-
-    writeRestPoses(out_rest_dir, targets, rest_poses);
 
     // Shut down
     gazebo::client::shutdown();
@@ -176,47 +178,6 @@ void obtainTargets(std::vector<std::string> & targets,
         std::cerr << "Unable to parse " << file_name << "\n";
     }
     debugPrintTrace("Found " << targets.size() << " objects in " << file_name);
-}
-
-/////////////////////////////////////////////////
-void writeRestPoses(
-    std::string & output,
-    std::vector<std::string> & targets,
-    std::vector<ignition::math::Pose3d> & poses)
-{
-    YAML::Node root;
-    unsigned int size = targets.size();
-
-    if (size != poses.size()) {
-        errorPrintTrace("Size mismatch: # targets and # rest poses");
-        exit(EXIT_FAILURE);
-    }
-
-    // TODO - Write to output
-    std::ostringstream init_os;
-    init_os << INIT_POSE;
-    std::string init_pose = init_os.str();
-
-    // Build YAML node
-    for (unsigned int i = 0; i < size; i++)
-    {
-        root[targets.at(i)]["rest"][0] = poses.at(i).Pos().X();
-        root[targets.at(i)]["rest"][1] = poses.at(i).Pos().Y();
-        root[targets.at(i)]["rest"][2] = poses.at(i).Pos().Z();
-        root[targets.at(i)]["rest"][3] = poses.at(i).Rot().Roll();
-        root[targets.at(i)]["rest"][4] = poses.at(i).Rot().Pitch();
-        root[targets.at(i)]["rest"][5] = poses.at(i).Rot().Yaw();
-    }
-
-    // Write output to file
-    std::ofstream fout(output);
-    if (!fout) {
-        errorPrintTrace("Could write output to " << output);
-    } else {
-        fout << root;
-        debugPrintTrace("All rest poses written to " << output);
-    }
-
 }
 
 /////////////////////////////////////////////////

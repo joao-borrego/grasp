@@ -35,6 +35,7 @@ link_directories(${PROJECT_BINARY_DIR}/utils)
 # Obtain target object resting pose script
 add_executable (gen_rest_poses
   gen_rest_poses.cc
+  RestPose.cc
   object_utils.cc)
 target_link_libraries(gen_rest_poses
   grasp_msgs
@@ -48,6 +49,7 @@ add_executable (run_trials
   run_trials.cc
   object_utils.cc
   Grasp.cc
+  RestPose.cc
   Randomiser.cc)
 target_link_libraries(run_trials
   grasp_msgs

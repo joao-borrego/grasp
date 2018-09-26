@@ -26,6 +26,8 @@
 // Custom messages
 #include "MessageTypes.hh"
 #include "MessageTopics.hh"
+// Write rest poses to file
+#include "RestPose.hh"
 // Tools
 #include "object_utils.hh"
 // Debug streams
@@ -85,12 +87,6 @@ void setupCommunications(
 /// TODO
 void obtainTargets(std::vector<std::string> & targets,
     const std::string & file_name);
-
-/// TODO
-void writeRestPoses(
-    std::string & output,
-    std::vector<std::string> & targets,
-    std::vector<ignition::math::Pose3d> & poses);
 
 /// \brief Requests target object rest pose
 /// \param pub Publisher to target's topic
