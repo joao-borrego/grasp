@@ -17,9 +17,9 @@
       <!-- PID controller parameters -->
       <controllers>
         <!-- PID parameters for real hand joints -->
-        <real type="position" p="30.0" i="4.0" d="5.0"/>
+        <real type="position" p="70.0" i="0.01" d="0.0"/>
         <!-- PID parameters for virtual joints -->
-        <virtual type="position" p="30.0" i="10.0" d="5.0"/>
+        <virtual type="position" p="15.0" i="0.01" d="0.0"/>
       </controllers>
       <!-- Constraints -->
       <gravity>0</gravity>
@@ -38,7 +38,7 @@
     <parent link="world"/>
     <child link="virtual_px_link"/>
     <limit effort="25.0" lower="-1.0" upper="1.0" velocity="25.0"/>
-    <dynamics damping="100.0" friction="100.0"/>
+    <dynamics damping="500.0" friction="200.0"/>
   </joint>
   <link name="virtual_px_link">
     <visual>
@@ -65,7 +65,7 @@
     <parent link="virtual_px_link"/>
     <child link="virtual_py_link"/>
     <limit effort="25.0" lower="-1.0" upper="1.0" velocity="25.0"/>
-    <dynamics damping="100.0" friction="100.0"/>
+    <dynamics damping="500.0" friction="200.0"/>
   </joint>
   <link name="virtual_py_link">
     <visual>
@@ -92,7 +92,7 @@
     <parent link="virtual_py_link"/>
     <child link="virtual_pz_link"/>
     <limit effort="25.0" lower="0.0" upper="1.0" velocity="25.0"/>
-    <dynamics damping="10.0" friction="1.0"/>
+    <dynamics damping="30.0" friction="2.0"/>
   </joint>
   <link name="virtual_pz_link">
     <visual>
@@ -121,7 +121,7 @@
     <parent link="virtual_pz_link"/>
     <child link="virtual_ry_link"/>
     <limit effort="25.0" velocity="25.0"/>
-    <dynamics damping="100.0" friction="100.0"/>
+    <dynamics damping="500.0" friction="200.0"/>
   </joint>
   <link name="virtual_ry_link">
     <visual>
@@ -148,7 +148,7 @@
     <parent link="virtual_ry_link"/>
     <child link="virtual_rp_link"/>
     <limit effort="25.0" velocity="25.0"/>
-    <dynamics damping="100.0" friction="100.0"/>
+    <dynamics damping="500.0" friction="200.0"/>
   </joint>
   <link name="virtual_rp_link">
     <visual>
@@ -175,7 +175,7 @@
     <parent link="virtual_rp_link"/>
     <child link="gripper_base"/>
     <limit effort="25.0" velocity="25.0"/>
-    <dynamics damping="100.0" friction="100.0"/>
+    <dynamics damping="500.0" friction="200.0"/>
   </joint>
 
   <!-- Base of end effector -->
@@ -333,7 +333,7 @@
     <axis xyz="0 1 0"/>
     <parent link="gripper_base"/>
     <child link="gripper_l_finger"/>
-    <limit effort="20.0" lower="0.0" upper="0.020833" velocity="5.0"/>
+    <limit effort="100.0" lower="0.0" upper="0.028833" velocity="5.0"/>
     <dynamics damping="0.7" friction="0.0"/>
   </joint>
   <joint name="gripper_r_finger_joint" type="prismatic">
@@ -341,7 +341,7 @@
     <axis xyz="0 1 0"/>
     <parent link="gripper_base"/>
     <child link="gripper_r_finger"/>
-    <limit effort="20.0" lower="-0.020833" upper="0.0" velocity="5.0"/>
+    <limit effort="100.0" lower="-0.028833" upper="0.0" velocity="5.0"/>
     <dynamics damping="0.7" friction="0.0"/>
     <!--
     <mimic joint="gripper_l_finger_joint" multiplier="-1.0"/>

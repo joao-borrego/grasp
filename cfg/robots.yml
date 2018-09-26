@@ -8,12 +8,12 @@ baxter:
   palm_offset: 0.02
   palm_normal: "0 0 -1"
   # Rigid transform from base link to gripper reference frame
-  pose: [0.0,0.0,0.0,0.0,0.0,0.0]
+  pose: [-0.005,0.0,-0.07,0.0,0.0,0.0]
   # Grasp joint configurations
   grasp_configurations:
     pinch:
-      gripper_l_finger_joint: {pre: 0.020833, post: 0.0}
-      gripper_r_finger_joint: {pre: -0.020833, post: 0.0}
+      gripper_l_finger_joint: {pre: 0.028833, post: 0.0}
+      gripper_r_finger_joint: {pre: -0.028833, post: 0.0}
 
 # Vizzy's right hand
 vizzy:
