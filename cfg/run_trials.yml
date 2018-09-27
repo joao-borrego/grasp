@@ -1,7 +1,7 @@
 # General settings
 
 # Object dataset yml
-obj_cfg: data/datasets/kit/kit.ds.yml
+obj_cfg: data/datasets/kit/reduced_kit.ds.yml
 # Grasp candidates directory
 grasp_cfg_dir: data/datasets/kit/grasps/
 # Rest poses directory

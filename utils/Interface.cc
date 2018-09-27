@@ -113,7 +113,7 @@ void Interface::reset()
 }
 
 /////////////////////////////////////////////////
-void Interface::openFingers(double timeout, bool force)
+void Interface::openFingers(double timeout, bool set_position)
 {
     grasp::msgs::Hand msg;
     // TODO allow grasp to be chosen
@@ -125,24 +125,41 @@ void Interface::openFingers(double timeout, bool force)
         target->set_joint(pair.first);
         target->set_value(pair.second);
     }
-    if (timeout > 0) { msg.set_timeout(timeout); }
-    if (force)       { msg.set_force_target(true); }
+    if (timeout > 0)    { msg.set_timeout(timeout); }
+    if (set_position)   { msg.set_force_target(true); }
     pub->Publish(msg);
 }
 
 /////////////////////////////////////////////////
-void Interface::closeFingers(double timeout)
+void Interface::closeFingers(double timeout, bool apply_force)
 {
     grasp::msgs::Hand msg;
     // TODO allow grasp to be chosen
     GraspShape grasp = grasps.back();
-    for (auto const & pair : grasp.post)
+    
+    if (apply_force)
     {
-        grasp::msgs::Target *target = msg.add_pid_targets();
-        target->set_type(POSITION);
-        target->set_joint(pair.first);
-        target->set_value(pair.second);
+        for (auto const & pair : grasp.pre)
+        {
+            grasp::msgs::Target *target = msg.add_pid_targets();
+            target->set_joint(pair.first);
+            target->set_type(FORCE);
+            // If target is positive apply constant regular
+            // force along positive direction, else negative
+            target->set_value((pair.second < 0)? 20 : -20);
+        }
     }
+    else
+    {
+        for (auto const & pair : grasp.post)
+        {
+            grasp::msgs::Target *target = msg.add_pid_targets();
+            target->set_joint(pair.first);
+            target->set_type(POSITION);
+            target->set_value(pair.second);   
+        }
+    }
+
     if (timeout > 0) { msg.set_timeout(timeout); }
     pub->Publish(msg);
 }

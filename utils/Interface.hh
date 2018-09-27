@@ -41,6 +41,9 @@
 /// \brief Hand interface
 class Interface
 {
+    /// Direct force/torque application
+    public: static const grasp::msgs::Target_Type FORCE =
+        grasp::msgs::Target::FORCE;
     /// Position controller target
     public: static const grasp::msgs::Target_Type POSITION = 
         grasp::msgs::Target::POSITION;
@@ -95,12 +98,14 @@ class Interface
 
     /// \brief Releases fingers and opens hand.
     /// \param timeout Timer value
-    /// \param force Force joint position to target value
-    void openFingers(double timeout=-1, bool force=false);
+    /// \param set_position Set joint position to target value
+    void openFingers(double timeout=-1,
+        bool set_position=false);
 
     /// \brief Clenches fingers and closes hand.
     /// \param timeout Timer value
-    void closeFingers(double timeout=-1);
+    void closeFingers(double timeout=-1,
+        bool apply_force=false);
 
     /// \brief Raises hand.
     /// \param timeout Timer value

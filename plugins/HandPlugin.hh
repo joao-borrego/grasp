@@ -50,6 +50,8 @@ namespace HandPlugin {
     /// Set gravity state SDF entity
     #define PARAM_GRAVITY           "gravity"
 
+    /// Apply force/torque directly
+    #define FORCE grasp::msgs::Target::FORCE
     /// Position controller type
     #define POSITION grasp::msgs::Target::POSITION
     /// Velocity controller type
@@ -71,8 +73,11 @@ namespace gazebo {
     typedef const boost::shared_ptr<const grasp::msgs::Hand>
         HandMsgPtr;
 
-    // Forward declaration of private joint class
+    // Forward declaration of private joint group class
     class JointGroup;
+
+    // Forward declaration of private joint force pair class
+    class JointForcePair;
 
     // Forward declaration of private data class
     class HandPluginPrivate;
@@ -101,6 +106,15 @@ namespace gazebo {
         private: bool timer_active {false};
         /// Next timeout
         private: common::Time timeout;
+
+        /// Routine update time step in seconds (10 Hz)
+        private: const common::Time routine_timestep {0.1};
+        /// Periodic timer trigger
+        private: bool routine_active {false};
+        /// Next routine timeout
+        private: common::Time routine_timeout;
+        /// Array of finger joints
+        private: std::vector<JointForcePair> joint_force_pairs;
 
         /// Initial pose
         private: ignition::math::Pose3d init_pose {0,0,1,0,0,0};
@@ -160,6 +174,17 @@ namespace gazebo {
         /// \brief Resets finger joints to default pose
         private: void resetJoints();
 
+        // Tools
+
+        /// \brief Sets up a timer routine
+        /// \param timeout Timeout to be checked in main onUpdate routine
+        /// \param trigger Boolean switch that indicates timer is active
+        /// \param duration Time until next timeout
+        private: void setupTimer(
+            common::Time & timeout,
+            bool & trigger,
+            const common::Time & duration);
+
         // Requests
 
         /// \brief Changes hand's pose
@@ -178,6 +203,9 @@ namespace gazebo {
         /// \brief Updates internal timer
         /// \param _msg The request message
         private: void updateTimer(HandMsgPtr & _msg);
+
+        /// \brief Updates joints by applying forces directly
+        private: void updateForces();
 
         // TODO
         private: void setPIDController(

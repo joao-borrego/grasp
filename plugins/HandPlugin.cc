@@ -23,10 +23,24 @@ class JointGroup
     /// Vector of corresponding mimic joint's multipliers
     public: std::vector<double> multipliers;
 
-    public: JointGroup(physics::JointPtr joint, double target=0.0)
+    /// Constructor
+    public: JointGroup(physics::JointPtr actuated_, double target_=0.0):
+        actuated(actuated_), target(target_)
     {
-        this->actuated = joint;
-        this->target = target;
+    }
+};
+
+/// \brief Class for joints under periodic force
+class JointForcePair
+{
+    /// Actuated joint
+    public: physics::JointPtr joint;
+    /// Value of the force/torque
+    public: double force {0.0};
+
+    public: JointForcePair(physics::JointPtr joint_, double force_=0.0):
+        joint(joint_), force(force_)
+    {
     }
 };
 
@@ -324,11 +338,16 @@ void HandPlugin::onUpdate()
 {
     std::lock_guard<std::mutex> lock(this->data_ptr->mutex);
 
-    if (timer_active) {
-        if (timeout <= world->SimTime()) {
-            sendTimeout();
-            timer_active = false;
-        }
+    // Periodic routine
+    if (routine_active && routine_timeout <= world->SimTime()) {
+        updateForces();
+        setupTimer(routine_timeout, routine_active, routine_timestep);
+    }
+
+    // Reply with timeout message after waiting
+    if (timer_active && timeout <= world->SimTime()) {
+        sendTimeout();
+        timer_active = false;
     }
 
     // Process request
@@ -354,6 +373,17 @@ void HandPlugin::onRequest(HandMsgPtr &_msg)
     std::lock_guard<std::mutex> lock(data_ptr->mutex);
     // If no pending request exists
     if (!msg_req) { msg_req = _msg; }
+}
+
+/////////////////////////////////////////////////
+void HandPlugin::setupTimer(
+    common::Time & timeout,
+    bool & trigger,
+    const common::Time & duration)
+{
+    common::Time now = this->world->SimTime();
+    timeout = now + duration;
+    trigger = true;
 }
 
 /////////////////////////////////////////////////
@@ -389,14 +419,23 @@ void HandPlugin::updatePose(HandMsgPtr &_msg)
 void HandPlugin::updateTimer(HandMsgPtr &_msg)
 {
     if (_msg->has_timeout()) {
-        if (_msg->timeout() > 0)
-        {
+        if (_msg->timeout() > 0) {
             common::Time duration(_msg->timeout());
-            common::Time now = this->world->SimTime();
-            this->timeout = now + duration;
-            this->timer_active = true;
+            setupTimer(timeout, timer_active, duration);
         }
     }
+}
+
+
+/////////////////////////////////////////////////
+void HandPlugin::updateForces()
+{
+    for (const auto & pair : joint_force_pairs)
+    {
+        // TODO - Index?
+        pair.joint->SetForce(0, pair.force);
+    }
+    gzdbg << "Applying direct forces/torques." << std::endl;
 }
 
 /////////////////////////////////////////////////
@@ -421,10 +460,14 @@ void HandPlugin::setPIDTarget(
         }
 
         // DEBUG
-        ctrl->Update();
         std::map<std::string, double> positions;
         positions = ctrl->GetPositions();
         gzdbg << joint_name << " : " << positions[joint_name] << "\n";
+    }
+    else if (type == FORCE)
+    {
+        joint_force_pairs.emplace_back(joint, value);
+        routine_active = true;
     }
 }
 
@@ -470,8 +513,16 @@ void HandPlugin::checkReset(HandMsgPtr &_msg)
 {
     if (_msg->has_reset()) {
         if (_msg->reset()) {
+
             imobilise();
-            resetWorld();
+            //resetWorld();
+
+            // Reset timers
+            timer_active = false;
+            routine_active = false;
+
+            // Reset joints under constant force/torque actuation
+            joint_force_pairs.clear();
         }
     }
 }

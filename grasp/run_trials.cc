@@ -282,10 +282,10 @@ void tryGrasp(
 
     // Teleport hand to grasp candidate pose
     // Add the resting position transformation first
-    interface.setPose(g_safe_pose, 1.0);
+    interface.setPose(g_safe_pose, 0.5);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
     debugPrintTrace("\tHand moved to safe pose");
-    interface.openFingers(2.0, true);
+    interface.openFingers(0.0001, true);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
     debugPrintTrace("\tHand opened fingers");
     interface.setPose(hand_pose, 0.00001);
@@ -306,12 +306,12 @@ void tryGrasp(
     debugPrintTrace("\tNo collisions detected");
 
     // Close fingers
-    interface.closeFingers(5.0);
+    interface.closeFingers(2.0, true);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
     debugPrintTrace("\tFingers closed");
 
     // Lift object
-    interface.raiseHand(5.0);
+    interface.raiseHand(2.0);
     while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
     debugPrintTrace("\tHand lifted");
 
@@ -319,10 +319,12 @@ void tryGrasp(
     checkHandCollisions(pubs["contact"], target, ground);
     while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
 
+    grasp.success = g_success;
     if (g_success) debugPrintTrace("Success - Object is not on the ground");
     else           errorPrintTrace("Failed - Object is on the ground");
 
-    grasp.success = g_success;
+    // Reset hand
+    interface.reset();
 }
 
 /////////////////////////////////////////////////

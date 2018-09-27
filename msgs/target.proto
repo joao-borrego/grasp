@@ -10,10 +10,12 @@ message Target
     /// Type of PID control target
     enum Type
     {
+        /// Apply constant force/torque
+        FORCE    = 1;
         /// Position target
-        POSITION = 1;
+        POSITION = 2;
         /// Velocity target
-        VELOCITY = 2;
+        VELOCITY = 3;
     }
 
     /// Type of PID control target
