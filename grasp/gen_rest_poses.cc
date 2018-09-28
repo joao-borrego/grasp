@@ -75,7 +75,7 @@ int main(int _argc, char **_argv)
         // Store object rest pose
         rest_poses.push_back(g_rest_pose);        
         std::string out_file = out_rest_dir + "/" + model_name + ".rest.yml"; 
-        RestPose::writeToYml(out_file, model_name, rest_poses);
+        RestPose::writeToYml(out_file, model_name, rest_poses, true, true);
 
         // Cleanup
         removeModel(pubs["request"], model_name);
@@ -95,7 +95,7 @@ const std::string getUsage(const char* argv_0)
     return \
         "usage:   " + std::string(argv_0) + " [options]\n" +
         "options: -d <object dataset yaml>\n"  +
-        "         -g <rest poses output yaml>\n";
+        "         -g <rest poses output directory>\n";
 }
 
 //////////////////////////////////////////////////
