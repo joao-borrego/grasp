@@ -1,3 +1,4 @@
+# Meshes to import for KIT dataset
 models:
   - Amicelli_800_tex.obj
   - BakingSoda_800_tex.obj
@@ -94,6 +95,7 @@ models:
   - PowderedSugar_800_tex.obj
   - PowderedSugarMill_800_tex.obj
   - RavioliLarge_800_tex.obj
+  - RedCup_800_tex.obj
   - Rice_800_tex.obj
   - Rusk_800_tex.obj
   - RuskWholemeal_800_tex.obj
