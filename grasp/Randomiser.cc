@@ -1,6 +1,6 @@
 /*!
     \file grasp/Randomiser.cc
-    \brief Randomiser
+    \brief Randomiser class
 
     \author João Borrego : jsbruglie
 */
@@ -317,9 +317,21 @@ void FrictionCoefficient::fillMsg(DRRequest & msg,
     for (int i = 0; i < num_targets; i++)
     {
         std::string model = models.at(i);
+        std::string link = links.at(i);
+        std::string col = link + "_collision";
+
         if (model == CFG_TARGET_OBJ) model = target;
-        
-        // TODO - Which parameters are relevant?
+
+        double i_mu1 = mu1.at(i);
+        double sample = sampler->sample(gen);
+        double mu1 = (additive)? (i_mu1 + sample) : (i_mu1 * sample);
+        gazebo::msgs::Surface *surface = new gazebo::msgs::Surface();
+        gazebo::msgs::Friction *friction = new gazebo::msgs::Friction();
+        friction->set_mu(mu1);
+        surface->set_allocated_friction(friction);
+        api.addSurface(msg, model, link, col, surface);
+
+        debugPrintTrace("Add mu " << mu1 << " to collision " << col);
     }
 }
 
@@ -339,7 +351,7 @@ void JointDampingCoefficient::fillMsg(DRRequest & msg,
         double damp = (additive)? (i_damp + sample) : (i_damp * sample);
         api.addJoint(msg, model, joint,
             /* lower = */ INFINITY, /* upper = */ INFINITY,
-            /* effort = */ INFINITY, /* velocity = */ INFINITY, 
+            /* effort = */ INFINITY, /* velocity = */ INFINITY,
             /* damping = */ damp, /* friction = */ INFINITY);
 
         debugPrintTrace("Add damping " << damp << " to joint " << joint);
@@ -387,7 +399,7 @@ void JointLimit::fillMsg(DRRequest & msg,
         double upper = (additive)? (i_upper + sample_u) : (i_upper * sample_u);
         api.addJoint(msg, model, joint,
             /* lower = */ lower, /* upper = */ upper,
-            /* effort = */ INFINITY, /* velocity = */ INFINITY, 
+            /* effort = */ INFINITY, /* velocity = */ INFINITY,
             /* damping = */ INFINITY, /* friction = */ INFINITY);
 
         debugPrintTrace("Add limits (" << lower << "," << upper

@@ -1,6 +1,9 @@
 /*!
     \file grasp/Randomiser.hh
-    \brief Randomiser
+    \brief Randomiser class
+
+    Helper class for streamlining physical property randomisation through
+    <a href="https://github.com/jsbruglie/gap">GAP</a>.
 
     \author João Borrego : jsbruglie
 */
@@ -87,8 +90,8 @@ class UniformSampler : public IRandomSampler
     private: bool log_uniform {false};
 
     /// \brief Constructor
-    /// \param mean Uniform mean
-    /// \param std Uniform standard deviation
+    /// \param a Domain lower limit
+    /// \param b Domain upper limit
     /// \param log_uniform Whether to use log-uniform or uniform dist
     public: UniformSampler(
         double a,
@@ -131,6 +134,7 @@ class RandomProperty
     /// \param msg DR request message
     /// \param api DR interface
     /// \param gen PRNG
+    /// \param target Name of target object
     public: virtual void fillMsg(DRRequest & msg,
         DRInterface & api,
         std::mt19937 & gen,
@@ -160,6 +164,7 @@ class ModelScale : public RandomProperty
     /// \param msg DR request message
     /// \param api DR interface
     /// \param gen PRNG
+    /// \param target Name of target object
     public: void fillMsg(DRRequest & msg,
         DRInterface & api,
         std::mt19937 & gen,
@@ -197,6 +202,7 @@ class LinkMass : public RandomProperty
     /// \param msg DR request message
     /// \param api DR interface
     /// \param gen PRNG
+    /// \param target Name of target object
     public: void fillMsg(DRRequest & msg,
         DRInterface & api,
         std::mt19937 & gen,
@@ -246,6 +252,7 @@ class FrictionCoefficient : public RandomProperty
     /// \param msg DR request message
     /// \param api DR interface
     /// \param gen PRNG
+    /// \param target Name of target object
     public: void fillMsg(DRRequest & msg,
         DRInterface & api,
         std::mt19937 & gen,
@@ -283,6 +290,7 @@ class JointDampingCoefficient : public RandomProperty
     /// \param msg DR request message
     /// \param api DR interface
     /// \param gen PRNG
+    /// \param target Name of target object
     public: void fillMsg(DRRequest & msg,
         DRInterface & api,
         std::mt19937 & gen,
@@ -306,8 +314,8 @@ class PGain : public RandomProperty
     /// \param additive_ Whether term is addictive or a scaling factor
     /// \param models_ List of affected models
     /// \param joints_ List of affected joints
-    /// \param damping_ List of respective controller types
-    /// \param damping_ List of respective P controller gains
+    /// \param types_ List of respective controller types
+    /// \param p_gains_ List of respective P controller gains
     /// \warning std::vectors params are moved inside instance!
     public: PGain(
         IRandomSampler *sampler_,
@@ -324,6 +332,7 @@ class PGain : public RandomProperty
     /// \param msg DR request message
     /// \param api DR interface
     /// \param gen PRNG
+    /// \param target Name of target object
     public: void fillMsg(DRRequest & msg,
         DRInterface & api,
         std::mt19937 & gen,
@@ -365,6 +374,7 @@ class JointLimit : public RandomProperty
     /// \param msg DR request message
     /// \param api DR interface
     /// \param gen PRNG
+    /// \param target Name of target object
     public: void fillMsg(DRRequest & msg,
         DRInterface & api,
         std::mt19937 & gen,
@@ -394,6 +404,7 @@ class Gravity : public RandomProperty
     /// \param msg DR request message
     /// \param api DR interface
     /// \param gen PRNG
+    /// \param target Name of target object
     public: void fillMsg(DRRequest & msg,
         DRInterface & api,
         std::mt19937 & gen,
