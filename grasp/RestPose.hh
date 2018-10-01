@@ -1,6 +1,7 @@
 /*!
     \file grasp/RestPose.hh
-    \brief RestPose tool
+    \brief RestPose tools
+
     \author João Borrego : jsbruglie
 */
 
@@ -40,7 +41,7 @@ class RestPose
         const std::string & file_name,
         const std::string & object_name,
         const std::vector<ignition::math::Pose3d> & rest_poses,
-        const bool use_pose=true,
+        const bool as_pose=true,
         const bool as_matrix=false);
 };
 
