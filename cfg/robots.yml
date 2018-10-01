@@ -8,7 +8,7 @@ baxter:
   palm_offset: 0.02
   palm_normal: "0 0 -1"
   # Rigid transform from base link to gripper reference frame
-  pose: [-0.005,0.0,-0.075,0.0,0.0,0.0]
+  pose: [0.0,0.0,-0.070,0.0,0.0,0.0]
   # Grasp joint configurations
   grasp_configurations:
     pinch:
