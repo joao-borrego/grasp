@@ -1,13 +1,13 @@
 # General settings
 
 # Object dataset yml
-obj_cfg: data/datasets/kit/reduced_kit.ds.yml
+obj_cfg: data/datasets/kit/kit.ds.yml
 # Grasp candidates directory
 grasp_cfg_dir: data/datasets/kit/grasps/
 # Rest poses directory
 rest_cfg_dir: data/datasets/kit/rest/
 # Dataset output directory
-out_trials_dir: data/datasets/kit/trials/
+out_trials_dir: data/datasets/kit/metrics/
 # Robot config yml
 robot_cfg: cfg/robots.yml
 # Robot name

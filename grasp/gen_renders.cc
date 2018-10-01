@@ -74,7 +74,7 @@ int main(int _argc, char **_argv)
         std::string cfg_file(grasp_cfg_dir +
             model_name + "." + robot + ".grasp.yml");
         std::vector<Grasp> grasps;
-        Grasp::loadFromYml(cfg_file, robot, grasps);
+        Grasp::loadFromYml(cfg_file, model_name, robot, grasps);
         if (grasps.empty()) {
             errorPrintTrace("No valid grasps retrieved from file");
             continue;

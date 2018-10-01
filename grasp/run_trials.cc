@@ -11,14 +11,10 @@
 
 // Globals are used for callbacks
 
-/// Global timeout flag
-bool g_timeout  {false};
-/// Mutex for global timeout flag
+// Condition variable for exclusive threaded access
+std::condition_variable g_timeout_var;
+/// Mutex for condition variables
 std::mutex g_timeout_mutex;
-/// Global setp finished flag
-bool g_finished {false};
-/// Mutex for global step finished flag
-std::mutex g_finished_mutex;
 
 /// Global hand resting pose
 ignition::math::Pose3d g_safe_pose  {0,0,0.9,0,0,0};
@@ -32,17 +28,16 @@ bool g_success  {false};
 
 int main(int _argc, char **_argv)
 {
-
     // List of grasp targets
     std::vector<std::string> targets;
 
     // YAML node for configs
-    Config config;
-    parseArgs(_argc, _argv, config);
+    Config cfg;
+    parseArgs(_argc, _argv, cfg);
     debugPrintTrace("Loaded configuration file.");
 
     // Obtain target objects
-    obtainTargets(targets, config["obj_cfg"]);
+    obtainTargets(targets, cfg["obj_cfg"]);
     if (targets.empty()) {
         errorPrintTrace("No valid objects retrieved from file");
         exit(EXIT_FAILURE);
@@ -57,12 +52,12 @@ int main(int _argc, char **_argv)
     std::map<std::string, gazebo::transport::SubscriberPtr> subs;
     setupCommunications(node, pubs, subs);
     // Domain randomiser
-    Randomiser rand_api(config["randomiser_cfg"]);
+    Randomiser rand_api(cfg["randomiser_cfg"]);
     debugPrintTrace("Initialised randomiser.");
 
     // Interface for hand plugin
     Interface interface;
-    interface.init(config["robot_cfg"],  config["robot"]);
+    interface.init(cfg["robot_cfg"],  cfg["robot"]);
     debugPrintTrace("Initialised hand interface.");
 
     std::string model_filename;
@@ -70,23 +65,22 @@ int main(int _argc, char **_argv)
     // For each target object
     for (auto const & model_name : targets)
     {
-        // Obtain candidate grasps
-        model_filename = "model://" + model_name;
-        std::string grasp_file(config["grasp_cfg_dir"] + model_name + ".grasp.yml");
         std::vector<Grasp> grasps;
-        Grasp::loadFromYml(grasp_file, config["robot"], grasps);
-        if (grasps.empty()) {
-            errorPrintTrace("No valid grasps retrieved from file.");
-            continue;
+        model_filename = "model://" + model_name;
+
+        // Obtain candidate grasps
+        if (!importGrasps(cfg["grasp_cfg_dir"], cfg["robot"], model_name, grasps)) {
+            continue; // No valid grasp retrieved from file
         }
 
         // Reset hand pose so it won't collide with target object
         interface.setPose(g_safe_pose);
+
         interface.raiseHand(0.1); // Avoid hand dropping
-        while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
+        waitForTrigger(500);
 
         // Obtain rest pose from file
-        std::string rest_file(config["rest_cfg_dir"] + model_name + ".rest.yml");
+        std::string rest_file(cfg["rest_cfg_dir"] + model_name + ".rest.yml");
         std::vector<ignition::math::Pose3d> rest_poses;
         RestPose::loadFromYml(rest_file, model_name, rest_poses);
         if (rest_poses.empty()) {
@@ -96,6 +90,7 @@ int main(int _argc, char **_argv)
         g_rest_pose = rest_poses.at(0);
 
         // Spawn object
+        debugPrintTrace("Spawning target object");
         spawnModelFromFilename(pubs["factory"], g_rest_pose, model_filename);
         pubs["target"]->WaitForConnection();
         debugPrintTrace("Target connected");
@@ -108,10 +103,15 @@ int main(int _argc, char **_argv)
             rand_api.randomise();
             // Try grasp
             tryGrasp(candidate, interface, pubs, model_name);
-            // Place target in rest pose
+
+            // Place target in rest pose, and wait for reply
+
             resetTarget(pubs["target"]);
-            while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
+            waitForTrigger(2000);
         }
+        // Export grasps outcome to file
+        exportGraspMetrics(cfg["out_trials_dir"], cfg["robot"],
+            model_name, grasps);
 
         // Cleanup
         removeModel(pubs["request"], model_name);
@@ -227,6 +227,34 @@ void obtainTargets(std::vector<std::string> & targets,
 }
 
 /////////////////////////////////////////////////
+bool importGrasps(const std::string & grasp_cfg_dir,
+    const std::string & robot,
+    const std::string & object_name,
+    std::vector<Grasp> & grasps)
+{
+    std::string file_name(grasp_cfg_dir + object_name + ".grasp.yml");
+    Grasp::loadFromYml(file_name, robot, object_name, grasps);
+    if (grasps.empty())
+    {
+        errorPrintTrace("No valid grasps retrieved from file " << file_name);
+        return false;
+    }
+    debugPrintTrace("Retrieved " << grasps.size() << " grasps from file" << file_name);
+    return true;
+}
+
+/////////////////////////////////////////////////
+void exportGraspMetrics(const std::string & trials_out_dir,
+    const std::string & robot,
+    const std::string & object_name,
+    const std::vector<Grasp> & grasps)
+{
+    std::string file_name(trials_out_dir + object_name + ".metrics.yml");
+    Grasp::writeToYml(file_name, robot, object_name, grasps);
+    debugPrintTrace("Written grasp metrics to " << file_name);
+}
+
+/////////////////////////////////////////////////
 void checkHandCollisions(gazebo::transport::PublisherPtr pub,
     const std::string & hand,
     std::vector<std::string> & targets)
@@ -282,14 +310,17 @@ void tryGrasp(
 
     // Teleport hand to grasp candidate pose
     // Add the resting position transformation first
+
     interface.setPose(g_safe_pose, 0.5);
-    while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
+    waitForTrigger(1000);
     debugPrintTrace("\tHand moved to safe pose");
+
     interface.openFingers(0.0001, true);
-    while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
+    waitForTrigger(1000);
     debugPrintTrace("\tHand opened fingers");
+
     interface.setPose(hand_pose, 0.00001);
-    while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
+    waitForTrigger(1000);
     debugPrintTrace("\tHand moved to grasp candidate pose");
 
     //std::cin.ignore();
@@ -297,29 +328,28 @@ void tryGrasp(
     // Check if hand is already in collision
     checkHandCollisions(pubs["contact"],
         interface.getRobotName(), target_and_ground);
-    while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
+    waitForTrigger(1000);
+
     if (!g_success) {
-        grasp.success = false;
+        grasp.metric = 0.0;
         errorPrintTrace("\tCollisions detected. Aborting grasp");
         return;
     }
     debugPrintTrace("\tNo collisions detected");
 
-    // Close fingers
     interface.closeFingers(2.0, true);
-    while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
+    waitForTrigger(4000);
     debugPrintTrace("\tFingers closed");
 
-    // Lift object
     interface.raiseHand(2.0);
-    while (waitingTrigger(g_timeout_mutex, g_timeout)) {waitMs(10);}
+    waitForTrigger(5000);
     debugPrintTrace("\tHand lifted");
 
     // Check if object was grasped
     checkHandCollisions(pubs["contact"], target, ground);
-    while (waitingTrigger(g_finished_mutex, g_finished)) {waitMs(10);}
+    waitForTrigger(5000);
 
-    grasp.success = g_success;
+    grasp.metric = (g_success)? 1.0 : 0.0;
     if (g_success) debugPrintTrace("Success - Object is not on the ground");
     else           errorPrintTrace("Failed - Object is on the ground");
 
@@ -327,31 +357,27 @@ void tryGrasp(
     interface.reset();
 }
 
-/////////////////////////////////////////////////
-void captureFrame(gazebo::transport::PublisherPtr pub)
-{
-    CameraRequest msg;
-    msg.set_type(REQ_CAPTURE);
-    pub->Publish(msg);
-}
-
 //////////////////////////////////////////////////
-bool waitingTrigger(std::mutex & mutex, bool & trigger)
+void waitForTrigger(int timeout)
 {
-    std::lock_guard<std::mutex> lock(mutex);
-    if (trigger) {
-        trigger = false;
-        return false;
+    debugPrintTrace("Waiting for at most " << timeout << " (ms)");
+
+    std::unique_lock<std::mutex> lock(g_timeout_mutex);
+    if (timeout <= 0) {
+        g_timeout_var.wait(lock);
+    } else {
+        g_timeout_var.wait_for(lock, std::chrono::milliseconds(timeout));
     }
-    return true;
 }
 
 /////////////////////////////////////////////////
 void onHandResponse(HandMsgPtr & _msg)
 {
-    if (_msg->has_timeout()) {
+    debugPrint("\tHand plugin response.\n");
+    if (_msg->has_timeout())
+    {
         std::lock_guard<std::mutex> lock(g_timeout_mutex);
-        g_timeout = true;
+        g_timeout_var.notify_one();
     }
 }
 
@@ -359,12 +385,10 @@ void onHandResponse(HandMsgPtr & _msg)
 void onTargetResponse(TargetResponsePtr & _msg)
 {
     debugPrint("\tTarget plugin response.\n");
-    if (_msg->has_pose()) {
-        if (_msg->type() == RES_POSE)
-        {
-            std::lock_guard<std::mutex> lock(g_finished_mutex);
-            g_finished = true;
-        }
+    if (_msg->type() == RES_POSE && _msg->has_pose())
+    {
+        std::lock_guard<std::mutex> lock(g_timeout_mutex);
+        g_timeout_var.notify_one();
     }
 }
 
@@ -372,17 +396,9 @@ void onTargetResponse(TargetResponsePtr & _msg)
 void onContactResponse(ContactResponsePtr & _msg)
 {
     debugPrint("\tContact plugin response\n");
-    std::lock_guard<std::mutex> lock(g_finished_mutex);
-    g_finished = true;
+    std::lock_guard<std::mutex> lock(g_timeout_mutex);
     g_success = (_msg->contacts_size() == 0);
-}
-
-/////////////////////////////////////////////////
-void onCameraResponse(CameraResponsePtr & _msg)
-{
-    debugPrint("\tCamera plugin response\n");
-    std::lock_guard<std::mutex> lock(g_finished_mutex);
-    g_finished = true;
+    g_timeout_var.notify_one();
 }
 
 /////////////////////////////////////////////////

@@ -24,23 +24,36 @@ class Grasp
     public: std::string name;
     /// Homogenous transform matrix from gripper to object reference frame
     public: ignition::math::Matrix4d t_gripper_object;
-    /// Grasp outcome
-    public: bool success {false};
+    /// Grasp success metric
+    public: double metric {false};
 
     /// \brief Deafult constructor
     public: Grasp();
     /// \brief Constructor
-    /// \param t_gripper_object Transform matrix from gripper to object frame
+    /// \param t_gripper_object_ Transform matrix from gripper to object frame
     public: Grasp(ignition::math::Matrix4d t_gripper_object_);
 
     /// \brief Load set of grasps from file
     /// \param file_name Input file name
     /// \param robot Target robot name
+    /// \param object_name Target object name
     /// \param grasps Set of grasps retrieved from file
     public: static void loadFromYml(
         const std::string & file_name,
         const std::string & robot,
+        const std::string & object_name,
         std::vector<Grasp> & grasps);
+
+    /// \brief Export set of grasps to file
+    /// \param file_name Output file name
+    /// \param robot Target robot name
+    /// \param object_name Target object name
+    /// \param grasps Set of grasps to export to file
+    public: static void writeToYml(
+        const std::string & file_name,
+        const std::string & robot,
+        const std::string & object_name,
+        const std::vector<Grasp> & grasps);
 };
 
 #endif

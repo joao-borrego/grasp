@@ -17,8 +17,10 @@
 #include <gazebo/msgs/msgs.hh>
 // I/O streams
 #include <iostream>
-// Sleep
+// Threads
 #include <chrono>
+#include <condition_variable>
+#include <mutex>
 #include <thread>
 // Open YAML config files
 #include "yaml-cpp/yaml.h"
@@ -143,7 +145,9 @@ typedef grasp::msgs::CameraResponse CameraResponse;
 typedef const boost::shared_ptr<const grasp::msgs::CameraResponse>
     CameraResponsePtr;
 
-// Functions
+//
+// Argument parsing and setup
+//
 
 /// \brief Obtains usage string
 /// \param argv_0 Name of the executable
@@ -168,10 +172,40 @@ void setupCommunications(
     std::map<std::string, gazebo::transport::PublisherPtr> & pubs,
     std::map<std::string, gazebo::transport::SubscriberPtr> & subs);
 
+//
+// File I/O
+//
 
-/// TODO
+/// \brief Obtain list of models' names in dataset yml
+/// \param targets Output list of model names
+/// \param file_name Input dataset config yml
 void obtainTargets(std::vector<std::string> & targets,
     const std::string & file_name);
+
+/// \brief Obtain list of grasps in yml files
+/// \param grasp_cfg_dir Directory for grasp files
+/// \param robot Target robot
+/// \param object_name Target object name
+/// \param grasps Output imported grasps
+/// \returns Whether import was successful
+bool importGrasps(const std::string & grasp_cfg_dir,
+    const std::string & robot,
+    const std::string & object_name,
+    std::vector<Grasp> & grasps);
+
+/// \brief Export set of metrics to file
+/// \param trials_out_dir Output directory
+/// \param robot Target robot name
+/// \param object_name Target object name
+/// \param grasps Set of grasps to export to file
+void exportGraspMetrics(const std::string & trials_out_dir,
+    const std::string & robot,
+    const std::string & object_name,
+    const std::vector<Grasp> & grasps);
+
+//
+// Gazebo plugin interaction
+//
 
 /// \brief Sets hand pose
 /// \param pub Publisher to hand's topic
@@ -188,11 +222,16 @@ void checkHandCollisions(gazebo::transport::PublisherPtr pub,
     const std::string & hand,
     std::vector<std::string> & targets);
 
-/// TODO
+/// \brief Closes manipulator fingers
+/// \param pub Publisher to hand topic
+/// \param timeout Timeout in seconds
+/// \warning Applies force directly
 void closeFingers(gazebo::transport::PublisherPtr pub,
     double timeout=-1);
 
-/// TODO
+/// \brief Lifts robotic manipulator along positive z axis
+/// \param pub Publisher to hand topic
+/// \param timeout Timeout in seconds
 void liftHand(gazebo::transport::PublisherPtr pub,
     double timeout=-1);
 
@@ -210,14 +249,13 @@ void tryGrasp(
     std::map<std::string, gazebo::transport::PublisherPtr> & pubs,
     const std::string & model_name);
 
-/// TODO
-void captureFrame(gazebo::transport::PublisherPtr pub);
+// Synchronisation
 
-/// \brief Returns whether to keep waiting for trigger
-/// \param mutex   Mutex that protects trigger variable
-/// \param trigger Trigger boolean variable
-/// \return True as long as trigger is false, false otherwise
-bool waitingTrigger(std::mutex & mutex, bool & trigger);
+/// \brief Waits for condition variable
+/// \param timeout Timeout value in milliseconds
+void waitForTrigger(int timeout=-1);
+
+// Callback functions
 
 /// TODO
 void onHandResponse(HandMsgPtr & _msg);
@@ -228,10 +266,5 @@ void onTargetResponse(TargetResponsePtr & _msg);
 /// TODO
 void onContactResponse(ContactResponsePtr & _msg);
 
-/// TODO
-void onCameraResponse(CameraResponsePtr & _msg);
-
-/// TODO
-void inline waitMs(int delay);
 
 #endif
