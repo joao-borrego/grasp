@@ -1,8 +1,8 @@
 /*!
-    \file utils/hand_remote.hh
-    \brief TODO
+    \file examples/hand_remote.hh
+    \brief Control manipulator example
 
-	TODO
+    Use keyboard to control robotic manipulator spawned in simulation.
 
     \author João Borrego : jsbruglie
 */

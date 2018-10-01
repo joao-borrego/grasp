@@ -2,8 +2,6 @@
     \file plugins/ContactWorldPlugin.cc
     \brief Contact manager Gazebo world plugin
 
-    // TODO
-
     \author João Borrego : jsbruglie
 */
 

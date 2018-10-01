@@ -88,7 +88,7 @@ class Interface
     // API
 
     /// \brief Sets hand pose
-    /// \detailed Sets hand pose using virtual joints
+    /// \details Sets hand pose using virtual joints
     /// \param pose New hand pose
     /// \param timeout Timer value
     void setPose(ignition::math::Pose3d pose, double timeout=-1);
@@ -104,6 +104,7 @@ class Interface
 
     /// \brief Clenches fingers and closes hand.
     /// \param timeout Timer value
+    /// \param apply_force Wether to bypass PIDs and apply force/torque directly
     void closeFingers(double timeout=-1,
         bool apply_force=false);
 

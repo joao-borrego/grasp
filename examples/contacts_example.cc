@@ -1,8 +1,6 @@
 /*!
-    \file utils/contacts_example.cc
-    \brief TODO
-
-    TODO
+    \file examples/contacts_example.cc
+    \brief Contact world plugin example
 
     \author João Borrego : jsbruglie
 */
@@ -33,7 +31,7 @@ int main(int _argc, char **_argv)
         getline(std::cin, line);
         std::stringstream input_stream(line);
         std::string command = input_stream.str();
-        
+
         // Check for collision between box and ground plane
         if (command == "check")
         {
@@ -79,8 +77,8 @@ void changeSurface(gazebo::transport::PublisherPtr pub,
     gazebo::msgs::Surface *surface = new gazebo::msgs::Surface();
     gazebo::msgs::Friction *friction = new gazebo::msgs::Friction();
 
-    friction->set_mu(1.0);
-    friction->set_mu2(1.0);
+    friction->set_mu(10000.0);
+    friction->set_mu2(10000.0);
     surface->set_allocated_friction(friction);
     req->set_allocated_surface(surface);
 

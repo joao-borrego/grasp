@@ -2,8 +2,6 @@
     \file plugins/ContactWorldPlugin.hh
     \brief Contact manager Gazebo world plugin
 
-    // TODO
-
     \author João Borrego : jsbruglie
 */
 
@@ -47,7 +45,7 @@ namespace gazebo {
     // Forward declaration of private data class
     class ContactWorldPluginPrivate;
 
-    // TODO
+    /// Contact manager world plugin
     class ContactWorldPlugin : public WorldPlugin
     {
         // Private attributes
@@ -81,12 +79,17 @@ namespace gazebo {
         public: virtual void Load(physics::WorldPtr _world, sdf::ElementPtr _sdf);
 
         /// \brief Callback on world update event
+        /// Processes stored request, unsubscribes from contacts topic and clears messages.
         public: void onUpdate();
 
-        /// TODO
+        /// \brief Callback on contact message received event
+        /// Stores message for later processing in update callback
+        /// \param _msg Received message
         public: void onContact(ConstContactsPtr & _msg);
 
         /// \brief Callback function for handling incoming requests
+        /// Subscribes to "~/physics/contacts" topic, which decreases performance.
+        /// Incoming contact messages are monitored in onContact callback function.
         /// \param _msg  The message
         public: void onRequest(ContactRequestPtr & _msg);
 
@@ -94,10 +97,13 @@ namespace gazebo {
         /// \param _msg  The message
         public: void onResponse(ContactResponsePtr & _msg);
 
-        /// TODO
+        /// \brief Check for collisions and update response message
+        /// \param _msg Output message
         public: void checkCollision(ContactResponse & _msg);
 
-        /// TODO
+        /// \brief Changes surface property from message
+        /// \param _msg Input message
+        /// \deprecated Redundant feature already implemented in external dependency
         public: void changeSurface(ContactResponse & _msg);
     };
 }

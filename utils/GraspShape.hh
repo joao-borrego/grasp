@@ -1,8 +1,6 @@
 /*!
     \file utils/GraspShape.hh
-    \brief TODO
-
-    TODO
+    \brief Grasp shape representation
 
     \author João Borrego : jsbruglie
 */
@@ -34,7 +32,7 @@ class GraspShape
     // Functions
 
     /// \brief Constructs the object.
-    /// \param name The grasp configuration name
+    /// \param _name The grasp configuration name
     GraspShape(std::string & _name);
 };
 

@@ -1,8 +1,6 @@
 /*!
     \file utils/GraspShape.cc
-    \brief TODO
-
-    TODO
+    \brief Grasp shape representation
 
     \author João Borrego : jsbruglie
 */
@@ -11,8 +9,6 @@
 
 //////////////////////////////////////////////////
 GraspShape::GraspShape(std::string & _name) :
-	name(_name)
+    name(_name)
 {
 }
-
-//////////////////////////////////////////////////

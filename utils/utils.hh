@@ -19,7 +19,7 @@
 
 /// \brief Checks for key press
 ///
-/// \detailed As seen in
+/// \details As seen in
 /// <a href="https://gist.github.com/vsajip/1864660">
 ///   this gist
 /// </a>

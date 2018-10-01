@@ -1,8 +1,6 @@
 /*!
-    \file utils/target_example.cc
-    \brief TODO
-
-    TODO
+    \file examples/target_example.cc
+    \brief Target object plugin example
 
     \author João Borrego : jsbruglie
 */

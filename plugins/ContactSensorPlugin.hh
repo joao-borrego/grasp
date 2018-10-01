@@ -52,16 +52,16 @@ namespace gazebo {
     // Forward declaration of private data class
     class ContactSensorPluginPrivate;
 
-    // TODO
+    /// \brief Contact sensor plugin
     class ContactSensorPlugin : public SensorPlugin
     {
         // Private attributes
 
-        /// Class with private attributes
+        /// \brief Class with private attributes
         private: std::unique_ptr<ContactSensorPluginPrivate> data_ptr;
-        /// Model to which the plugin is attached
+        /// \brief Sensor to which the plugin is attached
         private: sensors::ContactSensorPtr sensor;
-        /// Connection to world update event
+        /// \brief Connection to world update event
         private: event::ConnectionPtr update_connection;
 
         // Public methods
@@ -73,8 +73,8 @@ namespace gazebo {
         public: virtual ~ContactSensorPlugin();
 
         /// \brief Loads the plugin
-        /// \param _model The sensor pointer
-        /// \param _sdf   The sdf element pointer
+        /// \param _sensor The sensor pointer
+        /// \param _sdf The sdf element pointer
         public: virtual void Load(sensors::SensorPtr _sensor, sdf::ElementPtr _sdf);
 
         /// \brief Updates model on world update

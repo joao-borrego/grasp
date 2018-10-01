@@ -1,8 +1,6 @@
 /*!
-    \file utils/contacts_example.hh
-    \brief TODO
-
-    TODO
+    \file examples/contacts_example.hh
+    \brief Contact world plugin example
 
     \author João Borrego : jsbruglie
 */
@@ -40,12 +38,19 @@ typedef const boost::shared_ptr<const grasp::msgs::ContactResponse>
 
 // Functions
 
-/// TODO
+/// \brief Obtain contact between two collision entities
+/// \param pub Communication publisher
+/// \param collision1 Name of first collision in pair to test
+/// \param collision2 Name of second collision in pair to test
 void getContactBetween(gazebo::transport::PublisherPtr pub,
     const std::string & collision1,
     const std::string & collision2);
 
-/// TODO
+/// \brief Change surface properties
+/// \param pub Communication publisher
+/// \param model Target model
+/// \param link Target link
+/// \param collision Target collision
 void changeSurface(gazebo::transport::PublisherPtr pub,
     const std::string & model,
     const std::string & link,

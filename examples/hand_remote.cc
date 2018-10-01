@@ -1,8 +1,6 @@
 /*!
-    \file utils/hand_remote.cc
-    \brief TODO
-
-    TODO
+    \file examples/hand_remote.cc
+    \brief Control manipulator example
 
     \author João Borrego : jsbruglie
 */
