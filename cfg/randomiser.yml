@@ -4,12 +4,12 @@
 trials: 10
 # Properties
 properties:
-  link_mass:
-    dist:
-      uniform: {a: 0.5, b: 1.5}
-    additive: False
-    target:
-      0: {model: TARGET_OBJECT, link: base_link, mass: 0.01}
+  # link_mass:
+  #   dist:
+  #     uniform: {a: 0.5, b: 1.5}
+  #   additive: False
+  #   target:
+  #     0: {model: TARGET_OBJECT, link: base_link, mass: 0.01}
   #     1: {model: baxter, link: gripper_l_finger, mass: 0.02}
   #     2: {model: baxter, link: gripper_r_finger, mass: 0.02}
   #     3: {model: baxter, link: gripper_l_finger_tip, mass: 0.01}
@@ -25,8 +25,10 @@ properties:
   #     uniform: {a: 0.7, b: 1.3}
   #   additive: False
   #   target:
-  #     0: {model: baxter, link: gripper_l_finger, mu1: 1000, mu2: 1000, fdir1: [0,0,1], kp: 100000, kd: 1}
-  #     1: {model: baxter, link: gripper_r_finger, mu1: 1000, mu2: 1000, fdir1: [0,0,1], kp: 100000, kd: 1}
+  #     0: {model: baxter, link: gripper_l_finger, mu1: 1000,
+  #        mu2: 1000, fdir1: [0,0,1], kp: 100000, kd: 1}
+  #     1: {model: baxter, link: gripper_r_finger, mu1: 1000,
+  #        mu2: 1000, fdir1: [0,0,1], kp: 100000, kd: 1}
   # joint_damping_coefficient:
   #   dist:
   #     loguniform: {a: 0.3, b: 3.0}
@@ -39,8 +41,10 @@ properties:
   #     loguniform: {a: 0.75, b: 1.5}
   #   additive: False
   #   target:
-  #     0: {model: baxter, joint: gripper_l_finger_joint, p: 30, type: position}
-  #     1: {model: baxter, joint: gripper_r_finger_joint, p: 30, type: position}
+  #     0: {model: baxter_gripper, joint: baxter_gripper::gripper_l_finger_joint,
+  #       p: 30, type: position}
+  #     1: {model: baxter_gripper, joint: baxter_gripper::gripper_r_finger_joint,
+  #       p: 30, type: position}
   # joint_limit:
   #   dist:
   #     gaussian: {mean: 0.0, std: 0.15}
