@@ -1,0 +1,8 @@
+# Stats.py default configuration
+
+# Dataset file path
+ds_path: data/datasets/kit/reduced_kit.ds.yml
+# Directory with metrics
+metrics_dir: data/datasets/kit/viable/
+# Robot
+robot: baxter
