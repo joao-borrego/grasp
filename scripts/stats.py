@@ -8,8 +8,10 @@ import csv
 import os
 # YAML output
 import yaml
-
+# Math
 import math
+# Numpy
+import numpy as np
 
 # Default parameters
 
@@ -17,12 +19,14 @@ import math
 DEF_CFG_FILE = 'cfg/stats.yml'
 # List of required parameters in cfg file
 REQ_PARAMS = [\
-  'ds_path',         # Dataset file path
-  'baseline_dir',    # Baseline metric directory
-  'metrics_dir',     # Custom metric directory
-  'robot',           # Robot name
-  'baseline_deltas', # Baseline metric threshold list
-  'trial_delta'      # Trial metric threshold
+  'ds_path',             # Dataset file path
+  'baseline_dir',        # Baseline metric directory
+  'metrics_dir',         # Custom metric directory
+  'robot',               # Robot name
+  'bl_delta_min',        # Baseline metric threshold
+  'bl_delta_max',
+  'bl_delta_step',
+  'trial_delta'          # Trial metric threshold
 ]
 
 class Grasp:
@@ -194,6 +198,11 @@ def main(argv):
   # max_success = -1
   # max_name = ''
 
+  baseline_deltas = np.arange(
+    round(cfg['bl_delta_min'],  3),
+    round(cfg['bl_delta_max'],  3), 
+    round(cfg['bl_delta_step'], 3)) 
+
   for obj in obj_list:
     # Obtain DR trial grasp metrics for every object
     grasp_path = os.path.join(cfg['metrics_dir'], obj.name + '.metrics.yml')
@@ -203,9 +212,9 @@ def main(argv):
     getGraspMetrics(obj.grasps, grasp_path, 'baseline', cfg)
 
     # Compute number of true positives, etc. for different delta thresholds
-    obj.compareBaseline(cfg['baseline_deltas'], cfg['trial_delta'])
+    obj.compareBaseline(baseline_deltas, cfg['trial_delta'])
 
-    for delta in cfg['baseline_deltas']:
+    for delta in baseline_deltas:
       delta_i = round(delta,3)
       print('{} - A {} ; P {} ; R {} ; F1 {} - d {}'.format(
         obj.name, 
