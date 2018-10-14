@@ -17,7 +17,7 @@
       <!-- PID controller parameters -->
       <controllers>
         <!-- PID parameters for real hand joints -->
-        <real type="position" p="70.0" i="0.01" d="0.0"/>
+        <real type="position" p="100.0" i="0.01" d="0.0"/>
         <!-- PID parameters for virtual joints -->
         <virtual type="position" p="20.0" i="5.0" d="1.0"/>
       </controllers>
@@ -42,7 +42,7 @@
   </joint>
   <link name="virtual_px_link">
     <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 -10"/>
       <geometry>
         <cylinder length="0.01" radius="0.005"/>
       </geometry>
@@ -69,7 +69,7 @@
   </joint>
   <link name="virtual_py_link">
     <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 -10"/>
       <geometry>
         <cylinder length="0.01" radius="0.005"/>
       </geometry>
@@ -96,7 +96,7 @@
   </joint>
   <link name="virtual_pz_link">
     <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 -10"/>
       <geometry>
         <cylinder length="0.01" radius="0.005"/>
       </geometry>
@@ -125,7 +125,7 @@
   </joint>
   <link name="virtual_ry_link">
     <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 -10"/>
       <geometry>
         <cylinder length="0.01" radius="0.005"/>
       </geometry>
@@ -152,7 +152,7 @@
   </joint>
   <link name="virtual_rp_link">
     <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 -10"/>
       <geometry>
         <cylinder length="0.01" radius="0.005"/>
       </geometry>
@@ -233,6 +233,13 @@
     <kp>1e5</kp>
     <kd>1.0</kd>
   </gazebo>
+  <gazebo reference="gripper_l_finger_tip">
+    <mu1>1000</mu1>
+    <mu2>1000</mu2>
+    <fdir1>0.0 0.0 1.0</fdir1>
+    <kp>1e5</kp>
+    <kd>1.0</kd>
+  </gazebo>
   <link name="gripper_l_finger_tip">
     <visual>
       <origin rpy="0 0 3.14159265359" xyz="0 0 0"/>
@@ -283,6 +290,13 @@
     </inertial>
   </link>
   <gazebo reference="gripper_r_finger">
+    <mu1>1000</mu1>
+    <mu2>1000</mu2>
+    <fdir1>0.0 0.0 1.0</fdir1>
+    <kp>1e5</kp>
+    <kd>1.0</kd>
+  </gazebo>
+  <gazebo reference="gripper_r_finger_tip">
     <mu1>1000</mu1>
     <mu2>1000</mu2>
     <fdir1>0.0 0.0 1.0</fdir1>

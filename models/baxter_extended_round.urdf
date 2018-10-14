@@ -42,7 +42,7 @@
   </joint>
   <link name="virtual_px_link">
     <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 -10"/>
       <geometry>
         <cylinder length="0.01" radius="0.005"/>
       </geometry>
@@ -69,7 +69,7 @@
   </joint>
   <link name="virtual_py_link">
     <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 -10"/>
       <geometry>
         <cylinder length="0.01" radius="0.005"/>
       </geometry>
@@ -96,7 +96,7 @@
   </joint>
   <link name="virtual_pz_link">
     <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 -10"/>
       <geometry>
         <cylinder length="0.01" radius="0.005"/>
       </geometry>
@@ -125,7 +125,7 @@
   </joint>
   <link name="virtual_ry_link">
     <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 -10"/>
       <geometry>
         <cylinder length="0.01" radius="0.005"/>
       </geometry>
@@ -152,7 +152,7 @@
   </joint>
   <link name="virtual_rp_link">
     <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="0 0 0" xyz="0 0 -10"/>
       <geometry>
         <cylinder length="0.01" radius="0.005"/>
       </geometry>
