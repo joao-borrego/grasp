@@ -2,9 +2,11 @@
 build/
 # 3D object datasets
 data/datasets/*
-# Grasp candidates files
-data/grasps/*
-# Exclude important configs
-!grasp/config
+# Figures
+data/figures/*
+# Object dataset meshes
+data/meshes/*
+# Experiment data backup
+data/BACKUP/*
 # Documentation
 doc/
