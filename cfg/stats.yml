@@ -4,15 +4,17 @@
 ds_path: data/datasets/kit/kit_dr_fix.ds.yml
 # Directory with baseline metrics
 baseline_dir: data/datasets/kit/baseline/
-# Directory with custom metrics
-metrics_dir: data/datasets/kit/metrics_dr/
+# Directory with custom metrics without DR
+metrics_dir: data/datasets/kit/metrics/
+# Directory with custom metrics with DR
+metrics_dr_dir: data/datasets/kit/metrics_dr_fix/
 # Robot
 robot: baxter
 
 # Convert metrics to binary label using threshold
 
 # Baseline metric threshold max
-bl_delta_max: 0.5
+bl_delta_max: 0.6
 # Baseline metric threshold min
 bl_delta_min: 0.0
 # Baseline metric threshold step
@@ -20,3 +22,8 @@ bl_delta_step: 0.02
 
 # Trial metric threshold
 trial_delta: 0.5
+
+# Figure parameters
+save_figures: True
+# Output directory
+figure_dir: 'data/figures/'

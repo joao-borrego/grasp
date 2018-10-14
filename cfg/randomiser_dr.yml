@@ -7,7 +7,7 @@ properties:
       uniform: {a: 0.5, b: 1.5}
     additive: False
     target:
-      0: {model: TARGET_OBJECT, link: base_link, mass: 0.5}
+      0: {model: TARGET_OBJECT, link: base_link, mass: 0.250}
   #     1: {model: baxter, link: gripper_l_finger, mass: 0.02}
   #     2: {model: baxter, link: gripper_r_finger, mass: 0.02}
   #     3: {model: baxter, link: gripper_l_finger_tip, mass: 0.01}

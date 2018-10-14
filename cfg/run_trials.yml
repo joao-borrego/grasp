@@ -1,16 +1,30 @@
 # General settings
 
 # Object dataset yml
-obj_cfg: data/datasets/kit/kit.ds.yml
+obj_cfg: data/datasets/kit/kit_dr_fix.ds.yml
 # Grasp candidates directory
 grasp_cfg_dir: data/datasets/kit/grasps/
 # Rest poses directory
 rest_cfg_dir: data/datasets/kit/rest/
 # Dataset output directory
-out_trials_dir: data/datasets/kit/metrics/
+out_trials_dir: data/datasets/kit/metrics_dr_fix/
 # Robot config yml
 robot_cfg: cfg/robots.yml
 # Robot name
 robot: baxter
 # Randomiser config yml
 randomiser_cfg: cfg/randomiser.yml
+
+# Grasp trial settings
+
+# Whether to use randomiser {True, False}
+use_randomiser: True
+# Number of trial repetions
+num_trials: 10
+
+# TODO - Implement
+
+# Duration of close operation (seconds)
+time_close: 2.0
+# Duration of lift operation (seconds)
+time_lift: 3.0
