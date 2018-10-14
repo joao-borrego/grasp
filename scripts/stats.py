@@ -13,6 +13,8 @@ import math
 # Numpy
 import numpy as np
 
+import matplotlib.pyplot as plt
+
 # Default parameters
 
 # Mesh root directory
@@ -21,13 +23,48 @@ DEF_CFG_FILE = 'cfg/stats.yml'
 REQ_PARAMS = [\
   'ds_path',             # Dataset file path
   'baseline_dir',        # Baseline metric directory
-  'metrics_dir',         # Custom metric directory
+  'metrics_dir',         # Custom metric (without physics DR) directory
+  'metrics_dr_dir',      # Custom metric (with physics DR) directory
   'robot',               # Robot name
   'bl_delta_min',        # Baseline metric threshold
   'bl_delta_max',
   'bl_delta_step',
   'trial_delta'          # Trial metric threshold
 ]
+
+# Figure settings
+colors = [
+    [50,136,189],    # rgb(50,136,189)
+    [253,174,97],    # rgb(253,174,97)
+    [213,62,79],     # rgb(213,62,79)
+    [171,221,164],   # rgb(171,221,164)
+    [94,72,162],     # rgb(94,79,162)
+    [94,79,162],     # #5e4fa2
+    [50,136,189],    # #3288bd
+    [102,194,165],   # #66c2a5
+    [171,221,164],   # #abdda4
+    [230,245,152],   # #e6f598
+    [254,224,139],   # #fee08b
+    [253,174,97],    # #fdae61
+    [244,109,67],    # #f46d43
+    [213,62,79],     # #d53e4f
+    [158,1,66],      # #9e0142
+    [164,6,6],       # #a40606
+    []
+]
+
+for idx in range(len(colors)):
+    colors[idx] = [(tmp/255.0) for tmp in colors[idx]]
+
+linestyles = ['-', '--', ':','-.','--']
+linewidth=[4, 4, 4, 4, 4]
+fontsize_=32
+plt.rc('font', family='serif')
+plt.rc('xtick', labelsize='x-small')
+plt.rc('ytick', labelsize='x-small')
+plt.rc('text', usetex=True)
+
+# Helper classes
 
 class Grasp:
   def __init__(self, name):
@@ -43,19 +80,23 @@ class Object:
     self.num_fail = -1
     self.num_success = -1
 
-    # (key: threshold, value: num true positives)
     self.t_pos = dict()
-    # (key: threshold, value: num true negatives)
     self.t_neg = dict()
-    # (key: threshold, value: num false positives)
     self.f_pos = dict()
-    # (key: threshold, value: num false negatives)
     self.f_neg = dict()
+    self.t_pos['trial'] = dict(); self.t_pos['trial_dr'] = dict(); 
+    self.t_neg['trial'] = dict(); self.t_neg['trial_dr'] = dict();
+    self.f_pos['trial'] = dict(); self.f_pos['trial_dr'] = dict();
+    self.f_neg['trial'] = dict(); self.f_neg['trial_dr'] = dict(); 
 
     self.accuracy = dict()
     self.precision = dict()
     self.recall = dict()
     self.f1 = dict()
+    self.accuracy['trial'] = dict(); self.accuracy['trial_dr'] = dict();
+    self.precision['trial'] = dict(); self.precision['trial_dr'] = dict();
+    self.recall['trial'] = dict(); self.recall['trial_dr'] = dict();
+    self.f1['trial'] = dict(); self.f1['trial_dr'] = dict();
 
   def computeStats(self, delta):
 
@@ -68,65 +109,72 @@ class Object:
       elif grasp.metrics['trial'] >= delta:
         self.num_success += 1
 
-  def computeAccuracy(self, delta_idx):
-    self.accuracy[delta_idx] = (self.t_pos[delta_idx] + self.t_neg[delta_idx]) / \
-      (self.t_pos[delta_idx] + self.t_neg[delta_idx] + \
-        self.f_pos[delta_idx] + self.f_neg[delta_idx])
+  def computeAccuracy(self, dr, delta_idx):
+    self.accuracy[dr][delta_idx] = \
+      (self.t_pos[dr][delta_idx] + self.t_neg[dr][delta_idx]) / \
+      (self.t_pos[dr][delta_idx] + self.t_neg[dr][delta_idx] + \
+        self.f_pos[dr][delta_idx] + self.f_neg[dr][delta_idx])
 
-  def computePrecision(self, delta_idx):
-    if self.t_pos[delta_idx] + self.f_pos[delta_idx] == 0:
-      self.precision[delta_idx] = math.inf
+  def computePrecision(self, dr, delta_idx):
+    if self.t_pos[dr][delta_idx] + self.f_pos[dr][delta_idx] == 0:
+      self.precision[dr][delta_idx] = math.inf
     else:
-      self.precision[delta_idx] = (self.t_pos[delta_idx]) / \
-        (self.t_pos[delta_idx] + self.f_pos[delta_idx]) 
+      self.precision[dr][delta_idx] = (self.t_pos[dr][delta_idx]) / \
+        (self.t_pos[dr][delta_idx] + self.f_pos[dr][delta_idx]) 
 
-  def computeRecall(self, delta_idx):
-    if self.t_pos[delta_idx] + self.f_neg[delta_idx] == 0:
-      self.recall[delta_idx] = math.inf
+  def computeRecall(self, dr, delta_idx):
+    if self.t_pos[dr][delta_idx] + self.f_neg[dr][delta_idx] == 0:
+      self.recall[dr][delta_idx] = math.inf
     else:
-      self.recall[delta_idx] = (self.t_pos[delta_idx]) / \
-        (self.t_pos[delta_idx] + self.f_neg[delta_idx])
+      self.recall[dr][delta_idx] = (self.t_pos[dr][delta_idx]) / \
+        (self.t_pos[dr][delta_idx] + self.f_neg[dr][delta_idx])
 
-  def computeF1(self, delta_idx):
-    self.f1[delta_idx] = (self.precision[delta_idx] * self.recall[delta_idx]) / \
-      (self.precision[delta_idx] + self.recall[delta_idx]) * 2
+  def computeF1(self, dr, delta_idx):
+    if self.precision[dr][delta_idx] + self.recall[dr][delta_idx] == 0:
+      self.f1[dr][delta_idx] = math.inf
+    else:
+      self.f1[dr][delta_idx] = \
+        (self.precision[dr][delta_idx] * self.recall[dr][delta_idx]) / \
+        (self.precision[dr][delta_idx] + self.recall[dr][delta_idx]) * 2
 
   def compareBaseline(self, deltas, trial_delta):
 
-    for delta in deltas:
-      delta_i = round(delta,3)
-      self.t_pos[delta_i] = 0
-      self.t_neg[delta_i] = 0
-      self.f_pos[delta_i] = 0
-      self.f_neg[delta_i] = 0
-
-    for key, grasp in self.grasps.items():
-
-      # Discard invalid grasps
-      if grasp.metrics['trial'] == -1:
-        continue
+    for dr in ['trial', 'trial_dr']:
 
       for delta in deltas:
-
-        trial = grasp.metrics['trial'] >= trial_delta
-        baseline = grasp.metrics['baseline'] >= delta
         delta_i = round(delta,3)
+        self.t_pos[dr][delta_i] = 0
+        self.t_neg[dr][delta_i] = 0
+        self.f_pos[dr][delta_i] = 0
+        self.f_neg[dr][delta_i] = 0
 
-        if (trial == True and baseline == True):
-          self.t_pos[delta_i] = self.t_pos[delta_i] + 1
-        if (trial == False and baseline == False):
-          self.t_neg[delta_i] = self.t_neg[delta_i] + 1
-        if (trial == True and baseline == False):
-          self.f_pos[delta_i] = self.f_pos[delta_i] + 1
-        if (trial == False and baseline == True):
-          self.f_neg[delta_i] = self.f_neg[delta_i] + 1
+      for key, grasp in self.grasps.items():
 
-    for delta in deltas:
-      delta_i = round(delta,3)
-      self.computeAccuracy(delta_i)
-      self.computePrecision(delta_i)
-      self.computeRecall(delta_i)
-      self.computeF1(delta_i)
+        # Discard invalid grasps
+        if grasp.metrics['trial'] == -1:
+          continue
+
+        for delta in deltas:
+
+          trial = grasp.metrics[dr] >= trial_delta
+          baseline = grasp.metrics['baseline'] >= delta
+          delta_i = round(delta,3)
+
+          if (trial == True and baseline == True):
+            self.t_pos[dr][delta_i] = self.t_pos[dr][delta_i] + 1
+          if (trial == False and baseline == False):
+            self.t_neg[dr][delta_i] = self.t_neg[dr][delta_i] + 1
+          if (trial == True and baseline == False):
+            self.f_pos[dr][delta_i] = self.f_pos[dr][delta_i] + 1
+          if (trial == False and baseline == True):
+            self.f_neg[dr][delta_i] = self.f_neg[dr][delta_i] + 1
+
+      for delta in deltas:
+        delta_i = round(delta,3)
+        self.computeAccuracy(dr, delta_i)
+        self.computePrecision(dr, delta_i)
+        self.computeRecall(dr, delta_i)
+        self.computeF1(dr, delta_i)
 
 def parseConfig(cfg_file):
   '''
@@ -181,6 +229,26 @@ def getGraspMetrics(grasps, grasp_path, metric_name, cfg):
     print('Could not load configuration {}: {}'.format(cfg_file, e))
     exit(-1)
 
+
+def plotAccuracy(obj, baseline_deltas, cfg):
+
+  accuracy = [obj.accuracy['trial'][delta] for delta in baseline_deltas]
+  accuracy_dr = [obj.accuracy['trial_dr'][delta] for delta in baseline_deltas]
+
+  fig, ax = plt.subplots()
+  plt.xlabel('Threshold $\\delta$', fontsize=fontsize_)
+  plt.ylabel('Accuracy', fontsize=fontsize_)
+  plt.xticks(size=fontsize_ - 10)
+  plt.yticks(size=fontsize_ - 10)
+  plt.xlim(min(baseline_deltas), max(baseline_deltas))
+  plt.ylim(0, 1.01)
+  ax.plot(baseline_deltas, accuracy, color=colors[0], linewidth=linewidth[0])
+  ax.plot(baseline_deltas, accuracy_dr, color=colors[1], linewidth=linewidth[1])
+  plt.tight_layout()
+  if (cfg['save_figures']):
+    plt.savefig(os.path.join(cfg['figure_dir'], 'accuracy_' + obj.name + '.pdf'), dpi=300)
+  plt.show()
+
 def main(argv):
   ''' Main executable
   '''
@@ -204,26 +272,32 @@ def main(argv):
     round(cfg['bl_delta_step'], 3)) 
 
   for obj in obj_list:
+    # Obtain baseline grasp metrics for every object
+    grasp_path = os.path.join(cfg['baseline_dir'], obj.name + '.baseline.yml')
+    getGraspMetrics(obj.grasps, grasp_path, 'baseline', cfg)
     # Obtain DR trial grasp metrics for every object
     grasp_path = os.path.join(cfg['metrics_dir'], obj.name + '.metrics.yml')
     getGraspMetrics(obj.grasps, grasp_path, 'trial', cfg)
     # Obtain baseline grasp metrics for every object
-    grasp_path = os.path.join(cfg['baseline_dir'], obj.name + '.baseline.yml')
-    getGraspMetrics(obj.grasps, grasp_path, 'baseline', cfg)
+    grasp_path = os.path.join(cfg['metrics_dr_dir'], obj.name + '.metrics.yml')
+    getGraspMetrics(obj.grasps, grasp_path, 'trial_dr', cfg)
 
     # Compute number of true positives, etc. for different delta thresholds
     obj.compareBaseline(baseline_deltas, cfg['trial_delta'])
 
-    for delta in baseline_deltas:
-      delta_i = round(delta,3)
-      print('{} - A {} ; P {} ; R {} ; F1 {} - d {}'.format(
-        obj.name, 
-        round(obj.accuracy[delta_i], 4),
-        round(obj.precision[delta_i], 4),
-        round(obj.recall[delta_i], 4),
-        round(obj.f1[delta_i], 4),
-        delta_i
-      ))
+    plotAccuracy(obj, baseline_deltas, cfg)
+    
+    # for delta in baseline_deltas:
+    #   delta_i = round(delta,3)
+
+    #   print('{} - A {} ; P {} ; R {} ; F1 {} - d {}'.format(
+    #     obj.name, 
+    #     round(obj.accuracy[delta_i], 4),
+    #     round(obj.precision[delta_i], 4),
+    #     round(obj.recall[delta_i], 4),
+    #     round(obj.f1[delta_i], 4),
+    #     delta_i
+    #   ))
 
     # # Count number
     # obj.computeStats(cfg['trial_delta'])
