@@ -84,7 +84,9 @@ void setupCommunications(
     std::map<std::string, gazebo::transport::PublisherPtr> & pubs,
     std::map<std::string, gazebo::transport::SubscriberPtr> & subs);
 
-/// TODO
+/// \brief Obtain list of models' names in dataset yml
+/// \param targets Output list of model names
+/// \param file_name Input dataset config yml
 void obtainTargets(std::vector<std::string> & targets,
     const std::string & file_name);
 
