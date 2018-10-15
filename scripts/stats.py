@@ -151,14 +151,14 @@ class Object:
       for key, grasp in self.grasps.items():
 
         # Discard invalid grasps
-        if grasp.metrics['trial'] == -1:
+        if grasp.metrics[dr] == -1:
           continue
 
         for delta in deltas:
 
-          trial = grasp.metrics[dr] >= trial_delta
-          baseline = grasp.metrics['baseline'] >= delta
           delta_i = round(delta,3)
+          trial = grasp.metrics[dr] >= trial_delta
+          baseline = grasp.metrics['baseline'] >= delta_i
 
           if (trial == True and baseline == True):
             self.t_pos[dr][delta_i] = self.t_pos[dr][delta_i] + 1
@@ -238,16 +238,40 @@ def plotAccuracy(obj, baseline_deltas, cfg):
   fig, ax = plt.subplots()
   plt.xlabel('Threshold $\\delta$', fontsize=fontsize_)
   plt.ylabel('Accuracy', fontsize=fontsize_)
-  plt.xticks(size=fontsize_ - 10)
-  plt.yticks(size=fontsize_ - 10)
+  plt.xticks(size=fontsize_ - 2)
+  plt.yticks(size=fontsize_ - 2)
   plt.xlim(min(baseline_deltas), max(baseline_deltas))
-  plt.ylim(0, 1.01)
+  plt.ylim(0.01, 1.01)
   ax.plot(baseline_deltas, accuracy, color=colors[0], linewidth=linewidth[0])
   ax.plot(baseline_deltas, accuracy_dr, color=colors[1], linewidth=linewidth[1])
+  leg = plt.legend(['w/o DR', 'w/ DR'],
+   fancybox=False, ncol=1,
+   loc='lower left',fontsize=fontsize_ - 10)
   plt.tight_layout()
   if (cfg['save_figures']):
     plt.savefig(os.path.join(cfg['figure_dir'], 'accuracy_' + obj.name + '.pdf'), dpi=300)
   plt.show()
+
+def printStatistics(obj, baseline_deltas):
+
+  print("{};{};{};{};{};{};{};{};{}".format(\
+    "delta",
+    "tp","tp_dr",
+    "tn","tn_dr",
+    "fp","fp_dr",
+    "fn","fn_dr"))
+  for delta in baseline_deltas:
+    delta_i = round(delta, 3)
+    a = obj.t_pos['trial'][delta_i] +  obj.t_neg['trial'][delta_i] + \
+       obj.f_pos['trial'][delta_i] +  obj.f_neg['trial'][delta_i]
+    b = obj.t_pos['trial_dr'][delta_i] +  obj.t_neg['trial_dr'][delta_i] + \
+       obj.f_pos['trial_dr'][delta_i] +  obj.f_neg['trial_dr'][delta_i]
+    print("{};{};{};{};{};{};{};{};{}".format(\
+      delta_i,
+      round(obj.t_pos['trial'][delta_i] / a,4), round(obj.t_pos['trial_dr'][delta_i] / b,4),
+      round(obj.t_neg['trial'][delta_i] / a,4), round(obj.t_neg['trial_dr'][delta_i] / b,4),
+      round(obj.f_pos['trial'][delta_i] / a,4), round(obj.f_pos['trial_dr'][delta_i] / b,4),
+      round(obj.f_neg['trial'][delta_i] / a,4), round(obj.f_neg['trial_dr'][delta_i] / b,4)))
 
 def main(argv):
   ''' Main executable
@@ -285,7 +309,11 @@ def main(argv):
     # Compute number of true positives, etc. for different delta thresholds
     obj.compareBaseline(baseline_deltas, cfg['trial_delta'])
 
+    print(obj.name)
     plotAccuracy(obj, baseline_deltas, cfg)
+
+    # Aux comparison of true positives, negatives, in CSV format
+    printStatistics(obj, baseline_deltas)
     
     # for delta in baseline_deltas:
     #   delta_i = round(delta,3)
