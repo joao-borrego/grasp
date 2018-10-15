@@ -29,6 +29,10 @@ class GraspShape
     /// Post-grasp joint configurations
     public: std::vector < std::pair < std::string, double > > post;
 
+    // TODO - Only use PIDs
+    /// Forces for closing fingers, per joint
+    public: std::vector < std::pair < std::string, double > > forces;
+
     // Functions
 
     /// \brief Constructs the object.

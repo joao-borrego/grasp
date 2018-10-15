@@ -37,7 +37,7 @@ bool Interface::init(
     const std::string & robot)
 {
     std::string grasp_name, joint;
-    double pre_value, post_value; 
+    double pre_value, post_value, force_value; 
 
     try
     {
@@ -58,10 +58,14 @@ bool Interface::init(
                 joint = pair.first.as<std::string>();
                 pre_value = pair.second["pre"].as<double>();
                 post_value = pair.second["post"].as<double>();
+                if (pair.second["force"])
+                {
+                    force_value = pair.second["force"].as<double>();
+                    grasps.back().forces.emplace_back(joint, force_value);
+                }
                 grasps.back().pre.emplace_back(joint, pre_value);
                 grasps.back().post.emplace_back(joint, post_value);
             }
-
             debugPrintTrace("Grasp configuration " << grasps.back().name << 
                 " : " << grasps.back().pre.size() << " joints.");
         }
@@ -139,14 +143,16 @@ void Interface::closeFingers(double timeout, bool apply_force)
     
     if (apply_force)
     {
-        for (auto const & pair : grasp.pre)
+        if (grasp.forces.empty())
+        {
+            debugPrintTrace("No force values for closing fingers specified in config."); 
+        }
+        for (auto const & pair : grasp.forces)
         {
             grasp::msgs::Target *target = msg.add_pid_targets();
             target->set_joint(pair.first);
             target->set_type(FORCE);
-            // If target is positive apply constant regular
-            // force along positive direction, else negative
-            target->set_value((pair.second < 0)? 20 : -20);
+            target->set_value(pair.second);   
         }
     }
     else
