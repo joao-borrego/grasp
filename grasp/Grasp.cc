@@ -8,16 +8,14 @@
 #include "Grasp.hh"
 
 //////////////////////////////////////////////////
-Grasp::Grasp():
-    t_gripper_object(ignition::math::Matrix4d::Identity),
-    metric(0.0)
+Grasp::Grasp(int id_):
+    id(id_), t_gripper_object(ignition::math::Matrix4d::Identity), metric(0.0)
 {
 }
 
 //////////////////////////////////////////////////
-Grasp::Grasp(ignition::math::Matrix4d t_gripper_object_):
-    t_gripper_object(t_gripper_object_),
-    metric(0.0)
+Grasp::Grasp(ignition::math::Matrix4d t_gripper_object_, int id_):
+    id(id_), t_gripper_object(t_gripper_object_), metric(0.0)
 {
 }
 
@@ -40,7 +38,7 @@ void Grasp::loadFromYml(
             for (int j = 0; j < 12; j++) {
                 tf_matrix(j/4,j%4) = transform_mat_node[j].as<double>();
             }
-            grasps.emplace_back(tf_matrix);
+            grasps.emplace_back(tf_matrix, i);
         }
     }
     catch (YAML::Exception& yamlException)

@@ -21,17 +21,19 @@ class Grasp
     // Public attributes
 
     /// Grasp candidate name
-    public: std::string name;
+    public: int id;
     /// Homogenous transform matrix from gripper to object reference frame
     public: ignition::math::Matrix4d t_gripper_object;
     /// Grasp success metric
     public: double metric {false};
 
     /// \brief Deafult constructor
-    public: Grasp();
+    public: Grasp(int id_=0);
+
     /// \brief Constructor
     /// \param t_gripper_object_ Transform matrix from gripper to object frame
-    public: Grasp(ignition::math::Matrix4d t_gripper_object_);
+    /// \param id Grasp identifier
+    public: Grasp(ignition::math::Matrix4d t_gripper_object_, int id_=0);
 
     /// \brief Load set of grasps from file
     /// \param file_name Input file name
