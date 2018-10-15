@@ -111,8 +111,8 @@ void HandPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     this->update_connection = event::Events::ConnectWorldUpdateBegin(
         std::bind(&HandPlugin::onUpdate, this));
     // Connect to world reset event
-    this->reset_connection = event::Events::ConnectWorldReset(
-        std::bind(&HandPlugin::onReset, this));
+    //this->reset_connection = event::Events::ConnectWorldReset(
+    //    std::bind(&HandPlugin::onReset, this));
 
     // Setup transport node
     this->data_ptr->node = transport::NodePtr(new transport::Node());
@@ -351,7 +351,7 @@ void HandPlugin::onUpdate()
     }
 
     // Process request
-    else if (msg_req)
+    if (msg_req)
     {
         updatePose(msg_req);
         updatePIDTargets(msg_req);

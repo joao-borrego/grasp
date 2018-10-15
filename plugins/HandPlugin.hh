@@ -107,8 +107,8 @@ namespace gazebo {
         /// Next timeout
         private: common::Time timeout;
 
-        /// Routine update time step in seconds (10 Hz)
-        private: const common::Time routine_timestep {0.1};
+        /// Routine update time step in seconds (100 Hz)
+        private: const common::Time routine_timestep {0.01};
         /// Periodic timer trigger
         private: bool routine_active {false};
         /// Next routine timeout
