@@ -2,7 +2,7 @@
     \file grasp/run_trials.hh
     \brief Performs grasp trials
 
-    TODO
+    Run full dynamic simulated grasp trials in Gazebo
 
     \author João Borrego : jsbruglie
 */
@@ -101,6 +101,9 @@ typedef std::map<std::string,std::string> Config;
 #define POSITION grasp::msgs::Target::POSITION
 /// Velocity control
 #define VELOCITY grasp::msgs::Target::VELOCITY
+
+/// Invalid grasp flag
+#define INVALID_GRASP -1.0
 
 // Message type definitions
 
@@ -243,7 +246,8 @@ void resetTarget(gazebo::transport::PublisherPtr pub);
 /// \param grasp The grasp configuration
 /// \param pubs  Map of publishers
 /// \param model_name Target object model name
-void tryGrasp(
+/// \return Grasp outcome metric
+double tryGrasp(
     Grasp & grasp,
     Interface & interface,
     std::map<std::string, gazebo::transport::PublisherPtr> & pubs,
@@ -265,6 +269,5 @@ void onTargetResponse(TargetResponsePtr & _msg);
 
 /// TODO
 void onContactResponse(ContactResponsePtr & _msg);
-
 
 #endif

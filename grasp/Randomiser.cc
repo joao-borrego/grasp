@@ -150,8 +150,11 @@ Randomiser::Randomiser(const std::string & config):
                     links.push_back(target[CFG_LINK].as<std::string>());
                     mu1.push_back(target[CFG_MU1].as<double>());
                     mu2.push_back(target[CFG_MU2].as<double>());
+                    // TODO - Implement
+                    /*
                     kp.push_back(target[CFG_KP].as<double>());
                     kd.push_back(target[CFG_KD].as<double>());
+                    */
                 }
                 properties.push_back(new FrictionCoefficient(sampler, additive,
                     models, links, mu1, mu2, kp, kd));
@@ -223,8 +226,8 @@ Randomiser::Randomiser(const std::string & config):
     catch (YAML::Exception& yamlException)
     {
         std::cerr << "[Randomiser] Unable to parse " << config << "\n";
+        return;
     }
-
     debugPrintTrace("Parsed " << config << " successfully.");
 }
 
@@ -314,6 +317,8 @@ void FrictionCoefficient::fillMsg(DRRequest & msg,
     std::string & target)
 {
     int num_targets = models.size();
+    double sample, i_mu1, i_mu2, new_mu1, new_mu2;
+
     for (int i = 0; i < num_targets; i++)
     {
         std::string model = models.at(i);
@@ -322,16 +327,21 @@ void FrictionCoefficient::fillMsg(DRRequest & msg,
 
         if (model == CFG_TARGET_OBJ) model = target;
 
-        double i_mu1 = mu1.at(i);
-        double sample = sampler->sample(gen);
-        double mu1 = (additive)? (i_mu1 + sample) : (i_mu1 * sample);
+        i_mu1 = mu1.at(i);
+        sample = sampler->sample(gen);
+        new_mu1 = (additive)? (i_mu1 + sample) : (i_mu1 * sample);
+        i_mu2 = mu2.at(i);
+        sample = sampler->sample(gen);
+        new_mu2 = (additive)? (i_mu2 + sample) : (i_mu2 * sample);
         gazebo::msgs::Surface *surface = new gazebo::msgs::Surface();
         gazebo::msgs::Friction *friction = new gazebo::msgs::Friction();
-        friction->set_mu(mu1);
+        friction->set_mu(new_mu1);
+        friction->set_mu2(new_mu2);
         surface->set_allocated_friction(friction);
         api.addSurface(msg, model, link, col, surface);
 
-        debugPrintTrace("Add mu " << mu1 << " to collision " << col);
+        debugPrintTrace("Add mu1 " << new_mu1 << " mu2 "<< new_mu2 <<
+            " to collision " << col);
     }
 }
 

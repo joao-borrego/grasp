@@ -2,7 +2,7 @@
     \file grasp/run_trials.cc
     \brief Performs grasp trials
 
-    TODO
+    Run full dynamic simulated grasp trials in Gazebo
 
     \author João Borrego : jsbruglie
 */
@@ -34,6 +34,9 @@ int main(int _argc, char **_argv)
     // YAML node for configs
     Config cfg;
     parseArgs(_argc, _argv, cfg);
+    int num_trials = std::atoi(cfg["num_trials"].c_str());
+    bool use_randomiser = cfg["use_randomiser"] == "True";
+
     debugPrintTrace("Loaded configuration file.");
 
     // Obtain target objects
@@ -96,22 +99,39 @@ int main(int _argc, char **_argv)
         debugPrintTrace("Target connected");
         rand_api.setTargetName(model_name);
 
+        interface.setPose(g_safe_pose, 5.0);
+        waitForTrigger(5000);
+
         // Perform trials
-        for (auto candidate : grasps)
+        for (auto & candidate : grasps)
         {
-            // Randomise scene
-            rand_api.randomise();
-            // Try grasp
-            tryGrasp(candidate, interface, pubs, model_name);
+            double metric = 0.0;
 
-            // Place target in rest pose, and wait for reply
+            for (int i = 0; i < num_trials; i++)
+            {
+                debugPrintTrace("Object " << model_name << " Grasp " <<
+                    candidate.id + 1<< "/" << grasps.size() <<
+                    " - Trial " << i + 1 << "/" << num_trials);
 
-            resetTarget(pubs["target"]);
-            waitForTrigger(2000);
+                // Randomise scene
+                if (use_randomiser) { rand_api.randomise(); }
+                // Try grasp
+                double outcome = tryGrasp(candidate, interface, pubs, model_name);
+
+                // Place target in rest pose, and wait for reply
+                resetTarget(pubs["target"]);
+                waitForTrigger();
+                // If grasp is invalid stop repetitions
+                if (outcome == INVALID_GRASP){
+                    break;
+                }
+                metric += outcome;
+            }
+            if (metric > 0) { candidate.metric = metric / num_trials; }
+            else            { candidate.metric = INVALID_GRASP; }
         }
         // Export grasps outcome to file
-        exportGraspMetrics(cfg["out_trials_dir"], cfg["robot"],
-            model_name, grasps);
+        exportGraspMetrics(cfg["out_trials_dir"], cfg["robot"], model_name, grasps);
 
         // Cleanup
         removeModel(pubs["request"], model_name);
@@ -162,6 +182,7 @@ void parseArgs(int argc, char** argv, Config & config)
     try
     {
         YAML::Node node = YAML::LoadFile(config_path);
+        // Required parameters
         config["obj_cfg"]        = node["obj_cfg"].as<std::string>();
         config["grasp_cfg_dir"]  = node["grasp_cfg_dir"].as<std::string>();
         config["rest_cfg_dir"]   = node["rest_cfg_dir"].as<std::string>();
@@ -169,6 +190,8 @@ void parseArgs(int argc, char** argv, Config & config)
         config["robot_cfg"]      = node["robot_cfg"].as<std::string>();
         config["robot"]          = node["robot"].as<std::string>();
         config["randomiser_cfg"] = node["randomiser_cfg"].as<std::string>();
+        config["use_randomiser"] = node["use_randomiser"].as<std::string>();
+        config["num_trials"]     = node["num_trials"].as<std::string>();
     }
     catch (YAML::Exception& yamlException)
     {
@@ -287,14 +310,18 @@ void resetTarget(gazebo::transport::PublisherPtr pub)
 }
 
 /////////////////////////////////////////////////
-void tryGrasp(
+double tryGrasp(
     Grasp & grasp,
     Interface & interface,
     std::map<std::string, gazebo::transport::PublisherPtr> & pubs,
     const std::string & target)
 {
+    // Aux vectors for collision check queries
     std::vector<std::string> target_and_ground {target, "ground_plane"};
     std::vector<std::string> ground {"ground_plane"};
+
+    // Grasp outcome return var
+    double metric = 0.0;
 
     // Get pose in world frame, given the object pose
     ignition::math::Pose3d hand_pose;
@@ -302,10 +329,10 @@ void tryGrasp(
     ignition::math::Pose3d t_base_gripper = interface.getTransformBaseGripper().Pose();
     hand_pose = t_base_gripper + t_gripper_object + g_rest_pose;
 
-    debugPrintTrace("\tCandidate " << hand_pose);
+    //debugPrintTrace("\tCandidate " << hand_pose);
     if (hand_pose.Pos().Z() < 0) {
-        debugPrintTrace("\tPose beneath ground plane. Aborting grasp");
-        return;
+        //debugPrintTrace("\tPose beneath ground plane. Aborting grasp");
+        return false;
     }
 
     // Teleport hand to grasp candidate pose
@@ -313,59 +340,61 @@ void tryGrasp(
 
     interface.setPose(g_safe_pose, 0.5);
     waitForTrigger(1000);
-    debugPrintTrace("\tHand moved to safe pose");
+    //debugPrintTrace("\tHand moved to safe pose");
 
     interface.openFingers(0.0001, true);
     waitForTrigger(1000);
-    debugPrintTrace("\tHand opened fingers");
+    //debugPrintTrace("\tHand opened fingers");
 
     interface.setPose(hand_pose, 0.00001);
     waitForTrigger(1000);
-    debugPrintTrace("\tHand moved to grasp candidate pose");
+    //debugPrintTrace("\tHand moved to grasp candidate pose");
 
+    // DEBUG pose
     //std::cin.ignore();
 
     // Check if hand is already in collision
     checkHandCollisions(pubs["contact"],
         interface.getRobotName(), target_and_ground);
     waitForTrigger(1000);
-
     if (!g_success) {
-        grasp.metric = 0.0;
         errorPrintTrace("\tCollisions detected. Aborting grasp");
-        return;
+        return INVALID_GRASP;
     }
-    debugPrintTrace("\tNo collisions detected");
+    //debugPrintTrace("\tNo collisions detected");
 
     interface.closeFingers(2.0, true);
-    waitForTrigger(4000);
-    debugPrintTrace("\tFingers closed");
+    waitForTrigger(10000);
+    //debugPrintTrace("\tFingers closed");
 
-    interface.raiseHand(2.0);
-    waitForTrigger(5000);
-    debugPrintTrace("\tHand lifted");
+    interface.raiseHand(5.0);
+    waitForTrigger(30000);
+    //debugPrintTrace("\tHand lifted");
 
     // Check if object was grasped
     checkHandCollisions(pubs["contact"], target, ground);
-    waitForTrigger(5000);
+    waitForTrigger(1000);
 
-    grasp.metric = (g_success)? 1.0 : 0.0;
-    if (g_success) debugPrintTrace("Success - Object is not on the ground");
-    else           errorPrintTrace("Failed - Object is on the ground");
+    metric = (g_success)? 1.0 : 0.0;
+    //if (g_success) debugPrintTrace("Success - Object is not on the ground");
+    //else           errorPrintTrace("Failed - Object is on the ground");
 
     // Reset hand
     interface.reset();
+
+    return metric;
 }
 
 //////////////////////////////////////////////////
 void waitForTrigger(int timeout)
 {
-    debugPrintTrace("Waiting for at most " << timeout << " (ms)");
 
     std::unique_lock<std::mutex> lock(g_timeout_mutex);
     if (timeout <= 0) {
+        //debugPrintTrace("Waiting for trigger");
         g_timeout_var.wait(lock);
     } else {
+        //debugPrintTrace("Waiting for at most " << timeout << " ms");
         g_timeout_var.wait_for(lock, std::chrono::milliseconds(timeout));
     }
 }
@@ -373,7 +402,7 @@ void waitForTrigger(int timeout)
 /////////////////////////////////////////////////
 void onHandResponse(HandMsgPtr & _msg)
 {
-    debugPrint("\tHand plugin response.\n");
+    //debugPrint("\tHand plugin response.\n");
     if (_msg->has_timeout())
     {
         std::lock_guard<std::mutex> lock(g_timeout_mutex);
@@ -384,7 +413,7 @@ void onHandResponse(HandMsgPtr & _msg)
 /////////////////////////////////////////////////
 void onTargetResponse(TargetResponsePtr & _msg)
 {
-    debugPrint("\tTarget plugin response.\n");
+    //debugPrint("\tTarget plugin response.\n");
     if (_msg->type() == RES_POSE && _msg->has_pose())
     {
         std::lock_guard<std::mutex> lock(g_timeout_mutex);
@@ -395,7 +424,7 @@ void onTargetResponse(TargetResponsePtr & _msg)
 /////////////////////////////////////////////////
 void onContactResponse(ContactResponsePtr & _msg)
 {
-    debugPrint("\tContact plugin response\n");
+    //debugPrint("\tContact plugin response\n");
     std::lock_guard<std::mutex> lock(g_timeout_mutex);
     g_success = (_msg->contacts_size() == 0);
     g_timeout_var.notify_one();
