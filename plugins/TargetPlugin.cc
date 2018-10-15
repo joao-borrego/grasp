@@ -39,9 +39,9 @@ TargetPlugin::TargetPlugin() : ModelPlugin(),
 /////////////////////////////////////////////////
 TargetPlugin::~TargetPlugin()
 {
+    gzmsg << "[TargetPlugin] Unloading plugin." << std::endl;
     this->update_connection.reset();
-    this->reset_connection.reset();
-       
+    //this->reset_connection.reset();
     gzmsg << "[TargetPlugin] Unloaded plugin." << std::endl;
 }
 
@@ -62,8 +62,8 @@ void TargetPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
     this->update_connection = event::Events::ConnectWorldUpdateBegin(
         std::bind(&TargetPlugin::onUpdate, this));
     // Connect to world reset event
-    this->reset_connection = event::Events::ConnectWorldReset(
-        std::bind(&TargetPlugin::onReset, this));
+//    this->reset_connection = event::Events::ConnectWorldReset(
+//        std::bind(&TargetPlugin::onReset, this));
 
     // Setup transport node
     this->data_ptr->node = transport::NodePtr(new transport::Node());
@@ -131,6 +131,10 @@ void TargetPlugin::onUpdate()
             reset_aux = true;
             reply_pose = true;
         }
+        if (outOfBounds())
+        {
+            reset_aux = true;
+        }
     }
 
     if (reply_pose)
@@ -147,10 +151,31 @@ void TargetPlugin::onUpdate()
     }
 }
 
+
+/////////////////////////////////////////////////
+bool TargetPlugin::outOfBounds()
+{
+    ignition::math::Pose3d pose = this->model->WorldPose();
+    double x, y, z;
+    x = pose.Pos().X();
+    y = pose.Pos().Y();
+    z = pose.Pos().Z();
+
+    if ((-GRID_SIZE <= x && x <= GRID_SIZE) ||
+        (-GRID_SIZE <= y && y <= GRID_SIZE) ||
+        (-GRID_SIZE <= z && z <= GRID_SIZE))
+    {
+        return false;
+    }
+    return true;
+}
+
 /////////////////////////////////////////////////
 void TargetPlugin::onReset()
 {
     this->model->SetWorldPose(this->init_pose);
+    this->model->SetAngularVel({0, 0, 0});
+    this->model->SetLinearVel({0, 0, 0});
     gzdbg << "Model reset to pose " << init_pose << std::endl;
 }
 

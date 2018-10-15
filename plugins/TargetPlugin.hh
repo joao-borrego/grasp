@@ -46,6 +46,8 @@ namespace TargetPlugin {
     #define LIN_VEL_EPSILON 0.000001
     /// Maximum angular velocity for an object to be considered static
     #define ANG_VEL_EPSILON 0.00001
+    /// Size of reachable grid
+    #define GRID_SIZE 10
 }
 
 namespace gazebo {
@@ -76,7 +78,7 @@ namespace gazebo {
         /// Connection to world update event
         private: event::ConnectionPtr update_connection;
         /// Connection to world reset event
-        private: event::ConnectionPtr reset_connection;
+        //private: event::ConnectionPtr reset_connection;
 
         /// Flag for pending get pose request
         private: bool get_pose {false};
@@ -97,12 +99,16 @@ namespace gazebo {
         public: TargetPlugin();
 
         /// \brief Destroys the object
-        public: virtual ~TargetPlugin();
+        public: virtual ~TargetPlugin() override;
 
         /// \brief Loads the plugin
         /// \param _model The model pointer
         /// \param _sdf   The sdf element pointer
         public: virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
+
+        /// \brief Returns whether object is out of bounds
+        /// \return Whether object is outside reachable grid
+        private: bool outOfBounds();
 
         /// \brief Callback on world update event
         public: void onUpdate();
