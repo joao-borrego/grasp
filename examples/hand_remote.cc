@@ -23,7 +23,7 @@ int main(int _argc, char **_argv)
         std::cout << "Exiting..." << std::endl;
         exit(EXIT_FAILURE);
     }
-    // Main loop
+    // Main loop - Keyboard input
     api.loop();
 
     // Shut down

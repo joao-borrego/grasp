@@ -21,7 +21,7 @@ It supports both parallel-plate grippers and multi-fingered hands, namely with u
 
 ### Setup environment and dependencies
 
-Refer to [setup].
+Refer to [setup]. 
 
 ### Compilation
 
@@ -40,6 +40,10 @@ We provide a simple script for this:
 cd ~/workspace/grasp && source setup.sh
 ```
 
+### Examples
+
+Check the provided [examples].
+
 ### Documentation
 
 Take a look at the automatic [documentation] for file and class description.
@@ -47,5 +51,6 @@ Take a look at the automatic [documentation] for file and class description.
 
 [DART]: https://dartsim.github.io/
 [documentation]: http://web.tecnico.ulisboa.pt/joao.borrego/grasp/
+[examples]: examples
 [Gazebo]: http://gazebosim.org/
 [setup]: deps/setup.md
