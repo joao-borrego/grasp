@@ -1,3 +1,7 @@
+# 2.8.8 required to use PROTOBUF_IMPORT_DIRS
+cmake_minimum_required(VERSION 2.8.8 FATAL_ERROR)
+
+# Find Protobuf package
 find_package(Protobuf REQUIRED)
 
 # Obtain Protobuf import directories
@@ -54,3 +58,9 @@ configure_file (${PROJECT_SOURCE_DIR}/msgs/MessageTypes.hh.in
 # Configure header for default message topics 
 configure_file (${PROJECT_SOURCE_DIR}/msgs/MessageTopics.hh.in
   ${CMAKE_CURRENT_BINARY_DIR}/MessageTopics.hh )
+
+# Install library
+install(TARGETS grasp_msgs
+  DESTINATION "${msgs_lib_dest}")
+install(FILES ${PROTO_HDRS}
+  DESTINATION "${msgs_include_dest}")

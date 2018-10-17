@@ -18,6 +18,11 @@ text_h1 = {'font': "Helvetica 20 bold"}
 text_h2 = {'font': "Helvetica 15"}
 text_p = {'font': "Helvetica 12"}
 
+# Input file
+IN_FILE = 'models/shadowhand.urdf'
+# Template model file
+TEMPLATE = 'template_model.urdf'
+
 def removeElemAttrMatch(root, element, attr, blacklist):
   """Removes elements matching given attribute values specified in a list
 
@@ -339,7 +344,7 @@ class MainApp(Frame):
 def main(argv):
   """TODO: Main Application"""
 
-  in_file = '../shadowhand_motor.urdf'
+  in_file = IN_FILE
 
   # Open input file
   tree = ET.parse(in_file)  

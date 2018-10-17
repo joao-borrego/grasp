@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <world name="default">
+
+  	<plugin name="contact_world_plugin" filename="libContactWorldPlugin.so">
+      <topic>grasp/contact/world</topic>
+    </plugin>
+
+    <plugin name="domain_randomization_plugin" filename="libDRPlugin.so">
+      <request_topic>~/gap/dr</request_topic>
+      <response_topic>~/gap/dr/response</response_topic>
+    </plugin>
+
+    <physics type="dart">
+      <!--
+      <real_time_update_rate>0.000000</real_time_update_rate>
+      -->
+      <!--
+      <dart>
+        <solver>
+          <solver_type>pgs</solver_type>
+        </solver>
+      </dart>
+      -->
+    </physics>
+
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+  </world>
+</sdf>

@@ -5,7 +5,7 @@ ds_path: data/datasets/kit/kit_dr_fix.ds.yml
 # Directory with baseline metrics
 baseline_dir: data/datasets/kit/baseline/
 # Directory with custom metrics without DR
-metrics_dir: data/datasets/kit/metrics/
+metrics_dir: data/datasets/kit/metrics_fix/
 # Directory with custom metrics with DR
 metrics_dr_dir: data/datasets/kit/metrics_dr_fix/
 # Robot

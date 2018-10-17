@@ -1,6 +1,23 @@
-# grasp (working title)
+<p align="center"> 
+	<img src=".image/logo.png" alt="GRASP" width="100%">
+</p>
 
-This project consists of a set of tools for performing grasping experiments within [Gazebo] using [DART] physics engine.
+--------------------
+
+GRASP is a set of tools for dynamic grasp simulation within [Gazebo] using [DART] physics engine.
+It supports both parallel-plate grippers and multi-fingered hands, namely with underactuated joints.
+
+<p align="center"> 
+<center>
+<table>
+  <tr>
+  <td width="33%"><img src=.image/vizzy.gif alt="scene_example"></td>
+  <td width="33%"><img src=.image/baxter.gif alt="shadowhand"></td>
+  <td width="33%"><img src=.image/shadow.gif alt="shadowhand"></td>
+  </tr>
+  </table>
+</center>
+</p>
 
 ### Setup environment and dependencies
 
@@ -10,12 +27,8 @@ Refer to [setup].
 
 Clone the repository to your workspace directory and build from source.
 
-``` bash
-cd ~/workspace/grasp/ &&
-mkdir build &&
-cd build &&
-cmake ../ &&
-make
+```bash
+cd ~/workspace/grasp/ && mkdir build && cd build && cmake ../ && make -j8
 ```
 
 ### Initialisation
@@ -23,27 +36,16 @@ make
 Make sure you properly initialise the required environment variables.
 We provide a simple script for this:
 
-``` bash
-cd ~/workspace/grasp &&
-source setup.sh
+```bash
+cd ~/workspace/grasp && source setup.sh
 ```
 
-### Simple example
+### Documentation
 
-Provided you have Vizzy's repository in a sourced catkin workspace, you can run an example client with the following commands:
+Take a look at the automatic [documentation] for file and class description.
 
-``` bash
-# In terminal 1
-cd ~/workspace/grasp &&
-source setup.sh &&
-roscore & rosrun gazebo_ros gazebo /DATA/Dropbox/Workspace/grasp/worlds/dart.world --verbose
-
-# In terminal 2
-rosrun gazebo_ros spawn_model -file models/vizzy_right_hand.urdf -z 0.05 -roll 1.57 -urdf -model vizzy_hand
-./build/utils/hand_remote
-# Issue commands like "grasp" or "pose"
-```
 
 [DART]: https://dartsim.github.io/
+[documentation]: http://web.tecnico.ulisboa.pt/joao.borrego/grasp/
 [Gazebo]: http://gazebosim.org/
 [setup]: deps/setup.md
