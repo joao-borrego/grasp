@@ -17,4 +17,4 @@ cd ~/workspace/grasp/ &&
 # Spawn shadow hand
 rosrun gazebo_ros spawn_model -file models/shadowhand.urdf -urdf -model shadowhand
 # Launch hand remote example
-./build/examples/hand_remote -c cfg/robots.yml -r shadow
+./build/bin/hand_remote -c cfg/robots.yml -r shadow

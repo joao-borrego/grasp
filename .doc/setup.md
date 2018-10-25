@@ -1,12 +1,10 @@
 ### Overall desired setup
 
 1. Ubuntu 16.04.4 LTS (Xenial Xerus)
-1. Gazebo 9.0.0
-1. DART 6.3.0
+1. Gazebo 9.6.2
+1. DART 6.6.0
 1. ROS Kinetic Kame desktop
 1. gazebo_ros_pks for Gazebo-ROS bridge
-
-You can either follow the installation of each of the required dependencies, or simply run the provided [installation script] (needs to be tested).
 
 ### Libraries
 
@@ -17,7 +15,7 @@ Version: 2.0-1 (Stable)
 Package: `libccd-dev`
 
 Install with `apt`:
-``` bash
+```bash
 sudo apt install libccd-dev
 ```
 
@@ -32,7 +30,7 @@ Dependencies:
 1. [Boost](#boost) (Optional: required for building tests)
 
 Install from source:
-``` bash
+```bash
 cd ~/workspace &&
 git clone https://github.com/flexible-collision-library/fcl/ &&
 cd fcl/ &&
@@ -64,7 +62,7 @@ sudo apt install libsdformat6-dev
 
 #### [DART] - Physics simulator
 
-Version: 6.3.0
+Version: 6.6.2
 
 Dependencies:
 1. [FCL](#fcl---flexible-collision-library)
@@ -72,7 +70,7 @@ Dependencies:
 1. [Eigen3](#eigen)
 
 Install from source:
-``` bash
+```bash
 sudo apt remove libdart* &&
 sudo apt install build-essential cmake pkg-config git &&
 sudo apt install libeigen3-dev libassimp-dev libccd-dev libfcl-dev libboost-regex-dev libboost-system-dev &&
@@ -80,7 +78,7 @@ sudo apt install libopenscenegraph-dev &&
 cd ~/workspace &&
 git clone https://github.com/dartsim/dart &&
 cd dart/ &&
-git checkout tags/v6.3.0 &&
+git checkout tags/v6.6.2 &&
 mkdir build &&
 cd build &&
 cmake .. &&
@@ -94,14 +92,14 @@ Installed to:
 
 #### [GAZEBO]
 
-Version: 9.0.0
+Version: 9.4.1
 
 Dependencies:
 1. Too many to count; Thankfully they provide an installer script for them.
 1. [DART](#dart---physics-simulator) (Optional)
 
 Install from source:
-``` bash
+```bash
 # Setup OSRF keys
 sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list' &&
 wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add - &&
@@ -114,7 +112,7 @@ sudo apt install $(sed 's:\\ ::g' <<< $BASE_DEPS) $(sed 's:\\ ::g' <<< $GAZEBO_B
 cd ~/workspace/ &&
 hg clone https://bitbucket.org/osrf/gazebo &&
 cd gazebo &&
-hg checkout gazebo9_9.0.0 &&
+hg checkout gazebo9_9.4.1 &&
 mkdir build &&
 cd build &&
 cmake .. &&
@@ -135,7 +133,7 @@ Installed to:
 Version: Kinetic Kame desktop
 
 Install with `apt`:
-``` bash
+```bash
 # Setup sources.list and keys
 sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
 sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
@@ -154,7 +152,7 @@ Dependencies:
 1. (Not sure since also compiled Baxter)
 
 Install from source:
-``` bash
+```bash
 # Dependencies
 sudo apt install ros-kinetic-hardware-interface ros-kinetic-polled-camera ros-kinetic-control-toolbox ros-kinetic-controller-manager ros-kinetic-transmission-interface ros-kinetic-camera-info-manager ros-kinetic-joint-limits-interface &&
 # Build from source
