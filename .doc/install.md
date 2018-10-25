@@ -104,7 +104,7 @@ cd ~/catkin_ws && catkin_make
 5.1 Install custom Gazebo plugins  ([official link](https://github.com/jsbruglie/gap))
 ```bash
 cd ~/deps && git clone https://github.com/jsbruglie/gap.git
-cd ~/workspace/gap/ && git checkout v1.5-beta &&
+cd ~/deps/gap/ && git checkout v1.5-beta &&
 mkdir build && cd build && cmake ../ && make -j8 &&
 sudo make install
 ```
@@ -124,6 +124,4 @@ git clone https://github.com/vislab-tecnico-lisboa/vizzy &&
 git clone https://github.com/RethinkRobotics/baxter_common.git
 ```
 
-
 [setup]: setup.md
-

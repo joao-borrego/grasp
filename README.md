@@ -21,13 +21,16 @@ It supports both parallel-plate grippers and multi-fingered hands, namely with u
 
 ### Setup environment and dependencies
 
-Refer to [setup]. 
+For a tutorial on how to achieve the setup check [dependencies].
+For an overview of each dependency, with respective version, check [setup]. 
 
-### Compilation
+### Install from source
 
 Clone the repository to your workspace directory and build from source.
 
 ```bash
+mkdir ~/workspace &&
+cd ~/workspace && git clone https://github.com/jsbruglie/grasp.git
 cd ~/workspace/grasp/ && mkdir build && cd build && cmake ../ && make -j8
 ```
 
@@ -53,4 +56,5 @@ Take a look at the automatic [documentation] for file and class description.
 [documentation]: http://web.tecnico.ulisboa.pt/joao.borrego/grasp/
 [examples]: examples
 [Gazebo]: http://gazebosim.org/
-[setup]: deps/setup.md
+[dependencies]: .doc/install.md
+[setup]: .doc/setup.md
