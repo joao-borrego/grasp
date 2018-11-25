@@ -1,20 +1,20 @@
 # Stats.py default configuration
 
 # Dataset file path
-ds_path: data/datasets/kit/kit_dr_fix.ds.yml
+ds_path: data/datasets/kit/kit_reduced.ds.yml
 # Directory with baseline metrics
-baseline_dir: data/datasets/kit/baseline/
+baseline_dir: data/datasets/kit/groundtruth/
 # Directory with custom metrics without DR
-metrics_dir: data/datasets/kit/metrics_fix/
+metrics_dir: data/datasets/kit/kit_metrics/
 # Directory with custom metrics with DR
-metrics_dr_dir: data/datasets/kit/metrics_dr_fix/
+metrics_dr_dir: data/datasets/kit/metrics_dr_10/
 # Robot
 robot: baxter
 
 # Convert metrics to binary label using threshold
 
 # Baseline metric threshold max
-bl_delta_max: 0.6
+bl_delta_max: 1.0
 # Baseline metric threshold min
 bl_delta_min: 0.0
 # Baseline metric threshold step
@@ -26,4 +26,4 @@ trial_delta: 0.5
 # Figure parameters
 save_figures: True
 # Output directory
-figure_dir: 'data/figures/'
+figure_dir: 'data/figures_25_11/'

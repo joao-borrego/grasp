@@ -32,6 +32,26 @@ REQ_PARAMS = [\
   'trial_delta'          # Trial metric threshold
 ]
 
+# Terminal colours
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+def info(msg):
+  print(bcolors.OKBLUE + "[INFO] " + msg + bcolors.ENDC)
+
+def warn(msg):
+  print(bcolors.WARNING + "[WARN] " + msg + bcolors.ENDC)
+
+def fail(msg):
+  print(bcolors.FAIL + "[ERRO] " + msg + bcolors.ENDC)
+
 # Figure settings
 colors = [
     [50,136,189],    # rgb(50,136,189)
@@ -76,9 +96,9 @@ class Object:
     self.name = name
     self.grasps = dict()
 
-    self.num_error = -1
-    self.num_fail = -1
-    self.num_success = -1
+    self.num_error = dict()
+    self.num_valid = dict()
+    self.valid_ratio = dict()
 
     self.t_pos = dict()
     self.t_neg = dict()
@@ -98,16 +118,18 @@ class Object:
     self.recall['trial'] = dict(); self.recall['trial_dr'] = dict();
     self.f1['trial'] = dict(); self.f1['trial_dr'] = dict();
 
-  def computeStats(self, delta):
+  def computeValid(self, dr):
 
-    self.num_error = self.num_fail = self.num_success = 0
+    self.num_error[dr] = 0
+    self.num_valid[dr] = 0
+    
     for key, grasp in self.grasps.items():
-      if grasp.metrics['trial'] == -1:
-        self.num_error += 1
-      elif grasp.metrics['trial'] < delta:
-        self.num_fail += 1
-      elif grasp.metrics['trial'] >= delta:
-        self.num_success += 1
+      if grasp.metrics[dr] == -1:
+        self.num_error[dr] += 1
+      else:
+        self.num_valid[dr] += 1
+
+    self.valid_ratio[dr] = self.num_valid[dr] / (self.num_valid[dr] + self.num_error[dr])
 
   def computeAccuracy(self, dr, delta_idx):
     self.accuracy[dr][delta_idx] = \
@@ -142,7 +164,7 @@ class Object:
     for dr in ['trial', 'trial_dr']:
 
       for delta in deltas:
-        delta_i = round(delta,3)
+        delta_i = "{:.6f}".format(delta)
         self.t_pos[dr][delta_i] = 0
         self.t_neg[dr][delta_i] = 0
         self.f_pos[dr][delta_i] = 0
@@ -151,30 +173,29 @@ class Object:
       for key, grasp in self.grasps.items():
 
         # Discard invalid grasps
-        if grasp.metrics[dr] == -1:
-          continue
+        if grasp.metrics[dr] != -1:
 
-        for delta in deltas:
+          for delta in deltas:
 
-          delta_i = round(delta,3)
-          trial = grasp.metrics[dr] >= trial_delta
-          baseline = grasp.metrics['baseline'] >= delta_i
+            delta_i = "{:.6f}".format(delta)
+            trial = grasp.metrics[dr] >= trial_delta
+            baseline = grasp.metrics['baseline'] >= delta
 
-          if (trial == True and baseline == True):
-            self.t_pos[dr][delta_i] = self.t_pos[dr][delta_i] + 1
-          if (trial == False and baseline == False):
-            self.t_neg[dr][delta_i] = self.t_neg[dr][delta_i] + 1
-          if (trial == True and baseline == False):
-            self.f_pos[dr][delta_i] = self.f_pos[dr][delta_i] + 1
-          if (trial == False and baseline == True):
-            self.f_neg[dr][delta_i] = self.f_neg[dr][delta_i] + 1
+            if (trial == True and baseline == True):
+              self.t_pos[dr][delta_i] = self.t_pos[dr][delta_i] + 1
+            elif (trial == False and baseline == False):
+              self.t_neg[dr][delta_i] = self.t_neg[dr][delta_i] + 1
+            elif (trial == True and baseline == False):
+              self.f_pos[dr][delta_i] = self.f_pos[dr][delta_i] + 1
+            elif (trial == False and baseline == True):
+              self.f_neg[dr][delta_i] = self.f_neg[dr][delta_i] + 1
 
-      for delta in deltas:
-        delta_i = round(delta,3)
-        self.computeAccuracy(dr, delta_i)
-        self.computePrecision(dr, delta_i)
-        self.computeRecall(dr, delta_i)
-        self.computeF1(dr, delta_i)
+          for delta in deltas:
+            delta_i = "{:.6f}".format(delta)
+            self.computeAccuracy(dr, delta_i)
+            #self.computePrecision(dr, delta_i)
+            #self.computeRecall(dr, delta_i)
+            #self.computeF1(dr, delta_i)
 
 def parseConfig(cfg_file):
   '''
@@ -232,10 +253,10 @@ def getGraspMetrics(grasps, grasp_path, metric_name, cfg):
 
 def plotAccuracy(obj, baseline_deltas, cfg):
 
-  accuracy = [obj.accuracy['trial'][delta] for delta in baseline_deltas]
-  accuracy_dr = [obj.accuracy['trial_dr'][delta] for delta in baseline_deltas]
+  accuracy = [obj.accuracy['trial']["{:.6f}".format(delta)] for delta in baseline_deltas]
+  accuracy_dr = [obj.accuracy['trial_dr']["{:.6f}".format(delta)] for delta in baseline_deltas]
 
-  fig, ax = plt.subplots()
+  fig, ax = plt.subplots(figsize=(5, 5))
   plt.xlabel('Threshold $\\delta$', fontsize=fontsize_)
   plt.ylabel('Accuracy', fontsize=fontsize_)
   plt.xticks(size=fontsize_ - 2)
@@ -246,11 +267,12 @@ def plotAccuracy(obj, baseline_deltas, cfg):
   ax.plot(baseline_deltas, accuracy_dr, color=colors[1], linewidth=linewidth[1])
   leg = plt.legend(['w/o DR', 'w/ DR'],
    fancybox=False, ncol=1,
-   loc='lower left',fontsize=fontsize_ - 10)
+   loc='upper right',fontsize=fontsize_ - 10)
   plt.tight_layout()
   if (cfg['save_figures']):
     plt.savefig(os.path.join(cfg['figure_dir'], 'accuracy_' + obj.name + '.pdf'), dpi=300)
-  plt.show()
+  #plt.show()
+  plt.close()
 
 def printStatistics(obj, baseline_deltas):
 
@@ -261,17 +283,17 @@ def printStatistics(obj, baseline_deltas):
     "fp","fp_dr",
     "fn","fn_dr"))
   for delta in baseline_deltas:
-    delta_i = round(delta, 3)
+    delta_i = "{:.6f}".format(delta)
     a = obj.t_pos['trial'][delta_i] +  obj.t_neg['trial'][delta_i] + \
        obj.f_pos['trial'][delta_i] +  obj.f_neg['trial'][delta_i]
     b = obj.t_pos['trial_dr'][delta_i] +  obj.t_neg['trial_dr'][delta_i] + \
        obj.f_pos['trial_dr'][delta_i] +  obj.f_neg['trial_dr'][delta_i]
-    print("{};{};{};{};{};{};{};{};{}".format(\
+    print("{};{:.2f};{:.2f};{:.2f};{:.2f};{:.2f};{:.2f};{:.2f};{:.2f}".format( \
       delta_i,
-      round(obj.t_pos['trial'][delta_i] / a,4), round(obj.t_pos['trial_dr'][delta_i] / b,4),
-      round(obj.t_neg['trial'][delta_i] / a,4), round(obj.t_neg['trial_dr'][delta_i] / b,4),
-      round(obj.f_pos['trial'][delta_i] / a,4), round(obj.f_pos['trial_dr'][delta_i] / b,4),
-      round(obj.f_neg['trial'][delta_i] / a,4), round(obj.f_neg['trial_dr'][delta_i] / b,4)))
+      obj.t_pos['trial'][delta_i] / a, obj.t_pos['trial_dr'][delta_i] / b,
+      obj.t_neg['trial'][delta_i] / a, obj.t_neg['trial_dr'][delta_i] / b,
+      obj.f_pos['trial'][delta_i] / a, obj.f_pos['trial_dr'][delta_i] / b,
+      obj.f_neg['trial'][delta_i] / a, obj.f_neg['trial_dr'][delta_i] / b))
 
 def main(argv):
   ''' Main executable
@@ -284,18 +306,19 @@ def main(argv):
   
   obj_list.sort(key=lambda obj: obj.name)
 
-  # sum_success = sum_fail = sum_error = 0
-  # num_obj = 0
+  # Average valid ratio
+  num_valid_objs = 0
+  avg_valid_ratio = dict()
+  avg_valid_ratio['trial'] = 0
+  avg_valid_ratio['trial_dr'] = 0
 
-  # max_success = -1
-  # max_name = ''
+  info("Configuration loaded.")
+  info("Output grasphs will be stored in {}.".format(cfg['figure_dir']))
 
-  baseline_deltas = np.arange(
-    round(cfg['bl_delta_min'],  3),
-    round(cfg['bl_delta_max'],  3), 
-    round(cfg['bl_delta_step'], 3)) 
+  baseline_deltas = np.arange(cfg['bl_delta_min'],cfg['bl_delta_max'],cfg['bl_delta_step'])
+  num_objs = len(obj_list)
 
-  for obj in obj_list:
+  for idx, obj in enumerate(obj_list):
     # Obtain baseline grasp metrics for every object
     grasp_path = os.path.join(cfg['baseline_dir'], obj.name + '.baseline.yml')
     getGraspMetrics(obj.grasps, grasp_path, 'baseline', cfg)
@@ -306,48 +329,46 @@ def main(argv):
     grasp_path = os.path.join(cfg['metrics_dr_dir'], obj.name + '.metrics.yml')
     getGraspMetrics(obj.grasps, grasp_path, 'trial_dr', cfg)
 
-    # Compute number of true positives, etc. for different delta thresholds
-    obj.compareBaseline(baseline_deltas, cfg['trial_delta'])
+    info("Processing {} ({}/{})".format(obj.name, idx + 1, num_objs))
 
-    print(obj.name)
-    plotAccuracy(obj, baseline_deltas, cfg)
+    # Count valid grasps per object
+    obj.computeValid('trial')
+    obj.computeValid('trial_dr')
+
+    if (obj.num_valid['trial'] > 0 and obj.num_valid['trial_dr'] > 0):
+
+      # Compute number of true positives, etc. for different delta thresholds
+      obj.compareBaseline(baseline_deltas, cfg['trial_delta'])
+      plotAccuracy(obj, baseline_deltas, cfg)
+      info("    Valid grasp ratio {}".format(obj.valid_ratio['trial_dr']))
+
+      num_valid_objs += 1
+      avg_valid_ratio['trial'] += obj.valid_ratio['trial']
+      avg_valid_ratio['trial_dr'] += obj.valid_ratio['trial_dr']
+
+    else:
+
+      warn("Object has no valid grasps. Skipping...")
 
     # Aux comparison of true positives, negatives, in CSV format
-    printStatistics(obj, baseline_deltas)
+    #printStatistics(obj, baseline_deltas)
     
     # for delta in baseline_deltas:
-    #   delta_i = round(delta,3)
+    #   delta_i = str(round(delta,4))
 
     #   print('{} - A {} ; P {} ; R {} ; F1 {} - d {}'.format(
     #     obj.name, 
-    #     round(obj.accuracy[delta_i], 4),
-    #     round(obj.precision[delta_i], 4),
-    #     round(obj.recall[delta_i], 4),
-    #     round(obj.f1[delta_i], 4),
+    #     str(round(obj.accuracy[delta_i], 4)),
+    #     str(round(obj.precision[delta_i], 4)),
+    #     str(round(obj.recall[delta_i], 4)),
+    #     str(round(obj.f1[delta_i], 4)),
     #     delta_i
     #   ))
 
-    # # Count number
-    # obj.computeStats(cfg['trial_delta'])
-
-    # if obj.num_success > max_success:
-    #   max_success = obj.num_success
-    #   max_name = obj.name
-
-    # # Remove objects with only invalid grasps
-    # if obj.num_error != len(obj.grasps):
-    #   num_obj += 1 
-
-    #   sum_success += obj.num_success / len(obj.grasps)
-    #   sum_fail += obj.num_fail / len(obj.grasps)
-    #   sum_error += obj.num_error / len(obj.grasps)
-
-  # avg_success = sum_success / num_obj
-  # avg_fail = sum_fail / num_obj
-  # avg_error = sum_error / num_obj
-
-  # print("{} & {} & {} \\".format(avg_success,avg_fail,avg_error))
-  # print("{} {} ".format(max_name, max_success))
+  avg_valid_ratio['trial'] /= num_valid_objs
+  avg_valid_ratio['trial_dr'] /= num_valid_objs
+  info("Average valid ratio for trials w/out DR {}".format(avg_valid_ratio['trial']))
+  info("Average valid ratio for trials w/ DR {}".format(avg_valid_ratio['trial_dr']))
 
 if __name__ == "__main__":
   main(sys.argv)
